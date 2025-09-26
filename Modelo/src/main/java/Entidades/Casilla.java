@@ -1,0 +1,21 @@
+package Entidades;
+
+import Enums.EstadoCasilla;
+
+/**
+ *
+ * @author daniel
+ */
+public class Casilla {
+    
+    private Nave nave;
+    private EstadoCasilla estado;
+    private Coordenadas coordenadas;
+
+    public Casilla(Nave nave, EstadoCasilla estado, Coordenadas coordenadas) {
+        this.nave = nave;
+        this.estado = estado;
+        this.coordenadas = coordenadas;
+    }
+    
+}
