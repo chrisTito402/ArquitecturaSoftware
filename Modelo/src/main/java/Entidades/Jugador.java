@@ -23,5 +23,9 @@ public class Jugador {
         this.tablero = tablero;
         this.estado = estado;
     }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
     
 }

@@ -20,4 +20,19 @@ public abstract class Nave {
     }
     
     public abstract int getTamanio();
+    
+    public EstadoNave addDisparo() {
+        if (cantDisparos == 0) {
+            estado = EstadoNave.AVERIADO;
+        } else {
+            if (cantDisparos == this.getTamanio()) {
+                estado = EstadoNave.HUNDIDO;
+            }
+        }
+        
+        cantDisparos++;
+        return estado;
+    }
+    
+    
 }

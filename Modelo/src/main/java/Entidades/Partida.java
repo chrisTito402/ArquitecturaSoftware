@@ -31,6 +31,29 @@ public class Partida {
     }
     
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+        if (jugador == turno) {
+            Jugador j2 = jugadores.stream().filter(e -> e != turno)
+                    .findFirst()
+                    .orElse(null);
+            
+            ResultadoDisparo resultadoDisparo = null;
+            if (j2 != null) {
+                Tablero tablero = j2.getTablero();
+                resultadoDisparo = tablero.realizarDisparo(coordenadas);
+            } else {
+                System.out.println("Error, no se encontro al jugador.");
+            }
+            
+            if (resultadoDisparo != ResultadoDisparo.IMPACTO &&
+                    resultadoDisparo != ResultadoDisparo.HUNDIMIENTO) {
+                turno = j2;
+            }
+            
+            return resultadoDisparo;
+        } else {
+            System.out.println("Error, no es el turno del jugador seleccionado");
+        }
+        
         return null;
     }
 }

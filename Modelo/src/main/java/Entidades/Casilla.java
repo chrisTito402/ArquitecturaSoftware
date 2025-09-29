@@ -18,4 +18,12 @@ public class Casilla {
         this.coordenadas = coordenadas;
     }
     
+    public EstadoCasilla getEstado() {
+        return estado;
+    }
+
+    public Nave getNave() {
+        return nave;
+    }
+    
 }
