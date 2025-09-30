@@ -8,6 +8,7 @@
     <modules>
         <module>Modelo</module>
         <module>Vista</module>
+        <module>Controlador</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
