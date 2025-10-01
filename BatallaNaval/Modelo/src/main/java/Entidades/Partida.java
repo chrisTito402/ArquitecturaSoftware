@@ -40,7 +40,9 @@ public class Partida implements IModelo {
         }
 
         //Obtener al oponente
-        Jugador j2 = jugadores.stream().filter(e -> e != turno).findFirst().orElse(null);
+        Jugador j2 = jugadores.stream().filter(e -> e != turno)
+                .findFirst()
+                .orElse(null);
 
         if (j2 == null) {
             System.out.println("Error, no se encontró al oponente.");
@@ -73,12 +75,8 @@ public class Partida implements IModelo {
     }
 
     @Override
-    public Coordenadas getCoordenadasDisparada() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Disparo getDisparo() {
+        return disparo;
     }
-
-    @Override
-    public ResultadoDisparo getResultadoDisparo() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    
 }

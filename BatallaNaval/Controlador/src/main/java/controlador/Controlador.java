@@ -5,8 +5,6 @@ import DTOs.JugadorDTO;
 import Entidades.Coordenadas;
 import Entidades.Jugador;
 import Entidades.Partida;
-import Enums.ColorJugador;
-import Enums.EstadoJugador;
 
 /**
  *

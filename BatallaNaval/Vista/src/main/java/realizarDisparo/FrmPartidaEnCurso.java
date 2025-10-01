@@ -17,6 +17,7 @@ import Enums.EstadoJugador;
 import Enums.EstadoPartida;
 import Enums.OrientacionNave;
 import Enums.ResultadoDisparo;
+import controlador.ControlVista;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Arrays;
@@ -61,18 +62,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
                 cB.setText(String.valueOf(i) + "," + String.valueOf(j));
                 cB.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        ResultadoDisparo result = p.realizarDisparo(cB.getCoordenadas(), j1);
-                        if (result != null) {
-                            System.out.println(result.toString());
-                            if (result == ResultadoDisparo.IMPACTO || result == ResultadoDisparo.HUNDIMIENTO) {
-                                cB.setBackground(Color.RED);
-                            }
-                            if (result == ResultadoDisparo.AGUA) {
-                                cB.setBackground(Color.BLUE);
-                            }
-                        } else {
-                            System.out.println("NULL");
-                        }
+                        
                     }
                 });
                 

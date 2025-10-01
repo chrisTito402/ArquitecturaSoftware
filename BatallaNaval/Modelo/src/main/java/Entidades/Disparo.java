@@ -17,5 +17,29 @@ public class Disparo {
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
     }
+
+    public Jugador getJugador() {
+        return jugador;
+    }
+
+    public void setJugador(Jugador jugador) {
+        this.jugador = jugador;
+    }
+
+    public Coordenadas getCoordenadas() {
+        return coordenadas;
+    }
+
+    public void setCoordenadas(Coordenadas coordenadas) {
+        this.coordenadas = coordenadas;
+    }
+
+    public ResultadoDisparo getResultadoDisparo() {
+        return resultadoDisparo;
+    }
+
+    public void setResultadoDisparo(ResultadoDisparo resultadoDisparo) {
+        this.resultadoDisparo = resultadoDisparo;
+    }
     
 }

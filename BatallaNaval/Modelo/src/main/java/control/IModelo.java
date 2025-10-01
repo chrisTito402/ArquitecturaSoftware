@@ -1,7 +1,7 @@
 package control;
 
-import Entidades.Casilla;
 import Entidades.Coordenadas;
+import Entidades.Disparo;
 import Entidades.Jugador;
 import Enums.ResultadoDisparo;
 
@@ -13,7 +13,5 @@ public interface IModelo {
     
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador);
     
-    public Coordenadas getCoordenadasDisparada();
-    
-    public ResultadoDisparo getResultadoDisparo();
+    public Disparo getDisparo();
 }
