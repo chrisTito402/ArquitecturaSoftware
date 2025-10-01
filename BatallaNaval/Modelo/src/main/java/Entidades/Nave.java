@@ -22,6 +22,7 @@ public abstract class Nave {
     public abstract int getTamanio();
     
     public EstadoNave addDisparo() {
+        cantDisparos++;
         if (cantDisparos == 0) {
             estado = EstadoNave.AVERIADO;
         } else {
@@ -30,7 +31,6 @@ public abstract class Nave {
             }
         }
         
-        cantDisparos++;
         return estado;
     }
     

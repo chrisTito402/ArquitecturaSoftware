@@ -2,13 +2,14 @@ package Entidades;
 
 import Enums.EstadoPartida;
 import Enums.ResultadoDisparo;
+import control.IModelo;
 import java.util.List;
 
 /**
  *
  * @author daniel
  */
-public class Partida {
+public class Partida implements IModelo {
     
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -18,6 +19,7 @@ public class Partida {
     private int cantPortaAviones;
     private int totalNaves;
     private EstadoPartida estado;
+    private Disparo disparo;
 
     public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado) {
         this.turno = turno;
@@ -30,6 +32,7 @@ public class Partida {
         this.estado = estado;
     }
     
+    @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         if (jugador == turno) {
             Jugador j2 = jugadores.stream().filter(e -> e != turno)
@@ -55,5 +58,15 @@ public class Partida {
         }
         
         return null;
+    }
+
+    @Override
+    public Coordenadas getCoordenadasDisparada() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public ResultadoDisparo getResultadoDisparo() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

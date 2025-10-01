@@ -37,7 +37,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
         Coordenadas co = new Coordenadas(1, 1);
         Casilla c = new Casilla(n1, EstadoCasilla.NO_DISPARADO, co);
-        Casilla c2 = new Casilla(n1, EstadoCasilla.AGUA, co);
+        Casilla c2 = new Casilla(null, EstadoCasilla.AGUA, co);
         Casilla[][] casillas = new Casilla[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {

@@ -24,6 +24,12 @@ public class Jugador {
         this.estado = estado;
     }
 
+    public Jugador(String nombre, ColorJugador color, EstadoJugador estado) {
+        this.nombre = nombre;
+        this.color = color;
+        this.estado = estado;
+    }
+
     public Tablero getTablero() {
         return tablero;
     }
