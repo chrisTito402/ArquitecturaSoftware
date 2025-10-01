@@ -10,7 +10,7 @@ import java.util.List;
  * @author daniel
  */
 public class Partida implements IModelo {
-    
+
     private Jugador turno;
     private List<Jugador> jugadores;
     private int cantBarcos;
@@ -31,33 +31,45 @@ public class Partida implements IModelo {
         this.totalNaves = totalNaves;
         this.estado = estado;
     }
-    
+
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
-        if (jugador == turno) {
-            Jugador j2 = jugadores.stream().filter(e -> e != turno)
-                    .findFirst()
-                    .orElse(null);
-            
-            ResultadoDisparo resultadoDisparo = null;
-            if (j2 != null) {
-                Tablero tablero = j2.getTablero();
-                resultadoDisparo = tablero.realizarDisparo(coordenadas);
-            } else {
-                System.out.println("Error, no se encontro al jugador.");
-            }
-            
-            if (resultadoDisparo != ResultadoDisparo.IMPACTO &&
-                    resultadoDisparo != ResultadoDisparo.HUNDIMIENTO) {
-                turno = j2;
-            }
-            
-            return resultadoDisparo;
-        } else {
+        if (jugador != turno) {
             System.out.println("Error, no es el turno del jugador seleccionado");
+            return null;
         }
-        
-        return null;
+
+        //Obtener al oponente
+        Jugador j2 = jugadores.stream().filter(e -> e != turno).findFirst().orElse(null);
+
+        if (j2 == null) {
+            System.out.println("Error, no se encontró al oponente.");
+            return null;
+        }
+
+        //Disparo del jugador actual
+        Tablero tablero = j2.getTablero();
+        ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
+
+        // Si falla, pasa turno
+        if (resultadoDisparo != ResultadoDisparo.IMPACTO
+                && resultadoDisparo != ResultadoDisparo.HUNDIMIENTO) {
+
+            turno = j2;
+
+            //Si el siguiente es un Bot, dispara automáticamente
+            if (j2 instanceof Bot) {
+                Bot bot = (Bot) j2;
+                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
+
+                // Si el Bot falla, regresa turno al jugador humano
+                if (resultadoBot == ResultadoDisparo.AGUA) {
+                    turno = jugador;
+                }
+            }
+        }
+
+        return resultadoDisparo;
     }
 
     @Override

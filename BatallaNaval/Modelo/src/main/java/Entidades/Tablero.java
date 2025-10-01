@@ -20,40 +20,39 @@ public class Tablero {
         this.limiteY = limiteY;
     }
     
-    public ResultadoDisparo realizarDisparo(Coordenadas c) {
-        if (c.getX() > limiteX || c.getX() < 0) {
-            System.out.println("Error, se excedio el limite del Tablero: " + c.getX());
-        }
-        if (c.getY() > limiteY || c.getY() < 0) {
-            System.out.println("Error, se excedio el limite del Tablero." + c.getY());
-        }
-        
-        Casilla casilla = casillas[c.getX()][c.getY()];
-        Nave nave = casilla.getNave();
-        EstadoCasilla eC = casilla.getEstado();
-        
-        if (eC == EstadoCasilla.YA_DISPARADO) {
-            return ResultadoDisparo.YA_DISPARADO;
-        }
-        
-        if (nave != null) {
-            EstadoNave estadoNave = nave.addDisparo();
-            
-            if (estadoNave == EstadoNave.AVERIADO) {
-                return ResultadoDisparo.IMPACTO;
-            }
-            if (estadoNave == EstadoNave.HUNDIDO) {
-                return ResultadoDisparo.HUNDIMIENTO;
-            }
-        }
-        
-        if (eC == EstadoCasilla.AGUA) {
-            return ResultadoDisparo.AGUA;
-        }
-        if (eC == EstadoCasilla.YA_DISPARADO) {
-            return ResultadoDisparo.YA_DISPARADO;
-        }
-        
+public ResultadoDisparo realizarDisparo(Coordenadas c) {
+    if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
+        System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
         return null;
     }
+
+    Casilla casilla = casillas[c.getX()][c.getY()];
+    Nave nave = casilla.getNave();
+    EstadoCasilla eC = casilla.getEstado();
+
+    if (eC == EstadoCasilla.YA_DISPARADO) {
+        return ResultadoDisparo.YA_DISPARADO;
+    }
+
+    if (nave != null) {
+        EstadoNave estadoNave = nave.addDisparo();
+        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+
+        if (estadoNave == EstadoNave.AVERIADO) {
+            return ResultadoDisparo.IMPACTO;
+        } else if (estadoNave == EstadoNave.HUNDIDO) {
+            return ResultadoDisparo.HUNDIMIENTO;
+        } else {
+            return ResultadoDisparo.IMPACTO; // fallback
+        }
+    }
+
+    if (eC == EstadoCasilla.AGUA) {
+        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+        return ResultadoDisparo.AGUA;
+    }
+
+    return ResultadoDisparo.AGUA; 
+}
+
 }

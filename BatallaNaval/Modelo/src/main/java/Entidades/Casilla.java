@@ -7,7 +7,7 @@ import Enums.EstadoCasilla;
  * @author daniel
  */
 public class Casilla {
-    
+
     private Nave nave;
     private EstadoCasilla estado;
     private Coordenadas coordenadas;
@@ -17,7 +17,7 @@ public class Casilla {
         this.estado = estado;
         this.coordenadas = coordenadas;
     }
-    
+
     public EstadoCasilla getEstado() {
         return estado;
     }
@@ -25,5 +25,8 @@ public class Casilla {
     public Nave getNave() {
         return nave;
     }
-    
+
+    public void setEstado(EstadoCasilla estado) {
+        this.estado = estado;
+    }
 }
