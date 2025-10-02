@@ -6,6 +6,8 @@ import Entidades.Coordenadas;
 import Entidades.Disparo;
 import Enums.ResultadoDisparo;
 import control.IModelo;
+import control.IObervable;
+import control.ISuscriptor;
 import java.awt.Color;
 import java.util.List;
 import realizarDisparo.CasillaButton;
@@ -18,10 +20,10 @@ import realizarDisparo.FrmPartidaEnCurso;
 public class ControlVista implements ISuscriptor{
     
     private IControlador control;
-    private IModelo modelo;
+    private IObervable modelo;
     private List<CasillaButton> casillas;
 
-    public ControlVista(IControlador control, IModelo modelo, List<CasillaButton> casillas) {
+    public ControlVista(IControlador control, IObervable modelo, List<CasillaButton> casillas) {
         this.control = control;
         this.modelo = modelo;
         this.casillas = casillas;
@@ -44,6 +46,8 @@ public class ControlVista implements ISuscriptor{
                 .findFirst()
                 .orElse(null);
         
+        System.out.println(cB.getX() + " " + cB.getY());
+        
         if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
             cB.setBackground(Color.YELLOW);
         }
@@ -53,10 +57,16 @@ public class ControlVista implements ISuscriptor{
         if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
             cB.setBackground(Color.BLUE);
         }
+        
+        System.out.println(d.getResultadoDisparo().toString());
+    }
+
+    public List<CasillaButton> getCasillas() {
+        return casillas;
     }
     
     public void mostrarFrmPartidaEnCurso() {
-        new FrmPartidaEnCurso();
+        new FrmPartidaEnCurso(this);
     }
     
 }

@@ -1,5 +1,6 @@
 package realizarDisparo;
 
+import DTOs.CoordenadasDTO;
 import Entidades.Coordenadas;
 import javax.swing.JButton;
 
@@ -9,13 +10,13 @@ import javax.swing.JButton;
  */
 public class CasillaButton extends JButton{
     
-    private Coordenadas coordenadas;
+    private CoordenadasDTO coordenadas;
 
-    public CasillaButton(Coordenadas coordenadas) {
+    public CasillaButton(CoordenadasDTO coordenadas) {
         this.coordenadas = coordenadas;
     }
 
-    public Coordenadas getCoordenadas() {
+    public CoordenadasDTO getCoordenadas() {
         return coordenadas;
     }
     

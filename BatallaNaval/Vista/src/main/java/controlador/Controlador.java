@@ -4,7 +4,7 @@ import DTOs.CoordenadasDTO;
 import DTOs.JugadorDTO;
 import Entidades.Coordenadas;
 import Entidades.Jugador;
-import Entidades.Partida;
+import control.IModelo;
 
 /**
  *
@@ -12,12 +12,12 @@ import Entidades.Partida;
  */
 public class Controlador implements IControlador{
     
-    private Partida partida;
+    private IModelo partida;
 
-    public Controlador(Partida partida) {
+    public Controlador(IModelo partida) {
         this.partida = partida;
     }
-    
+
     @Override
     public void realizarDisparo(CoordenadasDTO c, JugadorDTO j) {
         Coordenadas coordenadas = new Coordenadas(

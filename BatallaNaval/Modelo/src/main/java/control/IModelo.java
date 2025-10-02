@@ -13,5 +13,4 @@ public interface IModelo {
     
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador);
     
-    public Disparo getDisparo();
 }

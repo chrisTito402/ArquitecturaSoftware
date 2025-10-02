@@ -3,13 +3,15 @@ package Entidades;
 import Enums.EstadoPartida;
 import Enums.ResultadoDisparo;
 import control.IModelo;
+import control.IObervable;
+import control.ISuscriptor;
 import java.util.List;
 
 /**
  *
  * @author daniel
  */
-public class Partida implements IModelo {
+public class Partida implements IModelo, IObervable {
 
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -20,8 +22,9 @@ public class Partida implements IModelo {
     private int totalNaves;
     private EstadoPartida estado;
     private Disparo disparo;
+    private List<ISuscriptor> suscriptores;
 
-    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado) {
+    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores) {
         this.turno = turno;
         this.jugadores = jugadores;
         this.cantBarcos = cantBarcos;
@@ -30,11 +33,20 @@ public class Partida implements IModelo {
         this.cantPortaAviones = cantPortaAviones;
         this.totalNaves = totalNaves;
         this.estado = estado;
+        this.suscriptores = suscriptores;
     }
-
+    
+    public void setSuscriptor(ISuscriptor suscriptor) {
+        suscriptores.add(suscriptor);
+    }
+    
+    public void notificarAllSuscriptores() {
+        suscriptores.forEach(s -> s.notificar());
+    }
+    
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
-        if (jugador != turno) {
+        if (jugador.getNombre() != turno.getNombre()) {
             System.out.println("Error, no es el turno del jugador seleccionado");
             return null;
         }
@@ -71,6 +83,9 @@ public class Partida implements IModelo {
             }
         }
 
+        disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+        notificarAllSuscriptores();
+        
         return resultadoDisparo;
     }
 

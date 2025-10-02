@@ -33,5 +33,17 @@ public class Jugador {
     public Tablero getTablero() {
         return tablero;
     }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public ColorJugador getColor() {
+        return color;
+    }
+
+    public EstadoJugador getEstado() {
+        return estado;
+    }
     
 }

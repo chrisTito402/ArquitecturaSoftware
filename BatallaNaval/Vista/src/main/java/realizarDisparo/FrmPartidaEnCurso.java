@@ -4,6 +4,8 @@
  */
 package realizarDisparo;
 
+import DTOs.CoordenadasDTO;
+import DTOs.JugadorDTO;
 import Entidades.Barco;
 import Entidades.Casilla;
 import Entidades.Coordenadas;
@@ -16,10 +18,13 @@ import Enums.EstadoCasilla;
 import Enums.EstadoJugador;
 import Enums.EstadoPartida;
 import Enums.OrientacionNave;
-import Enums.ResultadoDisparo;
+import control.IModelo;
+import control.IObervable;
+import control.ISuscriptor;
 import controlador.ControlVista;
-import java.awt.Color;
-import java.awt.Component;
+import controlador.Controlador;
+import controlador.IControlador;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,47 +34,17 @@ import java.util.List;
  */
 public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
+    private ControlVista cV;
+    
     /**
      * Creates new form FrmPartidaEnCurso
      */
-    public FrmPartidaEnCurso() {
+    public FrmPartidaEnCurso(ControlVista cV) {
         initComponents();
         
-        Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
-        Coordenadas co = new Coordenadas(1, 1);
-        Casilla c = new Casilla(n1, EstadoCasilla.NO_DISPARADO, co);
-        Casilla c2 = new Casilla(null, EstadoCasilla.AGUA, co);
-        Casilla[][] casillas = new Casilla[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                Casilla c3 = new Casilla(null, EstadoCasilla.AGUA, co);
-                casillas[i][j] = c3;
-            }
-        }
+        this.cV = cV;
         
-        casillas[1][1] = c;
-        casillas[1][2] = c2;
-        Tablero t2 = new Tablero(casillas, 3, 3);
-        Jugador j1 = new Jugador("j1", ColorJugador.ROJO, null, t2, EstadoJugador.JUGANDO);
-        Jugador j2 = new Jugador("j2", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
-        List<Jugador> jugadores = Arrays.asList(j1, j2);
-        Partida p = new Partida(j1, jugadores, 1, 0, 0, 0, 1, EstadoPartida.EN_CURSO);
-        
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                Coordenadas coordenadas = new Coordenadas(i, j);
-                CasillaButton cB = new CasillaButton(coordenadas);
-                cB.setText(String.valueOf(i) + "," + String.valueOf(j));
-                cB.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        
-                    }
-                });
-                
-                jPanel1.add(cB);
-            }
-        }
-       
+        cV.getCasillas().forEach(c -> jPanel1.add(c));
     }
 
     /**
@@ -105,40 +80,40 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmPartidaEnCurso().setVisible(true);
-            }
-        });
-    }
+//    /**
+//     * @param args the command line arguments
+//     */
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(FrmPartidaEnCurso.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new FrmPartidaEnCurso().setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
