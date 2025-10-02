@@ -92,6 +92,6 @@ public class Vista {
         }
         
         
-        new FrmPartidaEnCurso(cV);
+        new FrmPartidaEnCurso(cV).setVisible(true);
     }
 }
