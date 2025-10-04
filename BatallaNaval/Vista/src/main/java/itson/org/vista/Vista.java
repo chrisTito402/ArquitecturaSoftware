@@ -7,6 +7,7 @@ package itson.org.vista;
 import DTOs.CoordenadasDTO;
 import DTOs.JugadorDTO;
 import Entidades.Barco;
+import Entidades.Bot;
 import Entidades.Casilla;
 import Entidades.Coordenadas;
 import Entidades.Jugador;
@@ -18,17 +19,17 @@ import Enums.EstadoCasilla;
 import Enums.EstadoJugador;
 import Enums.EstadoPartida;
 import Enums.OrientacionNave;
-import control.IModelo;
-import control.IObervable;
 import control.ISuscriptor;
 import controlador.ControlVista;
 import controlador.Controlador;
 import controlador.IControlador;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.BorderFactory;
 import realizarDisparo.CasillaButton;
-import realizarDisparo.FrmPartidaEnCurso;
+import realizarDisparo.CasillaPanel;
 
 /**
  *
@@ -42,26 +43,37 @@ public class Vista {
         Coordenadas co = new Coordenadas(1, 1);
         Casilla c = new Casilla(n1, EstadoCasilla.NO_DISPARADO, co);
         Casilla c2 = new Casilla(null, EstadoCasilla.AGUA, co);
-        Casilla[][] casillas = new Casilla[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        
+        Casilla[][] casillas1 = new Casilla[10][10];
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
                 Casilla c3 = new Casilla(null, EstadoCasilla.AGUA, co);
-                casillas[i][j] = c3;
+                casillas1[i][j] = c3;
             }
         }
         
-        casillas[1][1] = c;
-        casillas[1][2] = c2;
-        Tablero t2 = new Tablero(casillas, 3, 3);
-        Jugador j1 = new Jugador("j1", ColorJugador.ROJO, null, t2, EstadoJugador.JUGANDO);
-        Jugador j2 = new Jugador("j2", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
+        Casilla[][] casillas2 = new Casilla[10][10];
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                Casilla c3 = new Casilla(null, EstadoCasilla.AGUA, co);
+                casillas2[i][j] = c3;
+            }
+        }
+        
+        casillas2[1][1] = c;
+        casillas2[1][2] = c2;
+        Tablero t1 = new Tablero(casillas1, 10, 10);
+        Tablero t2 = new Tablero(casillas2, 10, 10);
+        Jugador j1 = new Jugador("j1", ColorJugador.ROJO, null, t1, EstadoJugador.JUGANDO);
+        Jugador j2 = new Bot("bot", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
         List<Jugador> jugadores = Arrays.asList(j1, j2);
         
         List<ISuscriptor> suscriptores = new ArrayList<>();
         //suscriptores.add();
-        IObervable p = new Partida(j1, jugadores, 1, 0, 0, 0, 1, EstadoPartida.EN_CURSO, suscriptores);
+        Partida p = new Partida(j1, jugadores, 1, 0, 0, 0, 1, EstadoPartida.EN_CURSO, suscriptores);
         
-        List<CasillaButton> casillasB = new ArrayList<>();
+        List<CasillaButton> casillasBP = new ArrayList<>();
+        List<CasillaPanel> casillasPE = new ArrayList<>();
         
         JugadorDTO j1DTO = new JugadorDTO(
                 j1.getNombre(),
@@ -69,14 +81,13 @@ public class Vista {
                 j1.getEstado()
         );
         
-        IModelo p2 = (IModelo) p;
-        IControlador controlador = new Controlador(p2);
+        IControlador controlador = new Controlador(p);
         
-        ControlVista cV = new ControlVista(controlador, p, casillasB);
+        ControlVista cV = new ControlVista(controlador, p, casillasPE, casillasBP, j1DTO);
         suscriptores.add(cV);
         
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
                 CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
                 CasillaButton cB = new CasillaButton(coordenadas);
                 cB.setText(String.valueOf(i) + "," + String.valueOf(j));
@@ -86,12 +97,20 @@ public class Vista {
                         cV.realizarDisparo(coordenadas, j1DTO);
                     }
                 });
-                
-                casillasB.add(cB);
+                casillasBP.add(cB);
             }
         }
         
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
+                CasillaPanel cP = new CasillaPanel(coordenadas);
+                cP.setBackground(Color.RED); // O cualquier color que necesites
+                cP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                casillasPE.add(cP);
+            }
+        }
         
-        new FrmPartidaEnCurso(cV).setVisible(true);
+        cV.mostrarFrmPartidaEnCurso();
     }
 }

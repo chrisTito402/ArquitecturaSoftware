@@ -7,6 +7,7 @@ package Entidades;
 import Enums.ColorJugador;
 import Enums.EstadoJugador;
 import Enums.ResultadoDisparo;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -27,6 +28,10 @@ public class Bot extends Jugador {
         this.disparos = new boolean[10][10]; // matriz de disparos 10x10
     }
 
+    public Bot(String nombre, ColorJugador color, List<Nave> naves, Tablero tablero, EstadoJugador estado) {
+        super(nombre, color, naves, tablero, estado);
+    }
+    
     /**
      * El bot realiza un disparo aleatorio sobre el tablero del jugador.
      *

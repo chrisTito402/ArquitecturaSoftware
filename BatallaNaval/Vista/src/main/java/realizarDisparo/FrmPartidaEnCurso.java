@@ -1,36 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package realizarDisparo;
 
-import DTOs.CoordenadasDTO;
-import DTOs.JugadorDTO;
-import Entidades.Barco;
-import Entidades.Casilla;
-import Entidades.Coordenadas;
-import Entidades.Jugador;
-import Entidades.Nave;
-import Entidades.Partida;
-import Entidades.Tablero;
-import Enums.ColorJugador;
-import Enums.EstadoCasilla;
-import Enums.EstadoJugador;
-import Enums.EstadoPartida;
-import Enums.OrientacionNave;
-import control.IModelo;
-import control.IObervable;
-import control.ISuscriptor;
 import controlador.ControlVista;
-import controlador.Controlador;
-import controlador.IControlador;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.awt.Color;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 
 /**
  *
- * @author guzman
+ * @author daniel
  */
 public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
@@ -44,7 +21,8 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         
         this.cV = cV;
         
-        cV.getCasillas().forEach(c -> jPanel1.add(c));
+        cV.getCasillasEnemigas().forEach(c -> jPanel2.add(c));
+        cV.getCasillasPropias().forEach(c -> jPanel1.add(c));
     }
 
     /**
@@ -56,25 +34,36 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setLayout(new java.awt.GridLayout(3, 3));
+        jPanel2.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel2.setLayout(new java.awt.GridLayout(10, 10));
+
+        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel1.setLayout(new java.awt.GridLayout(10, 10));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 577, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(32, 32, 32)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 451, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 451, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(32, 32, 32))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 382, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(51, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(44, 44, 44))
         );
 
         pack();
@@ -117,5 +106,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
 }

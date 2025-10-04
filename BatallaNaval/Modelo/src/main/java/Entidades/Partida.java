@@ -6,6 +6,7 @@ import control.IModelo;
 import control.IObervable;
 import control.ISuscriptor;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -66,20 +67,23 @@ public class Partida implements IModelo, IObervable {
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
 
         // Si falla, pasa turno
-        if (resultadoDisparo != ResultadoDisparo.IMPACTO
-                && resultadoDisparo != ResultadoDisparo.HUNDIMIENTO) {
+        if (resultadoDisparo == ResultadoDisparo.AGUA) {
 
             turno = j2;
 
             //Si el siguiente es un Bot, dispara automáticamente
             if (j2 instanceof Bot) {
+                System.out.println("ES UN BOT");
                 Bot bot = (Bot) j2;
-                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
+//                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
+                Random r = new Random();
+                Coordenadas c = new Coordenadas(r.nextInt(10), r.nextInt(10));
+                realizarDisparo(c, j2);
 
-                // Si el Bot falla, regresa turno al jugador humano
-                if (resultadoBot == ResultadoDisparo.AGUA) {
-                    turno = jugador;
-                }
+//                // Si el Bot falla, regresa turno al jugador humano
+//                if (resultadoBot == ResultadoDisparo.AGUA) {
+//                    turno = jugador;
+//                }
             }
         }
 
