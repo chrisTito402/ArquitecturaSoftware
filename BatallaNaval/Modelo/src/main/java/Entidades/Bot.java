@@ -28,8 +28,9 @@ public class Bot extends Jugador {
         this.disparos = new boolean[10][10]; // matriz de disparos 10x10
     }
 
-    public Bot(String nombre, ColorJugador color, List<Nave> naves, Tablero tablero, EstadoJugador estado) {
+    public Bot(boolean[][] disparos, String nombre, ColorJugador color, List<Nave> naves, Tablero tablero, EstadoJugador estado) {
         super(nombre, color, naves, tablero, estado);
+        this.disparos = disparos;
     }
     
     /**
@@ -52,6 +53,21 @@ public class Bot extends Jugador {
 
         System.out.println("🤖 Bot dispara en (" + x + ", " + y + ") -> " + resultado);
         return resultado;
+    }
+    
+    public Coordenadas getCoordenadas() {
+        Random r = new Random();
+        
+        int x, y;
+        do {
+            x = r.nextInt(10); // 0..9
+            y = r.nextInt(10); // 0..9
+        } while (disparos[x][y]);
+
+        disparos[x][y] = true;
+        Coordenadas c = new Coordenadas(x, y);
+        
+        return c;
     }
 }
 

@@ -40,9 +40,10 @@ public class Vista {
     public static void main(String[] args) {
         
         Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
+        Nave n2 = new Barco(OrientacionNave.HORIZONTAL);
         Coordenadas co = new Coordenadas(1, 1);
         Casilla c = new Casilla(n1, EstadoCasilla.NO_DISPARADO, co);
-        Casilla c2 = new Casilla(null, EstadoCasilla.AGUA, co);
+        Casilla c2 = new Casilla(n2, EstadoCasilla.AGUA, co);
         
         Casilla[][] casillas1 = new Casilla[10][10];
         for (int i = 0; i < 10; i++) {
@@ -61,11 +62,12 @@ public class Vista {
         }
         
         casillas2[1][1] = c;
-        casillas2[1][2] = c2;
+        casillas2[1][3] = c2;
         Tablero t1 = new Tablero(casillas1, 10, 10);
         Tablero t2 = new Tablero(casillas2, 10, 10);
         Jugador j1 = new Jugador("j1", ColorJugador.ROJO, null, t1, EstadoJugador.JUGANDO);
-        Jugador j2 = new Bot("bot", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
+        boolean[][] cBO = new boolean[10][10];
+        Jugador j2 = new Bot(cBO, "bot", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
         List<Jugador> jugadores = Arrays.asList(j1, j2);
         
         List<ISuscriptor> suscriptores = new ArrayList<>();
@@ -105,8 +107,8 @@ public class Vista {
             for (int j = 0; j < 10; j++) {
                 CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
                 CasillaPanel cP = new CasillaPanel(coordenadas);
-                cP.setBackground(Color.RED); // O cualquier color que necesites
-                cP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                cP.setBackground(Color.WHITE); // O cualquier color que necesites
+                cP.setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 casillasPE.add(cP);
             }
         }

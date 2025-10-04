@@ -68,17 +68,14 @@ public class Partida implements IModelo, IObervable {
 
         // Si falla, pasa turno
         if (resultadoDisparo == ResultadoDisparo.AGUA) {
-
             turno = j2;
 
             //Si el siguiente es un Bot, dispara automáticamente
-            if (j2 instanceof Bot) {
+            if (turno instanceof Bot) {
                 System.out.println("ES UN BOT");
-                Bot bot = (Bot) j2;
+                Bot bot = (Bot) turno;
 //                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
-                Random r = new Random();
-                Coordenadas c = new Coordenadas(r.nextInt(10), r.nextInt(10));
-                realizarDisparo(c, j2);
+                realizarDisparo(bot.getCoordenadas(), turno);
 
 //                // Si el Bot falla, regresa turno al jugador humano
 //                if (resultadoBot == ResultadoDisparo.AGUA) {
