@@ -1,6 +1,7 @@
 package control;
 
 import Entidades.Disparo;
+import Enums.EstadoPartida;
 
 /**
  *
@@ -9,4 +10,6 @@ import Entidades.Disparo;
 public interface IObervable {
     
     public Disparo getDisparo();
+    
+    public EstadoPartida getEstado();
 }

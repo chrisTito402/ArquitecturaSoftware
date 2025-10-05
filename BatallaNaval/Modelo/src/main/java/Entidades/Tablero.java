@@ -38,12 +38,10 @@ public ResultadoDisparo realizarDisparo(Coordenadas c) {
         EstadoNave estadoNave = nave.addDisparo();
         casilla.setEstado(EstadoCasilla.YA_DISPARADO);
 
-        if (estadoNave == EstadoNave.AVERIADO) {
+        if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
             return ResultadoDisparo.IMPACTO;
         } else if (estadoNave == EstadoNave.HUNDIDO) {
             return ResultadoDisparo.HUNDIMIENTO;
-        } else {
-            return ResultadoDisparo.IMPACTO; // fallback
         }
     }
 

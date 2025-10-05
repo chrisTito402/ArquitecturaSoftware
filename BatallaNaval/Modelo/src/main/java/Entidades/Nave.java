@@ -33,6 +33,9 @@ public abstract class Nave {
         
         return estado;
     }
-    
+
+    public EstadoNave getEstado() {
+        return estado;
+    }
     
 }

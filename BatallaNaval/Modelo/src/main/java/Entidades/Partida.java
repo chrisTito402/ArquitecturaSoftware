@@ -1,12 +1,12 @@
 package Entidades;
 
+import Enums.EstadoNave;
 import Enums.EstadoPartida;
 import Enums.ResultadoDisparo;
 import control.IModelo;
 import control.IObervable;
 import control.ISuscriptor;
 import java.util.List;
-import java.util.Random;
 
 /**
  *
@@ -36,15 +36,15 @@ public class Partida implements IModelo, IObervable {
         this.estado = estado;
         this.suscriptores = suscriptores;
     }
-    
+
     public void setSuscriptor(ISuscriptor suscriptor) {
         suscriptores.add(suscriptor);
     }
-    
+
     public void notificarAllSuscriptores() {
         suscriptores.forEach(s -> s.notificar());
     }
-    
+
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         if (jugador.getNombre() != turno.getNombre()) {
@@ -83,10 +83,32 @@ public class Partida implements IModelo, IObervable {
 //                }
             }
         }
+        if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
+            Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
+                    || n.getEstado() == EstadoNave.AVERIADO)
+                    .findFirst()
+                    .orElse(null);
+
+            if (nave == null) {
+                System.out.println("Jugador: " + turno.getNombre() + " GANO!");
+                estado = EstadoPartida.FINALIZADA;
+                disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+                notificarAllSuscriptores();
+                return resultadoDisparo;
+            }
+        }
+
+        if (turno instanceof Bot) {
+            if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO
+                    || resultadoDisparo == ResultadoDisparo.IMPACTO) {
+                Bot bot = (Bot) turno;
+                realizarDisparo(bot.getCoordenadas(), turno);
+            }
+        }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
         notificarAllSuscriptores();
-        
+
         return resultadoDisparo;
     }
 
@@ -94,5 +116,10 @@ public class Partida implements IModelo, IObervable {
     public Disparo getDisparo() {
         return disparo;
     }
-    
+
+    @Override
+    public EstadoPartida getEstado() {
+        return estado;
+    }
+
 }

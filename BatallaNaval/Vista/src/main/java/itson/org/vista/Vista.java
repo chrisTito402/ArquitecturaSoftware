@@ -10,6 +10,7 @@ import Entidades.Barco;
 import Entidades.Bot;
 import Entidades.Casilla;
 import Entidades.Coordenadas;
+import Entidades.Crucero;
 import Entidades.Jugador;
 import Entidades.Nave;
 import Entidades.Partida;
@@ -39,11 +40,31 @@ public class Vista {
 
     public static void main(String[] args) {
         
-        Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
-        Nave n2 = new Barco(OrientacionNave.HORIZONTAL);
+        List<Nave> naves1 = new ArrayList<>();
+        List<Nave> naves2 = new ArrayList<>();
+        Nave nJ1 = new Barco(OrientacionNave.HORIZONTAL);
+        Nave nJ2 = new Barco(OrientacionNave.HORIZONTAL);
+        
+        Nave nB1 = new Barco(OrientacionNave.HORIZONTAL);
+        Nave nB2 = new Barco(OrientacionNave.HORIZONTAL);
+        Nave nB3 = new Crucero(OrientacionNave.HORIZONTAL);
+        
+        naves1.add(nJ1);
+        naves1.add(nJ2);
+        
+        naves2.add(nB1);
+        naves2.add(nB2);
+        naves2.add(nB3);
+        
         Coordenadas co = new Coordenadas(1, 1);
-        Casilla c = new Casilla(n1, EstadoCasilla.NO_DISPARADO, co);
-        Casilla c2 = new Casilla(n2, EstadoCasilla.AGUA, co);
+        Casilla cJ1 = new Casilla(nJ1, EstadoCasilla.NO_DISPARADO, co);
+        Casilla cJ2 = new Casilla(nJ2, EstadoCasilla.NO_DISPARADO, co);
+        
+        Casilla cB1 = new Casilla(nB1, EstadoCasilla.NO_DISPARADO, co);
+        Casilla cB2 = new Casilla(nB2, EstadoCasilla.NO_DISPARADO, co);
+        Casilla cB3 = new Casilla(nB3, EstadoCasilla.NO_DISPARADO, co);
+        Casilla cB4 = new Casilla(nB3, EstadoCasilla.NO_DISPARADO, co);
+        Casilla cB5 = new Casilla(nB3, EstadoCasilla.NO_DISPARADO, co);
         
         Casilla[][] casillas1 = new Casilla[10][10];
         for (int i = 0; i < 10; i++) {
@@ -61,13 +82,21 @@ public class Vista {
             }
         }
         
-        casillas2[1][1] = c;
-        casillas2[1][3] = c2;
+        casillas2[1][1] = cB1;
+        casillas2[1][3] = cB2;
+        casillas2[2][0] = cB3;
+        casillas2[2][1] = cB4;
+        casillas2[2][2] = cB5;
+        
+        casillas1[0][0] = cJ1;
+        casillas1[0][2] = cJ2;
+        
         Tablero t1 = new Tablero(casillas1, 10, 10);
         Tablero t2 = new Tablero(casillas2, 10, 10);
-        Jugador j1 = new Jugador("j1", ColorJugador.ROJO, null, t1, EstadoJugador.JUGANDO);
+        
+        Jugador j1 = new Jugador("j1", ColorJugador.ROJO, naves1, t1, EstadoJugador.JUGANDO);
         boolean[][] cBO = new boolean[10][10];
-        Jugador j2 = new Bot(cBO, "bot", ColorJugador.AZUL, null, t2, EstadoJugador.JUGANDO);
+        Jugador j2 = new Bot(cBO, "bot", ColorJugador.AZUL, naves2, t2, EstadoJugador.JUGANDO);
         List<Jugador> jugadores = Arrays.asList(j1, j2);
         
         List<ISuscriptor> suscriptores = new ArrayList<>();
@@ -92,7 +121,6 @@ public class Vista {
             for (int j = 0; j < 10; j++) {
                 CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
                 CasillaButton cB = new CasillaButton(coordenadas);
-                cB.setText(String.valueOf(i) + "," + String.valueOf(j));
                 cB.addActionListener(new java.awt.event.ActionListener() {
                     @Override
                     public void actionPerformed(java.awt.event.ActionEvent evt) {

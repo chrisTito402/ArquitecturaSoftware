@@ -45,5 +45,9 @@ public class Jugador {
     public EstadoJugador getEstado() {
         return estado;
     }
+
+    public List<Nave> getNaves() {
+        return naves;
+    }
     
 }

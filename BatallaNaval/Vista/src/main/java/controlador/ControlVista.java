@@ -4,6 +4,7 @@ import DTOs.CoordenadasDTO;
 import DTOs.JugadorDTO;
 import Entidades.Coordenadas;
 import Entidades.Disparo;
+import Enums.EstadoPartida;
 import Enums.ResultadoDisparo;
 import control.IObervable;
 import control.ISuscriptor;
@@ -91,6 +92,11 @@ public class ControlVista implements ISuscriptor{
         System.out.println(c.getX() + " " + c.getY());
         
         System.out.println(d.getResultadoDisparo().toString());
+        
+        if (modelo.getEstado() == EstadoPartida.FINALIZADA) {
+            casillasEnemigas.forEach(e -> e.setEnabled(false));
+            System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
+        }
     }
 
     public List<CasillaPanel> getCasillasPropias() {
