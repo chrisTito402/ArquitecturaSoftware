@@ -3,6 +3,7 @@ package Entidades;
 import Enums.EstadoCasilla;
 import Enums.EstadoNave;
 import Enums.ResultadoDisparo;
+import java.util.List;
 
 /**
  *
@@ -20,37 +21,43 @@ public class Tablero {
         this.limiteY = limiteY;
     }
     
-public ResultadoDisparo realizarDisparo(Coordenadas c) {
-    if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
-        System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
-        return null;
-    }
-
-    Casilla casilla = casillas[c.getX()][c.getY()];
-    Nave nave = casilla.getNave();
-    EstadoCasilla eC = casilla.getEstado();
-
-    if (eC == EstadoCasilla.YA_DISPARADO) {
-        return ResultadoDisparo.YA_DISPARADO;
-    }
-
-    if (nave != null) {
-        EstadoNave estadoNave = nave.addDisparo();
-        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
-
-        if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
-            return ResultadoDisparo.IMPACTO;
-        } else if (estadoNave == EstadoNave.HUNDIDO) {
-            return ResultadoDisparo.HUNDIMIENTO;
+    public ResultadoDisparo realizarDisparo(Coordenadas c) {
+        if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
+            System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
+            return null;
         }
-    }
 
-    if (eC == EstadoCasilla.AGUA) {
-        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+        Casilla casilla = casillas[c.getX()][c.getY()];
+        Nave nave = casilla.getNave();
+        EstadoCasilla eC = casilla.getEstado();
+
+        if (eC == EstadoCasilla.YA_DISPARADO) {
+            return ResultadoDisparo.YA_DISPARADO;
+        }
+
+        if (nave != null) {
+            EstadoNave estadoNave = nave.addDisparo();
+            casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+
+            if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
+                return ResultadoDisparo.IMPACTO;
+            } else if (estadoNave == EstadoNave.HUNDIDO) {
+                return ResultadoDisparo.HUNDIMIENTO;
+            }
+        }
+
+        if (eC == EstadoCasilla.AGUA) {
+            casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+            return ResultadoDisparo.AGUA;
+        }
+
         return ResultadoDisparo.AGUA;
     }
-
-    return ResultadoDisparo.AGUA; 
-}
+    
+    public boolean addNave(Nave nave, List<Coordenadas> coordenadas) {
+        coordenadas.forEach(c -> casillas[c.getX()][c.getY()].setNave(nave));
+        
+        return true;
+    }
 
 }

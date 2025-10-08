@@ -4,13 +4,18 @@ import DTOs.CoordenadasDTO;
 import DTOs.JugadorDTO;
 import Entidades.Coordenadas;
 import Entidades.Disparo;
+import Entidades.Jugador;
+import Entidades.Nave;
 import Enums.EstadoPartida;
 import Enums.ResultadoDisparo;
+import builder.IPartidaBuilder;
 import control.IObervable;
 import control.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.List;
+import javax.swing.BorderFactory;
 import realizarDisparo.CasillaButton;
 import realizarDisparo.CasillaPanel;
 import realizarDisparo.FrmPartidaEnCurso;
@@ -21,17 +26,41 @@ import realizarDisparo.FrmPartidaEnCurso;
  */
 public class ControlVista implements ISuscriptor{
     
+    private static ControlVista controlVista;
+    
     private IControlador control;
     private IObervable modelo;
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
     private JugadorDTO jugador;
 
-    public ControlVista(IControlador control, IObervable modelo, List<CasillaPanel> casillasPropias, List<CasillaButton> casillasEnemigas, JugadorDTO jugador) {
+    private ControlVista() {
+    }
+    
+    public static ControlVista getInstancia() {
+        if (controlVista == null) {
+            controlVista = new ControlVista();
+        }
+        return controlVista;
+    }
+
+    public List<CasillaPanel> getCasillasPropias() {
+        return casillasPropias;
+    }
+
+    public List<CasillaButton> getCasillasEnemigas() {
+        return casillasEnemigas;
+    }
+
+    public void setControl(IControlador control) {
         this.control = control;
+    }
+
+    public void setModelo(IObervable modelo) {
         this.modelo = modelo;
-        this.casillasPropias = casillasPropias;
-        this.casillasEnemigas = casillasEnemigas;
+    }
+
+    public void setJugador(JugadorDTO jugador) {
         this.jugador = jugador;
     }
     
@@ -98,17 +127,61 @@ public class ControlVista implements ISuscriptor{
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
         }
     }
-
-    public List<CasillaPanel> getCasillasPropias() {
-        return casillasPropias;
+    
+    public void initTableroPropio() {
+        casillasPropias = new ArrayList<>();
+        
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
+                CasillaPanel cP = new CasillaPanel(coordenadas);
+                cP.setBackground(new Color(242, 242, 242)); // O cualquier color que necesites
+                cP.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                casillasPropias.add(cP);
+            }
+        }
     }
     
-    public List<CasillaButton> getCasillasEnemigas() {
-        return casillasEnemigas;
+    public void initTableroEnemigo() {
+        casillasEnemigas = new ArrayList<>();
+        
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
+                CasillaButton cB = new CasillaButton(coordenadas);
+                cB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                cB.addActionListener(new java.awt.event.ActionListener() {
+                    @Override
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        realizarDisparo(coordenadas, jugador);
+                    }
+                });
+                casillasEnemigas.add(cB);
+            }
+        }
+    }
+    
+    public void crearPartida(IPartidaBuilder builder, Jugador j) {
+        control.crearPartida(builder, j);
+    }
+    
+    public void addNave(JugadorDTO jugador, Nave nave, List<CoordenadasDTO> coordenadas) {
+        boolean resultado = control.addNave(jugador, nave, coordenadas);
+        if (!resultado) {
+            System.out.println("No se pudo agregar la Nave.");
+        }
+    }
+    
+    public void addJugador(Jugador j) {
+        control.addJugador(j);
+    }
+    
+    public void crearTableros() {
+        control.crearTableros();
     }
     
     public void mostrarFrmPartidaEnCurso() {
-        new FrmPartidaEnCurso(this).setVisible(true);
+        new FrmPartidaEnCurso().setVisible(true);
     }
     
 }

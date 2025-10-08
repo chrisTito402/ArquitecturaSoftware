@@ -6,6 +6,7 @@ import Enums.ResultadoDisparo;
 import control.IModelo;
 import control.IObervable;
 import control.ISuscriptor;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,14 @@ public class Partida implements IModelo, IObervable {
         this.suscriptores = suscriptores;
     }
 
+    public List<Jugador> getJugadores() {
+        return jugadores;
+    }
+
+    public void setJugadores(List<Jugador> jugadores) {
+        this.jugadores = jugadores;
+    }
+    
     public void setSuscriptor(ISuscriptor suscriptor) {
         suscriptores.add(suscriptor);
     }
@@ -45,6 +54,11 @@ public class Partida implements IModelo, IObervable {
         suscriptores.forEach(s -> s.notificar());
     }
 
+    @Override
+    public void addJugador(Jugador j) {
+        jugadores.add(j);
+    }
+    
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         if (jugador.getNombre() != turno.getNombre()) {
@@ -122,4 +136,23 @@ public class Partida implements IModelo, IObervable {
         return estado;
     }
 
+    @Override
+    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+        Jugador j = jugadores.stream().filter(e -> e.getNombre() == jugador.getNombre())
+                .findFirst()
+                .orElse(null);
+        
+        j.getTablero();
+        
+        return false;
+    }
+
+    @Override
+    public void crearTableros() {
+        
+        for (Jugador j : jugadores) {
+            
+        }
+    }
+    
 }

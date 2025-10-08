@@ -18,8 +18,17 @@ public class Casilla {
         this.coordenadas = coordenadas;
     }
 
+    public Casilla(EstadoCasilla estado, Coordenadas coordenadas) {
+        this.estado = estado;
+        this.coordenadas = coordenadas;
+    }
+
     public EstadoCasilla getEstado() {
         return estado;
+    }
+
+    public void setNave(Nave nave) {
+        this.nave = nave;
     }
 
     public Nave getNave() {

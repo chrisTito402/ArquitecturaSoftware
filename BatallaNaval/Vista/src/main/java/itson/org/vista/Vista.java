@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package itson.org.vista;
 
 import DTOs.CoordenadasDTO;
@@ -24,11 +20,9 @@ import control.ISuscriptor;
 import controlador.ControlVista;
 import controlador.Controlador;
 import controlador.IControlador;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.BorderFactory;
 import realizarDisparo.CasillaButton;
 import realizarDisparo.CasillaPanel;
 
@@ -114,32 +108,14 @@ public class Vista {
         
         IControlador controlador = new Controlador(p);
         
-        ControlVista cV = new ControlVista(controlador, p, casillasPE, casillasBP, j1DTO);
+        ControlVista cV = ControlVista.getInstancia();
+        cV.setControl(controlador);
+        cV.setModelo(p);
+        cV.setJugador(j1DTO);
         suscriptores.add(cV);
         
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
-                CasillaButton cB = new CasillaButton(coordenadas);
-                cB.addActionListener(new java.awt.event.ActionListener() {
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        cV.realizarDisparo(coordenadas, j1DTO);
-                    }
-                });
-                casillasBP.add(cB);
-            }
-        }
-        
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
-                CasillaPanel cP = new CasillaPanel(coordenadas);
-                cP.setBackground(Color.WHITE); // O cualquier color que necesites
-                cP.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                casillasPE.add(cP);
-            }
-        }
+        cV.initTableroEnemigo();
+        cV.initTableroPropio();
         
         cV.mostrarFrmPartidaEnCurso();
     }

@@ -30,24 +30,44 @@ public class Jugador {
         this.estado = estado;
     }
 
-    public Tablero getTablero() {
-        return tablero;
-    }
-
     public String getNombre() {
         return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public ColorJugador getColor() {
         return color;
     }
 
-    public EstadoJugador getEstado() {
-        return estado;
+    public void setColor(ColorJugador color) {
+        this.color = color;
     }
 
     public List<Nave> getNaves() {
         return naves;
+    }
+
+    public void setNaves(List<Nave> naves) {
+        this.naves = naves;
+    }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+
+    public void setTablero(Tablero tablero) {
+        this.tablero = tablero;
+    }
+
+    public EstadoJugador getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoJugador estado) {
+        this.estado = estado;
     }
     
 }

@@ -1,25 +1,20 @@
 package realizarDisparo;
 
 import controlador.ControlVista;
-import java.awt.Color;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 
 /**
  *
  * @author daniel
  */
 public class FrmPartidaEnCurso extends javax.swing.JFrame {
-
-    private ControlVista cV;
     
     /**
      * Creates new form FrmPartidaEnCurso
      */
-    public FrmPartidaEnCurso(ControlVista cV) {
+    public FrmPartidaEnCurso() {
         initComponents();
         
-        this.cV = cV;
+        ControlVista cV = ControlVista.getInstancia();
         
         cV.getCasillasEnemigas().forEach(c -> jPanel2.add(c));
         cV.getCasillasPropias().forEach(c -> jPanel1.add(c));
