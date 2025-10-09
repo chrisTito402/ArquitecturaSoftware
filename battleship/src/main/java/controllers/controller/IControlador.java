@@ -1,20 +1,21 @@
 package controllers.controller;
 
-import views.DTOs.CoordenadasDTO;
-import views.DTOs.JugadorDTO;
+//import views.DTOs.CoordenadasDTO;
+//import views.DTOs.JugadorDTO;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import views.builder.IPartidaBuilder;
+import models.builder.IPartidaBuilder;
 import java.util.List;
+import models.entidades.Coordenadas;
 
 /**
  *
  * @author daniel
  */
 public interface IControlador {
-    public void realizarDisparo(CoordenadasDTO c, JugadorDTO j);
-    public String crearPartida(IPartidaBuilder builder, Jugador j);
-    public boolean addNave(JugadorDTO jugador, Nave nave, List<CoordenadasDTO> coordenadas);
-    public void addJugador(Jugador j);
-    public void crearTableros();
+    String crearPartida(IPartidaBuilder builder, Jugador j);
+    void realizarDisparo(Coordenadas c, Jugador j);
+    boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+    void addJugador(Jugador j);
+    void crearTableros();
 }

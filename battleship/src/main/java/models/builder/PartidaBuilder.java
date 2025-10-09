@@ -1,11 +1,11 @@
-package views.builder;
+package models.builder;
 
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Partida;
 import models.enums.EstadoPartida;
 import models.control.IModelo;
-import models.control.ISuscriptor;
+import models.observador.ISuscriptor;
 import java.util.List;
 
 /**

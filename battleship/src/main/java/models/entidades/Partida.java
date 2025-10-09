@@ -4,8 +4,8 @@ import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.control.IModelo;
-import models.control.IObervable;
-import models.control.ISuscriptor;
+import models.observador.IObervable;
+import models.observador.ISuscriptor;
 import java.util.ArrayList;
 import java.util.List;
 

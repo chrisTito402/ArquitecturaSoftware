@@ -1,4 +1,4 @@
-package models.control;
+package models.observador;
 
 /**
  *

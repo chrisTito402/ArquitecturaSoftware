@@ -1,4 +1,4 @@
-package views.builder;
+package models.builder;
 
 import models.entidades.Casilla;
 import models.entidades.Coordenadas;

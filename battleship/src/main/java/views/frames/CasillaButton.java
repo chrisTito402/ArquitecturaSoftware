@@ -10,13 +10,13 @@ import javax.swing.JButton;
  */
 public class CasillaButton extends JButton{
     
-    private CoordenadasDTO coordenadas;
+    private Coordenadas coordenadas;
 
-    public CasillaButton(CoordenadasDTO coordenadas) {
+    public CasillaButton(Coordenadas coordenadas) {
         this.coordenadas = coordenadas;
     }
 
-    public CoordenadasDTO getCoordenadas() {
+    public Coordenadas getCoordenadas() {
         return coordenadas;
     }
     

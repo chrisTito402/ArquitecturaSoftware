@@ -1,26 +1,17 @@
 package controllers.controller;
 
-import views.DTOs.CoordenadasDTO;
-import views.DTOs.JugadorDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import views.builder.Director;
-import views.builder.IPartidaBuilder;
+import models.builder.Director;
+import models.builder.IPartidaBuilder;
 import models.control.IModelo;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author daniel
- */
-public class Controlador implements IControlador{
+public class Controlador implements IControlador {
     
     private IModelo partida;
-
-    public Controlador() {
-    }
 
     public Controlador(IModelo partida) {
         this.partida = partida;
@@ -28,52 +19,30 @@ public class Controlador implements IControlador{
 
     @Override
     public String crearPartida(IPartidaBuilder builder, Jugador j) {
-        Director d = new Director();
-        IModelo modelo = d.makePartida(builder);
+        Director director = new Director();
+        IModelo modelo = director.makePartida(builder);
         this.partida = modelo;
-        
-        return null;
+        return "Partida creada correctamente";
     }
-    
+
     @Override
-    public void realizarDisparo(CoordenadasDTO c, JugadorDTO j) {
-        Coordenadas coordenadas = new Coordenadas(
-                c.getX(),
-                c.getY()
-        );
-        Jugador jugador = new Jugador(
-                j.getNombre(),
-                j.getColor(),
-                j.getEstado()
-        );
-        
+    public void realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         partida.realizarDisparo(coordenadas, jugador);
     }
-    
+
     @Override
-    public boolean addNave(JugadorDTO jugador, Nave nave, List<CoordenadasDTO> coordenadas) {
-        List<Coordenadas> cords = new ArrayList<>();
-        coordenadas.forEach(c ->
-                cords.add(new Coordenadas(c.getX(), c.getY()))
-        );
-        Jugador j = new Jugador(
-                jugador.getNombre(),
-                jugador.getColor(),
-                jugador.getEstado()
-        );
-        
-        partida.addNave(j, nave, cords);
-        
+    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+        partida.addNave(jugador, nave, coordenadas);
         return true;
     }
 
     @Override
-    public void addJugador(Jugador j) {
-        partida.addJugador(j);
+    public void addJugador(Jugador jugador) {
+        partida.addJugador(jugador);
     }
 
     @Override
     public void crearTableros() {
-        
+        partida.crearTableros();
     }
 }
