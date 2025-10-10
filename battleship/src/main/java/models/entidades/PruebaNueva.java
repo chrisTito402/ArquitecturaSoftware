@@ -1,15 +1,13 @@
 package models.entidades;
 
 import controllers.controller.ControlVista;
-import controllers.controller.Controlador;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.Timer;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 import models.enums.OrientacionNave;
-import views.DTOs.CoordenadasDTO;
-import views.DTOs.JugadorDTO;
+import controllers.controller.Controlador;
 
 /**
  *
@@ -35,21 +33,18 @@ public class PruebaNueva {
         
         controlVista.crearTableros();
         
-        JugadorDTO j = new JugadorDTO("J1", ColorJugador.AZUL, EstadoJugador.JUGANDO);
-        JugadorDTO bot = new JugadorDTO("Bot", ColorJugador.ROJO, EstadoJugador.JUGANDO);
-        
-        controlVista.setJugador(j);
+        controlVista.setJugador(j1);
         
         controlVista.addNave(
-                bot,
+                b,
                 new Barco(OrientacionNave.HORIZONTAL),
-                Arrays.asList(new CoordenadasDTO(0, 0))
+                Arrays.asList(new Coordenadas(0, 0))
         );
         
         controlVista.addNave(
-                j,
+                j1,
                 new Barco(OrientacionNave.HORIZONTAL),
-                Arrays.asList(new CoordenadasDTO(0, 0))
+                Arrays.asList(new Coordenadas(0, 0))
         );
         
         controlVista.suscribirAModelo();

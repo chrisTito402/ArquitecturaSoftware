@@ -4,27 +4,8 @@
  */
 package views.frames;
 
-import views.DTOs.CoordenadasDTO;
-import models.entidades.Barco;
-import models.entidades.Casilla;
-import models.entidades.Coordenadas;
-import models.entidades.Jugador;
-import models.entidades.Nave;
-import models.entidades.Partida;
-import models.entidades.Tablero;
-import models.enums.ColorJugador;
-import models.enums.EstadoCasilla;
-import models.enums.EstadoJugador;
-import models.enums.EstadoPartida;
-import models.enums.OrientacionNave;
-import models.enums.ResultadoDisparo;
-import controllers.controller.ControlVista;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.JPanel;
+import models.entidades.Coordenadas;
 
 /**
  *
@@ -63,10 +44,10 @@ public class FrmPartidaEnCursoMetodoBotones extends javax.swing.JFrame {
 
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
-                casillasJugador[i][j] = new CasillaButton(new CoordenadasDTO(i, j));
+                casillasJugador[i][j] = new CasillaButton(new Coordenadas(i, j));
                 panelJugador.add(casillasJugador[i][j]);
 
-                casillasBot[i][j] = new CasillaButton(new CoordenadasDTO(i, j));
+                casillasBot[i][j] = new CasillaButton(new Coordenadas(i, j));
                 panelBot.add(casillasBot[i][j]);
             }
         }

@@ -5,6 +5,7 @@ import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoDisparo;
 import java.util.List;
+import models.observador.ISuscriptor;
 
 /**
  *
