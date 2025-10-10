@@ -1,4 +1,4 @@
-package models.control;
+package models.observador;
 
 import models.entidades.Disparo;
 import models.enums.EstadoPartida;

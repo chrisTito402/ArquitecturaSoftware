@@ -4,10 +4,10 @@ import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.control.IModelo;
-import models.control.ISuscriptor;
+import models.observador.ISuscriptor;
 import java.util.List;
-import views.builder.Director;
-import views.builder.TableroBuilder;
+import models.builder.Director;
+import models.builder.TableroBuilder;
 
 /**
  *

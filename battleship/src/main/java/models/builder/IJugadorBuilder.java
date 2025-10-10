@@ -1,4 +1,4 @@
-package views.builder;
+package models.builder;
 
 import models.entidades.Nave;
 import models.enums.ColorJugador;

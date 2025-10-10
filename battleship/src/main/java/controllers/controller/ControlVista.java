@@ -1,13 +1,12 @@
 package controllers.controller;
 
 import views.DTOs.CoordenadasDTO;
-import views.DTOs.JugadorDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoDisparo;
-import models.control.ISuscriptor;
+import models.observador.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
@@ -30,8 +29,8 @@ public class ControlVista implements ISuscriptor{
     private IControlador control;
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
-    private JugadorDTO jugador;
     private Timer timer;
+    private Jugador jugador;
 
     private ControlVista() {
     }
@@ -55,7 +54,7 @@ public class ControlVista implements ISuscriptor{
         this.control = control;
     }
 
-    public void setJugador(JugadorDTO jugador) {
+    public void setJugador(Jugador jugador) {
         this.jugador = jugador;
     }
 
@@ -67,7 +66,7 @@ public class ControlVista implements ISuscriptor{
         return timer;
     }
     
-    public void realizarDisparo(CoordenadasDTO c, JugadorDTO j) {
+    public void realizarDisparo(Coordenadas c, Jugador j) {
         control.realizarDisparo(c, j);
     }
     
@@ -145,7 +144,7 @@ public class ControlVista implements ISuscriptor{
         
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
+                Coordenadas coordenadas = new Coordenadas(i, j);
                 CasillaButton cB = new CasillaButton(coordenadas);
                 cB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 cB.addActionListener(new java.awt.event.ActionListener() {
@@ -164,7 +163,7 @@ public class ControlVista implements ISuscriptor{
         control.crearPartida(j);
     }
     
-    public void addNave(JugadorDTO jugador, Nave nave, List<CoordenadasDTO> coordenadas) {
+    public void addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         boolean resultado = control.addNave(jugador, nave, coordenadas);
         if (!resultado) {
             System.out.println("No se pudo agregar la Nave.");

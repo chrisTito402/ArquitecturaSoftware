@@ -1,4 +1,4 @@
-package views.builder;
+package models.builder;
 
 import java.util.ArrayList;
 import models.entidades.Casilla;
