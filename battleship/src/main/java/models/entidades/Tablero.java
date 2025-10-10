@@ -37,7 +37,6 @@ public class Tablero {
 
         if (nave != null) {
             EstadoNave estadoNave = nave.addDisparo();
-            casilla.setEstado(EstadoCasilla.YA_DISPARADO);
 
             if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
                 return ResultadoDisparo.IMPACTO;
@@ -47,10 +46,11 @@ public class Tablero {
         }
 
         if (eC == EstadoCasilla.AGUA) {
-            casilla.setEstado(EstadoCasilla.YA_DISPARADO);
             return ResultadoDisparo.AGUA;
         }
 
+        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+        
         return ResultadoDisparo.AGUA;
     }
     

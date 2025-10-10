@@ -6,10 +6,11 @@ import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import views.builder.Director;
-import views.builder.IPartidaBuilder;
 import models.control.IModelo;
 import java.util.ArrayList;
 import java.util.List;
+import models.control.ISuscriptor;
+import views.builder.PartidaBuilder;
 
 /**
  *
@@ -27,9 +28,9 @@ public class Controlador implements IControlador{
     }
 
     @Override
-    public String crearPartida(IPartidaBuilder builder, Jugador j) {
+    public String crearPartida(Jugador j) {
         Director d = new Director();
-        IModelo modelo = d.makePartida(builder);
+        IModelo modelo = d.makePartida(new PartidaBuilder());
         this.partida = modelo;
         
         return null;
@@ -74,6 +75,11 @@ public class Controlador implements IControlador{
 
     @Override
     public void crearTableros() {
-        
+        partida.crearTableros();
+    }
+
+    @Override
+    public void suscribirAPartida(ISuscriptor suscriptor) {
+        partida.suscribirAPartida(suscriptor);
     }
 }

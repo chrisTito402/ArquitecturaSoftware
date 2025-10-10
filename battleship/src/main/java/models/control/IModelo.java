@@ -16,5 +16,5 @@ public interface IModelo {
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
     public void crearTableros();
-    
+    public void suscribirAPartida(ISuscriptor suscriptor);
 }

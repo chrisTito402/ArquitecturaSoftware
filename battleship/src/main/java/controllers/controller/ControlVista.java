@@ -6,16 +6,15 @@ import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
-import views.builder.IPartidaBuilder;
-import models.control.IObervable;
 import models.control.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.Timer;
+import models.enums.EstadoPartida;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -29,10 +28,10 @@ public class ControlVista implements ISuscriptor{
     private static ControlVista controlVista;
     
     private IControlador control;
-    private IObervable modelo;
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
     private JugadorDTO jugador;
+    private Timer timer;
 
     private ControlVista() {
     }
@@ -56,38 +55,34 @@ public class ControlVista implements ISuscriptor{
         this.control = control;
     }
 
-    public void setModelo(IObervable modelo) {
-        this.modelo = modelo;
-    }
-
     public void setJugador(JugadorDTO jugador) {
         this.jugador = jugador;
+    }
+
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+    }
+
+    public Timer getTimer() {
+        return timer;
     }
     
     public void realizarDisparo(CoordenadasDTO c, JugadorDTO j) {
         control.realizarDisparo(c, j);
     }
     
-    private void actualizarCasillasPropias(Disparo d) {
+    private Component getCasillaPropia(Disparo d) {
         Coordenadas c = d.getCoordenadas();
         
-        Component cB = casillasPropias.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
+        Component cP = casillasPropias.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
                 && e.getCoordenadas().getY() == c.getY())
                 .findFirst()
                 .orElse(null);
         
-        if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
-            cB.setBackground(Color.YELLOW);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
-            cB.setBackground(Color.RED);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
-            cB.setBackground(Color.BLUE);
-        }
+        return cP;
     }
     
-    private void actualizarCasillasEnemigas(Disparo d) {
+    private Component getCasillaEnemiga(Disparo d) {
         Coordenadas c = d.getCoordenadas();
         
         Component cB = casillasEnemigas.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
@@ -95,35 +90,38 @@ public class ControlVista implements ISuscriptor{
                 .findFirst()
                 .orElse(null);
         
-        if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
-            cB.setBackground(Color.YELLOW);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
-            cB.setBackground(Color.RED);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
-            cB.setBackground(Color.BLUE);
-        }
+        return cB;
     }
     
     @Override
-    public void notificar() {
-        Disparo d = modelo.getDisparo();
+    public void notificar(Disparo disparo, EstadoPartida ePartida) {
+        Disparo d = disparo;
         Coordenadas c = d.getCoordenadas();
         
-        List<CasillaButton> casillas;
+        Component componente;
         if (d.getJugador().getNombre() == jugador.getNombre()) {
-            actualizarCasillasEnemigas(d);
+            componente = getCasillaEnemiga(d);
         } else {
-            actualizarCasillasPropias(d);
+            componente = getCasillaPropia(d);
+        }
+        
+        if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
+            componente.setBackground(Color.YELLOW);
+        }
+        if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
+            componente.setBackground(Color.RED);
+        }
+        if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
+            componente.setBackground(Color.BLUE);
         }
         
         System.out.println(c.getX() + " " + c.getY());
         
         System.out.println(d.getResultadoDisparo().toString());
         
-        if (modelo.getEstado() == EstadoPartida.FINALIZADA) {
+        if (ePartida == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
+            timer.stop();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
         }
     }
@@ -154,6 +152,7 @@ public class ControlVista implements ISuscriptor{
                     @Override
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         realizarDisparo(coordenadas, jugador);
+                        //cB.setEnabled(false);
                     }
                 });
                 casillasEnemigas.add(cB);
@@ -161,8 +160,8 @@ public class ControlVista implements ISuscriptor{
         }
     }
     
-    public void crearPartida(IPartidaBuilder builder, Jugador j) {
-        control.crearPartida(builder, j);
+    public void crearPartida(Jugador j) {
+        control.crearPartida(j);
     }
     
     public void addNave(JugadorDTO jugador, Nave nave, List<CoordenadasDTO> coordenadas) {
@@ -178,6 +177,10 @@ public class ControlVista implements ISuscriptor{
     
     public void crearTableros() {
         control.crearTableros();
+    }
+    
+    public void suscribirAModelo() {
+        control.suscribirAPartida(this);
     }
     
     public void mostrarFrmPartidaEnCurso() {

@@ -4,16 +4,16 @@ import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.control.IModelo;
-import models.control.IObervable;
 import models.control.ISuscriptor;
-import java.util.ArrayList;
 import java.util.List;
+import views.builder.Director;
+import views.builder.TableroBuilder;
 
 /**
  *
  * @author daniel
  */
-public class Partida implements IModelo, IObervable {
+public class Partida implements IModelo {
 
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -45,13 +45,9 @@ public class Partida implements IModelo, IObervable {
     public void setJugadores(List<Jugador> jugadores) {
         this.jugadores = jugadores;
     }
-    
-    public void setSuscriptor(ISuscriptor suscriptor) {
-        suscriptores.add(suscriptor);
-    }
 
     public void notificarAllSuscriptores() {
-        suscriptores.forEach(s -> s.notificar());
+        suscriptores.forEach(s -> s.notificar(disparo, estado));
     }
 
     @Override
@@ -61,6 +57,7 @@ public class Partida implements IModelo, IObervable {
     
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+        jugadores.forEach(e -> System.out.println(e.getNombre()));
         if (jugador.getNombre() != turno.getNombre()) {
             System.out.println("Error, no es el turno del jugador seleccionado");
             return null;
@@ -88,13 +85,7 @@ public class Partida implements IModelo, IObervable {
             if (turno instanceof Bot) {
                 System.out.println("ES UN BOT");
                 Bot bot = (Bot) turno;
-//                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
                 realizarDisparo(bot.getCoordenadas(), turno);
-
-//                // Si el Bot falla, regresa turno al jugador humano
-//                if (resultadoBot == ResultadoDisparo.AGUA) {
-//                    turno = jugador;
-//                }
             }
         }
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
@@ -127,32 +118,35 @@ public class Partida implements IModelo, IObervable {
     }
 
     @Override
-    public Disparo getDisparo() {
-        return disparo;
-    }
-
-    @Override
-    public EstadoPartida getEstado() {
-        return estado;
-    }
-
-    @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         Jugador j = jugadores.stream().filter(e -> e.getNombre() == jugador.getNombre())
                 .findFirst()
                 .orElse(null);
         
-        j.getTablero();
+        Tablero t = j.getTablero();
+        t.addNave(nave, coordenadas);
+        j.getNaves().add(nave);
+        
+        // Provisional
+        turno = j;
         
         return false;
     }
 
     @Override
     public void crearTableros() {
+        Director d = new Director();
+        TableroBuilder builder = new TableroBuilder();
         
         for (Jugador j : jugadores) {
-            
+            d.makeTablero(builder);
+            j.setTablero(builder.getResult());
         }
+    }
+
+    @Override
+    public void suscribirAPartida(ISuscriptor suscriptor) {
+        suscriptores.add(suscriptor);
     }
     
 }

@@ -35,8 +35,8 @@ public class JugadorBuilder implements IJugadorBuilder {
     }
 
     @Override
-    public void setTablero() {
-        
+    public void setTablero(Tablero tablero) {
+        this.tablero = tablero;
     }
 
     @Override

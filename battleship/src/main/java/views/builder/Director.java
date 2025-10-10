@@ -1,5 +1,6 @@
 package views.builder;
 
+import java.util.ArrayList;
 import models.entidades.Casilla;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
@@ -24,6 +25,8 @@ public class Director {
         builder.setCantPortaAviones(0);
         builder.setTotalNaves(0);
         builder.setEstado(EstadoPartida.EN_CURSO);
+        builder.setJugadores(new ArrayList<>());
+        builder.setSuscriptores(new ArrayList<>());
         
         return builder.getResult();
     }

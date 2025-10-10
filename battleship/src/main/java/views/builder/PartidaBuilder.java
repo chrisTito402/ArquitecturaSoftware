@@ -32,7 +32,7 @@ public class PartidaBuilder implements IPartidaBuilder {
 
     @Override
     public void setJugadores(List<Jugador> jugadores) {
-        
+        this.jugadores = jugadores;
     }
 
     @Override
