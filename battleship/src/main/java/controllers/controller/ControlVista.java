@@ -10,7 +10,9 @@ import models.observador.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import models.enums.EstadoPartida;
@@ -31,6 +33,7 @@ public class ControlVista implements ISuscriptor{
     private List<CasillaButton> casillasEnemigas;
     private Timer timer;
     private Jugador jugador;
+    private Map<String, Runnable> notificaciones;
 
     private ControlVista() {
     }
@@ -90,6 +93,13 @@ public class ControlVista implements ISuscriptor{
                 .orElse(null);
         
         return cB;
+    }
+    
+    @Override
+    public void notificar(String contexto, Object datos) {
+        Map<String, Runnable> metodos = new HashMap<>();
+        metodos.put("AGUA", () -> {
+        });
     }
     
     @Override

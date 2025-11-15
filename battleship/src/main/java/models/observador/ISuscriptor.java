@@ -10,4 +10,5 @@ import models.enums.EstadoPartida;
 public interface ISuscriptor {
     
     public void notificar(Disparo disparo, EstadoPartida ePartida);
+    public void notificar(String contexto, Object datos);
 }
