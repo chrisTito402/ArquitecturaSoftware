@@ -1,4 +1,4 @@
-package buseventos;
+package buseventos.servidorsocket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class UserServerThread extends Thread {
         }
     }
     
-    void sendMessage(String message) {
+    public void sendMessage(String message) {
         writer.println(message);
     }
     

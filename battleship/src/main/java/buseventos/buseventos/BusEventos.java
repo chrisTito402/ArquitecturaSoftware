@@ -1,5 +1,8 @@
-package buseventos;
+package buseventos.buseventos;
 
+import buseventos.Mensaje;
+import buseventos.TipoAccion;
+import buseventos.servidorsocket.UserServerThread;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.HashSet;

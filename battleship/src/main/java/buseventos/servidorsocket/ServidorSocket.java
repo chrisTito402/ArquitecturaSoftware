@@ -1,5 +1,6 @@
-package buseventos;
+package buseventos.servidorsocket;
 
+import buseventos.buseventos.BusEventos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

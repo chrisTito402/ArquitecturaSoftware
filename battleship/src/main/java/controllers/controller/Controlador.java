@@ -1,5 +1,8 @@
 package controllers.controller;
 
+import buseventos.Mensaje;
+import clientesocket.IClienteSocket;
+import com.google.gson.Gson;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
@@ -9,9 +12,10 @@ import java.util.List;
 import models.builder.PartidaBuilder;
 import models.observador.ISuscriptor;
 
-public class Controlador implements IControlador {
+public class Controlador implements IControlador, ManejadorRespuestaCliente{
     
     private IModelo partida;
+    private IClienteSocket cliente;
 
     public Controlador() {
     }
@@ -20,6 +24,19 @@ public class Controlador implements IControlador {
         this.partida = partida;
     }
 
+    // Metodo para enviar mensaje por la red.
+    private void enviarMensaje(String json) {
+        cliente.enviarMensaje(json);
+    }
+    
+    // Metodo para manejar el mensaje recibido por la red.
+    @Override
+    public void manejarMensaje(String json) {
+        Gson gson = new Gson();
+        Mensaje mensaje = gson.fromJson(json, Mensaje.class);
+        System.out.println((String) mensaje.getData());
+    }
+    
     @Override
     public String crearPartida(Jugador j) {
         Director d = new Director();

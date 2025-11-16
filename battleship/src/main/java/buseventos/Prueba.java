@@ -1,5 +1,8 @@
 package buseventos;
 
+import buseventos.buseventos.BusEventos;
+import buseventos.servidorsocket.ServidorSocket;
+
 /**
  *
  * @author daniel

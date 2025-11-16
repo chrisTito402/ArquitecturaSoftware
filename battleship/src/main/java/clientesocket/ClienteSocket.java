@@ -1,35 +1,39 @@
-package buseventos;
+package clientesocket;
 
+import buseventos.Mensaje;
+import buseventos.TipoAccion;
 import com.google.gson.Gson;
+import controllers.controller.Controlador;
+import controllers.controller.ManejadorRespuestaCliente;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author daniel
  */
-public class ClienteSocket {
+public class ClienteSocket implements IClienteSocket {
     
     private String hostname;
     private int port;
     private PrintWriter writer;
     private Socket socket;
+    private ManejadorRespuestaCliente control;
 
-    public ClienteSocket(String hostname, int port) {
+    public ClienteSocket(String hostname, int port, ManejadorRespuestaCliente control) {
         this.hostname = hostname;
         this.port = port;
+        this.control = control;
     }
     
     public static void main(String[] args) {
         String hostname = "localhost";
         int port = 5000;
         
-        ClienteSocket client = new ClienteSocket(hostname, port);
+        ClienteSocket client = new ClienteSocket(hostname, port, new Controlador());
         client.execute();
         
         Mensaje mensaje = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null, "1");
@@ -67,6 +71,7 @@ public class ClienteSocket {
         }
     }
     
+    @Override
     public void enviarMensaje(String json) {
         System.out.println("ENVIAR MENSAJE A SERVIDOR");
         writer.println(json);
@@ -74,8 +79,6 @@ public class ClienteSocket {
     
     public void manejarMensaje(String json) {
         // Simulando lo que ocurre en el Controlador
-        Gson gson = new Gson();
-        Mensaje mensaje = gson.fromJson(json, Mensaje.class);
-        System.out.println((String) mensaje.getData());
+        control.manejarMensaje(json);
     }
 }
