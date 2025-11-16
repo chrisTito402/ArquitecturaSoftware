@@ -53,4 +53,17 @@ public class Controlador implements IControlador {
     public void suscribirAPartida(ISuscriptor suscriptor) {
         partida.suscribirAPartida(suscriptor);
     }
+    
+    // Caso de Uso: Unirse Partida
+    public void unirsePartida() {
+        partida.unirsePartida();
+    }
+    
+    public void empezarPartida() {
+        partida.empezarPartida();
+    }
+    
+    public void abandonarLobby() {
+        partida.abandonarLobby();
+    }
 }

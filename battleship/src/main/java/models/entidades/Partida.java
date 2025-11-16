@@ -149,4 +149,19 @@ public class Partida implements IModelo {
         suscriptores.add(suscriptor);
     }
     
+    // Caso de Uso: Unirse Partida
+    @Override
+    public void unirsePartida() {
+        List<Jugador> jugadoresActuales = this.jugadores;
+    }
+    
+    @Override
+    public void empezarPartida() {
+        
+    }
+    
+    @Override
+    public void abandonarLobby() {
+        List<Jugador> jugadoresActuales = this.jugadores;
+    }
 }

@@ -18,4 +18,9 @@ public interface IModelo {
     public void addJugador(Jugador j);
     public void crearTableros();
     public void suscribirAPartida(ISuscriptor suscriptor);
+    
+    // Caso de Uso: Unirse Partida
+    public void unirsePartida();
+    public void empezarPartida();
+    public void abandonarLobby();
 }
