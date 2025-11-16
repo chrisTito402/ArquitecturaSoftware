@@ -73,8 +73,8 @@ public class ControlVista implements ISuscriptor{
         return timer;
     }
     
-    public void realizarDisparo(Coordenadas c, Jugador j) {
-        control.realizarDisparo(c, j);
+    public void realizarDisparo(Coordenadas c) {
+        control.realizarDisparo(c);
     }
     
     private Component getCasillaPropia(Disparo d) {
@@ -171,7 +171,7 @@ public class ControlVista implements ISuscriptor{
                 cB.addActionListener(new java.awt.event.ActionListener() {
                     @Override
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        realizarDisparo(coordenadas, jugador);
+                        realizarDisparo(coordenadas);
                         //cB.setEnabled(false);
                     }
                 });

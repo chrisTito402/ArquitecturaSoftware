@@ -10,7 +10,7 @@ import models.enums.ColorJugador;
 import models.enums.EstadoCasilla;
 import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
-import models.control.IModelo;
+import models.control.IModeloCliente;
 
 /**
  *
@@ -18,7 +18,7 @@ import models.control.IModelo;
  */
 public class Director {
     
-    public IModelo makePartida(IPartidaBuilder builder) {
+    public IModeloCliente makePartida(IPartidaBuilder builder) {
         builder.setCantBarcos(0);
         builder.setCantSubmarinos(0);
         builder.setCantCruceros(0);

@@ -3,17 +3,17 @@ package models.entidades;
 import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
-import models.control.IModelo;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import servidor.modelo.IModeloServidor;
 
 /**
  *
  * @author daniel
  */
-public class Partida implements IModelo {
+public class Partida implements IModeloServidor {
 
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -99,7 +99,6 @@ public class Partida implements IModelo {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
                 disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-                notificarAllSuscriptores("DISPARO", disparo);
                 return disparo;
             }
         }
@@ -113,7 +112,6 @@ public class Partida implements IModelo {
         }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-        notificarAllSuscriptores("DISPARO", disparo);
 
         return disparo;
     }

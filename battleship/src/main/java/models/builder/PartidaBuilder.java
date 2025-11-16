@@ -4,9 +4,9 @@ import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Partida;
 import models.enums.EstadoPartida;
-import models.control.IModelo;
 import models.observador.ISuscriptor;
 import java.util.List;
+import models.control.IModeloCliente;
 
 /**
  *
@@ -76,7 +76,7 @@ public class PartidaBuilder implements IPartidaBuilder {
     }
 
     @Override
-    public IModelo getResult() {
+    public IModeloCliente getResult() {
         return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
     }
     
