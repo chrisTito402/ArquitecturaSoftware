@@ -1,8 +1,6 @@
 package views.frames;
 
 import controllers.controller.ControlVista;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Timer;
 
 /**

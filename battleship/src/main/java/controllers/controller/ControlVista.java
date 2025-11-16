@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import models.enums.EstadoPartida;
@@ -33,9 +34,12 @@ public class ControlVista implements ISuscriptor{
     private List<CasillaButton> casillasEnemigas;
     private Timer timer;
     private Jugador jugador;
-    private Map<String, Runnable> notificaciones;
+    private Map<String, Consumer<Object>> manejadoresNoti;
 
     private ControlVista() {
+        manejadoresNoti = new HashMap<>();
+        manejadoresNoti.put("DISPARO", this::notificarDisparo);
+        
     }
     
     public static ControlVista getInstancia() {
@@ -97,14 +101,21 @@ public class ControlVista implements ISuscriptor{
     
     @Override
     public void notificar(String contexto, Object datos) {
-        Map<String, Runnable> metodos = new HashMap<>();
-        metodos.put("AGUA", () -> {
-        });
+        if (datos == null) {
+            System.out.println("Los datos estan vacios.");
+            return;
+        } else {
+            manejadoresNoti.get(contexto).accept(datos);
+        }
     }
     
-    @Override
-    public void notificar(Disparo disparo, EstadoPartida ePartida) {
-        Disparo d = disparo;
+    private void notificarDisparo(Object datos) {
+        if (!(datos instanceof Disparo)) {
+            System.out.println("Los datos no son un objeto Disparo");
+            return;
+        }
+        
+        Disparo d = (Disparo) datos;
         Coordenadas c = d.getCoordenadas();
         
         Component componente;
@@ -128,7 +139,7 @@ public class ControlVista implements ISuscriptor{
         
         System.out.println(d.getResultadoDisparo().toString());
         
-        if (ePartida == EstadoPartida.FINALIZADA) {
+        if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stop();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");

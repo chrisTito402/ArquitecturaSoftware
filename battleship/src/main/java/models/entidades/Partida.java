@@ -46,8 +46,8 @@ public class Partida implements IModelo {
         this.jugadores = jugadores;
     }
 
-    public void notificarAllSuscriptores() {
-        suscriptores.forEach(s -> s.notificar(disparo, estado));
+    public void notificarAllSuscriptores(String contexto, Object datos) {
+        suscriptores.forEach(s -> s.notificar(contexto, datos));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class Partida implements IModelo {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
                 disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-                notificarAllSuscriptores();
+                notificarAllSuscriptores("DISPARO", disparo);
                 return resultadoDisparo;
             }
         }
@@ -112,7 +112,7 @@ public class Partida implements IModelo {
         }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-        notificarAllSuscriptores();
+        notificarAllSuscriptores("DISPARO", disparo);
 
         return resultadoDisparo;
     }

@@ -1,5 +1,6 @@
 package models.entidades;
 
+import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 
 /**
@@ -11,6 +12,14 @@ public class Disparo {
     private Jugador jugador;
     private Coordenadas coordenadas;
     private ResultadoDisparo resultadoDisparo;
+    private EstadoPartida estadoPartida;
+
+    public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+    }
 
     public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo) {
         this.jugador = jugador;
@@ -40,6 +49,14 @@ public class Disparo {
 
     public void setResultadoDisparo(ResultadoDisparo resultadoDisparo) {
         this.resultadoDisparo = resultadoDisparo;
+    }
+
+    public EstadoPartida getEstadoPartida() {
+        return estadoPartida;
+    }
+
+    public void setEstadoPartida(EstadoPartida estadoPartida) {
+        this.estadoPartida = estadoPartida;
     }
     
 }
