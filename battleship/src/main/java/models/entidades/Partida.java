@@ -46,6 +46,7 @@ public class Partida implements IModelo {
         this.jugadores = jugadores;
     }
 
+    @Override
     public void notificarAllSuscriptores(String contexto, Object datos) {
         suscriptores.forEach(s -> s.notificar(contexto, datos));
     }
@@ -56,7 +57,7 @@ public class Partida implements IModelo {
     }
     
     @Override
-    public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         jugadores.forEach(e -> System.out.println(e.getNombre()));
         if (jugador.getNombre() != turno.getNombre()) {
             System.out.println("Error, no es el turno del jugador seleccionado");
@@ -99,7 +100,7 @@ public class Partida implements IModelo {
                 estado = EstadoPartida.FINALIZADA;
                 disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
                 notificarAllSuscriptores("DISPARO", disparo);
-                return resultadoDisparo;
+                return disparo;
             }
         }
 
@@ -114,7 +115,7 @@ public class Partida implements IModelo {
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
         notificarAllSuscriptores("DISPARO", disparo);
 
-        return resultadoDisparo;
+        return disparo;
     }
 
     @Override
