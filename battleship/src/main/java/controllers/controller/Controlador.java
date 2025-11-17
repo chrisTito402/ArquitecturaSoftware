@@ -98,19 +98,16 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     }
     
     // Caso de Uso: Unirse Partida
-    @Override
-    public void unirsePartida(Jugador jugador) {
-        partida.unirsePartida(jugador);
+    public void unirsePartida() {
+        partida.unirsePartida();
     }
     
-    @Override
     public void empezarPartida() {
         partida.empezarPartida();
     }
     
-    @Override
-    public void abandonarLobby(Jugador jugador) {
-        partida.abandonarLobby(jugador);
+    public void abandonarLobby() {
+        partida.abandonarLobby();
     }
 
     @Override

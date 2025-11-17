@@ -20,7 +20,7 @@ public interface IModeloServidor {
     public void notificarAllSuscriptores(String contexto, Object datos);
     
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
+    public void unirsePartida();
     public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
+    public void abandonarLobby();
 }

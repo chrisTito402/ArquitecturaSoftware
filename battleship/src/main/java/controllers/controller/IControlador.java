@@ -19,9 +19,4 @@ public interface IControlador {
     public void realizarDisparo(Coordenadas c);
     public JugadorDTO getJugador();
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
-    
-    // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
-    public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
 }
