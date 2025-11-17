@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import controllers.controller.ControlVista;
 import controllers.controller.Controlador;
 import java.util.ArrayList;
+import java.util.HashMap;
 import models.control.ControlModelo;
 import models.entidades.Casilla;
 import models.enums.ColorJugador;
@@ -30,7 +31,7 @@ public class PruebaCliente1 {
         cM.suscribirAPartida(cV);
         
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);
-        Controlador c = new Controlador(cM, cS);
+        Controlador c = new Controlador(cM, cS, new HashMap<>());
         cS.setControl(c);
         cV.setControl(c);
         

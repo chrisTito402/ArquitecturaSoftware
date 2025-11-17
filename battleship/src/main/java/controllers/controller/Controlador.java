@@ -9,8 +9,9 @@ import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.builder.Director;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
-import models.entidades.Disparo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
@@ -20,13 +21,17 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     
     private IModeloCliente partida;
     private IClienteSocket cliente;
+    private Map<String, Consumer<Mensaje>> manejadorEventos;
 
     public Controlador() {
     }
 
-    public Controlador(IModeloCliente partida, IClienteSocket cliente) {
+    public Controlador(IModeloCliente partida, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
         this.partida = partida;
         this.cliente = cliente;
+        this.manejadorEventos = mapa;
+        
+        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
     }
     
     // Metodo para enviar mensaje por la red.
@@ -41,13 +46,16 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
-        // PROVISIONAL, hay que agregar un patron que maneje los diferentes eventos.
-        // Lo que hay ahora es solo para probar el DISPARO
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
+        
+        manejadorEventos.get(mensaje.getEvento()).accept(mensaje);
+    }
+    
+    private void manejarResultadoDisparo(Mensaje mensaje) {
+        Gson gson = new Gson();
         DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
         System.out.println(d.getResultadoDisparo());
-        System.out.println(json);
         
         partida.notificarAllSuscriptores("DISPARO", d);
     }

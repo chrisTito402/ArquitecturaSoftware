@@ -84,8 +84,6 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
                 disparo.getEstadoPartida()
         );
         enviarMensaje("RESULTADO_DISPARO", resultado);
-        
-        System.out.println("RESULTADO DISPAROOOOOOOOO");
     }
     
 }
