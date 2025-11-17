@@ -9,11 +9,11 @@ import controllers.controller.Controlador;
 import java.util.ArrayList;
 import java.util.HashMap;
 import models.control.ControlModelo;
-import models.entidades.Casilla;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 import views.DTOs.JugadorDTO;
 import views.DTOs.TableroDTO;
+import views.frames.TimerPanel;
 
 /**
  *
@@ -35,6 +35,7 @@ public class PruebaCliente1 {
         cS.setControl(c);
         cV.setControl(c);
         
+        cV.setTimer(new TimerPanel(30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
         cV.mostrarFrmPartidaEnCurso();

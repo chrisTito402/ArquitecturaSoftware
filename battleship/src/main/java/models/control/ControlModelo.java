@@ -1,5 +1,6 @@
 package models.control;
 
+import java.time.Instant;
 import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
@@ -45,7 +46,7 @@ public class ControlModelo implements IModeloCliente {
             return null;
         }
         
-        DisparoDTO disparo = new DisparoDTO(jugador, coordenadas, null, null);
+        DisparoDTO disparo = new DisparoDTO(jugador, coordenadas, null, null, Instant.now().toEpochMilli());
         return disparo;
     }
 

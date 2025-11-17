@@ -1,5 +1,6 @@
 package views.DTOs;
 
+import java.time.Instant;
 import models.entidades.Coordenadas;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
@@ -14,10 +15,19 @@ public class DisparoDTO {
     private Coordenadas coordenadas;
     private ResultadoDisparo resultadoDisparo;
     private EstadoPartida estadoPartida;
+    private long tiempo;
 
     public DisparoDTO() {
     }
 
+    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+        this.tiempo = tiempo;
+    }
+    
     public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
@@ -57,9 +67,17 @@ public class DisparoDTO {
         this.estadoPartida = estadoPartida;
     }
 
+    public long getTiempo() {
+        return tiempo;
+    }
+
+    public void setTiempo(long tiempo) {
+        this.tiempo = tiempo;
+    }
+
     @Override
     public String toString() {
-        return "DisparoDTO{" + "jugador=" + jugador + ", coordenadas=" + coordenadas + ", resultadoDisparo=" + resultadoDisparo + ", estadoPartida=" + estadoPartida + '}';
+        return "DisparoDTO{" + "jugador=" + jugador + ", coordenadas=" + coordenadas + ", resultadoDisparo=" + resultadoDisparo + ", estadoPartida=" + estadoPartida + ", tiempo=" + tiempo + '}';
     }
     
 }

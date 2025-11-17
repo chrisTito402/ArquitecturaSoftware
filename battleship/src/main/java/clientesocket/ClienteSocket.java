@@ -1,9 +1,5 @@
 package clientesocket;
 
-import buseventos.Mensaje;
-import buseventos.TipoAccion;
-import com.google.gson.Gson;
-import controllers.controller.Controlador;
 import controllers.controller.ManejadorRespuestaCliente;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,7 +32,7 @@ public class ClienteSocket implements IClienteSocket {
     public void execute() {
         try {
             socket = new Socket(hostname, port);
-            System.out.println("Conectado al Servidor de Chat.");
+            System.out.println("Conectado al Servidor.");
             new UserReadClientThread(socket, this).start();
             
             OutputStream output = socket.getOutputStream();
@@ -55,7 +51,6 @@ public class ClienteSocket implements IClienteSocket {
     }
     
     public void manejarMensaje(String json) {
-        // Simulando lo que ocurre en el Controlador
         control.manejarMensaje(json);
     }
 }

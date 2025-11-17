@@ -7,6 +7,7 @@ import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
 
 /**
@@ -25,8 +26,9 @@ public class Partida implements IModeloServidor {
     private EstadoPartida estado;
     private Disparo disparo;
     private List<ISuscriptor> suscriptores;
+    private ICronometro cronometro;
 
-    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores) {
+    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores, ICronometro cronometro) {
         this.turno = turno;
         this.jugadores = jugadores;
         this.cantBarcos = cantBarcos;
@@ -36,6 +38,10 @@ public class Partida implements IModeloServidor {
         this.totalNaves = totalNaves;
         this.estado = estado;
         this.suscriptores = suscriptores;
+        this.cronometro = cronometro;
+        
+        // PROVISIONAL para simular cuando empieza la patida
+        cronometro.initCronometro(30000);
     }
 
     public List<Jugador> getJugadores() {
@@ -57,10 +63,18 @@ public class Partida implements IModeloServidor {
     }
     
     @Override
-    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo) {
         jugadores.forEach(e -> System.out.println(e.getNombre()));
+        
+        // Verificar el Cronometro
+        if (!cronometro.isInTime(tiempo)) {
+            System.out.println("Error, el disparo no fue hecho a tiempo.");
+            return null;
+        }
+        
+        // Verificar Turno
         if (!jugador.getNombre().equals(turno.getNombre())) {
-            System.out.println("Error, no es el turno del jugador seleccionado");
+            System.out.println("Error, no es el turno del jugador seleccionado.");
             return null;
         }
 
@@ -86,7 +100,7 @@ public class Partida implements IModeloServidor {
             if (turno instanceof Bot) {
                 System.out.println("ES UN BOT");
                 Bot bot = (Bot) turno;
-                realizarDisparo(bot.getCoordenadas(), turno);
+                //realizarDisparo(bot.getCoordenadas(), turno);
             }
         }
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
@@ -107,7 +121,7 @@ public class Partida implements IModeloServidor {
             if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO
                     || resultadoDisparo == ResultadoDisparo.IMPACTO) {
                 Bot bot = (Bot) turno;
-                realizarDisparo(bot.getCoordenadas(), turno);
+                //realizarDisparo(bot.getCoordenadas(), turno);
             }
         }
 

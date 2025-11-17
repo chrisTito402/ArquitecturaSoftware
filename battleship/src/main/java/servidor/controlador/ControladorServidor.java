@@ -10,10 +10,6 @@ import java.util.function.Consumer;
 import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
-import models.enums.EstadoPartida;
-import models.enums.ResultadoDisparo;
 import servidor.modelo.IModeloServidor;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -67,7 +63,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
                 jugadorDTO.getEstado()
         );
         
-        Disparo disparo = servidor.realizarDisparo(coordenadas, jugador);
+        Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
         
         if (disparo == null) {
             System.out.println("Error en el Servidor");

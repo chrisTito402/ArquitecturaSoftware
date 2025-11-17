@@ -2,7 +2,6 @@ package controllers.controller;
 
 import views.DTOs.CoordenadasDTO;
 import models.entidades.Coordenadas;
-import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoDisparo;
@@ -15,13 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
-import javax.swing.Timer;
 import models.enums.EstadoPartida;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
+import views.frames.TimerPanel;
 
 /**
  *
@@ -34,12 +33,12 @@ public class ControlVista implements ISuscriptor{
     private IControlador control;
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
-    private Timer timer;
+    private TimerPanel timer;
     private Map<String, Consumer<Object>> manejadoresNoti;
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
-        manejadoresNoti.put("DISPARO", this::notificarDisparo);
+        manejadoresNoti.put("DISPARO", this::manejarDisparo);
         
     }
     
@@ -62,12 +61,12 @@ public class ControlVista implements ISuscriptor{
         this.control = control;
     }
 
-    public void setTimer(Timer timer) {
-        this.timer = timer;
+    public TimerPanel getTimer() {
+        return timer;
     }
 
-    public Timer getTimer() {
-        return timer;
+    public void setTimer(TimerPanel timer) {
+        this.timer = timer;
     }
     
     public void realizarDisparo(Coordenadas c) {
@@ -102,11 +101,14 @@ public class ControlVista implements ISuscriptor{
         }
     }
     
-    private void notificarDisparo(Object datos) {
+    private void manejarDisparo(Object datos) {
         if (!(datos instanceof DisparoDTO)) {
             System.out.println("Los datos no son un objeto DisparoDTO");
             return;
         }
+        
+        // Reiniciar Temporizador
+        timer.initTimer();
         
         DisparoDTO d = (DisparoDTO) datos;
         Coordenadas c = d.getCoordenadas();
@@ -136,7 +138,7 @@ public class ControlVista implements ISuscriptor{
         
         if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
-            timer.stop();
+            timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
         }
     }
@@ -200,6 +202,7 @@ public class ControlVista implements ISuscriptor{
     
     public void mostrarFrmPartidaEnCurso() {
         new FrmPartidaEnCurso().setVisible(true);
+        timer.initTimer();
     }
     
 }

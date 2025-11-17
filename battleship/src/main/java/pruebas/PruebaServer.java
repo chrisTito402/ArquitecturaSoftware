@@ -19,6 +19,7 @@ import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
 import servidor.controlador.ControladorServidor;
+import servidor.cronometro.Cronometro;
 
 /**
  *
@@ -77,7 +78,9 @@ public class PruebaServer {
                 0, 
                 0, 
                 EstadoPartida.EN_CURSO, 
-                new ArrayList<>());
+                new ArrayList<>(),
+                new Cronometro()
+        );
         
         ClienteSocket cliente = new ClienteSocket("localhost", 5000, null);
         ControladorServidor control = new ControladorServidor(p, cliente, new HashMap<>());

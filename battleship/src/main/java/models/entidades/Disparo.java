@@ -1,5 +1,6 @@
 package models.entidades;
 
+import java.time.Instant;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 
@@ -13,18 +14,21 @@ public class Disparo {
     private Coordenadas coordenadas;
     private ResultadoDisparo resultadoDisparo;
     private EstadoPartida estadoPartida;
+    private Instant tiempo;
+
+    public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, Instant tiempo) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+        this.tiempo = tiempo;
+    }
 
     public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
         this.estadoPartida = estadoPartida;
-    }
-
-    public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo) {
-        this.jugador = jugador;
-        this.coordenadas = coordenadas;
-        this.resultadoDisparo = resultadoDisparo;
     }
 
     public Jugador getJugador() {
@@ -57,6 +61,14 @@ public class Disparo {
 
     public void setEstadoPartida(EstadoPartida estadoPartida) {
         this.estadoPartida = estadoPartida;
+    }
+
+    public Instant getTiempo() {
+        return tiempo;
+    }
+
+    public void setTiempo(Instant tiempo) {
+        this.tiempo = tiempo;
     }
     
 }

@@ -13,6 +13,7 @@ import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 import views.DTOs.JugadorDTO;
 import views.DTOs.TableroDTO;
+import views.frames.TimerPanel;
 
 /**
  *
@@ -34,6 +35,7 @@ public class PruebaCliente2 {
         cS.setControl(c);
         cV.setControl(c);
         
+        cV.setTimer(new TimerPanel(30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
         cV.mostrarFrmPartidaEnCurso();

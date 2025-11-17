@@ -12,7 +12,7 @@ import models.observador.ISuscriptor;
  * @author daniel
  */
 public interface IModeloServidor {
-    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador);
+    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
     public void crearTableros();
