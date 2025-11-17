@@ -205,4 +205,16 @@ public class ControlVista implements ISuscriptor{
         timer.initTimer();
     }
     
+    // Caso de Uso: Unirse Partida
+    public void unirsePartida(Jugador jugador) {
+        control.unirsePartida(jugador);
+    }
+    
+    public void empezarPartida() {
+        control.empezarPartida();
+    }
+    
+    public void abandonarLobby(Jugador jugador) {
+        control.abandonarLobby(jugador);
+    }
 }

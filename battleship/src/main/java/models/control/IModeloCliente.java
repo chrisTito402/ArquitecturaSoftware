@@ -23,7 +23,7 @@ public interface IModeloCliente {
     public JugadorDTO getJugador();
     
     // Caso de Uso: Unirse Partida
-    public void unirsePartida();
+    public void unirsePartida(Jugador jugador);
     public void empezarPartida();
-    public void abandonarLobby();
+    public void abandonarLobby(Jugador jugador);
 }

@@ -76,7 +76,7 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
-    public void unirsePartida() {
+    public void unirsePartida(Jugador jugador) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -86,7 +86,7 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
-    public void abandonarLobby() {
+    public void abandonarLobby(Jugador jugador) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
