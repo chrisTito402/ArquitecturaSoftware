@@ -2,11 +2,8 @@ package models.control;
 
 import java.util.List;
 import models.entidades.Coordenadas;
-import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import models.enums.EstadoPartida;
-import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -25,11 +22,12 @@ public class ControlModelo implements IModeloCliente {
     private boolean turno;
     private List<ISuscriptor> suscriptores;
 
-    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno) {
+    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores) {
         this.jugador = jugador;
         this.tablero = tablero;
         this.naves = naves;
         this.turno = turno;
+        this.suscriptores = suscriptores;
     }
     
     @Override
@@ -68,7 +66,7 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        suscriptores.add(suscriptor);
     }
 
     @Override
@@ -89,6 +87,11 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void abandonarLobby() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public JugadorDTO getJugador() {
+        return jugador;
     }
     
 }

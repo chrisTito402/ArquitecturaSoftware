@@ -77,7 +77,8 @@ public class PartidaBuilder implements IPartidaBuilder {
 
     @Override
     public IModeloCliente getResult() {
-        return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
+        //return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
+        return null;
     }
     
 }

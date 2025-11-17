@@ -6,6 +6,7 @@ import models.entidades.Nave;
 import java.util.List;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
+import views.DTOs.JugadorDTO;
 
 /**
  *
@@ -19,6 +20,7 @@ public interface IModeloCliente {
     public void crearTableros();
     public void suscribirAPartida(ISuscriptor suscriptor);
     public void notificarAllSuscriptores(String contexto, Object datos);
+    public JugadorDTO getJugador();
     
     // Caso de Uso: Unirse Partida
     public void unirsePartida();

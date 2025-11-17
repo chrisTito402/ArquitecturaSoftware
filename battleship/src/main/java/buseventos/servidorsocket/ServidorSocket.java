@@ -24,6 +24,7 @@ public class ServidorSocket {
     
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Servidor escuchando en el puerto " + port);
             while (true) {
                 Socket socket = serverSocket.accept();
                 UserServerThread newUser = new UserServerThread(socket, this);

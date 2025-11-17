@@ -14,6 +14,7 @@ import models.entidades.Disparo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
+import views.DTOs.JugadorDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente{
     
@@ -23,14 +24,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     public Controlador() {
     }
 
-    public Controlador(IModeloCliente partida) {
+    public Controlador(IModeloCliente partida, IClienteSocket cliente) {
         this.partida = partida;
+        this.cliente = cliente;
     }
     
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, datos, "1");
         Gson gson = new Gson();
+        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), "1");
         String json = gson.toJson(mensaje);
         
         cliente.enviarMensaje(json);
@@ -43,8 +45,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         // Lo que hay ahora es solo para probar el DISPARO
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
-        Disparo d = (Disparo) mensaje.getData();
+        DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
         System.out.println(d.getResultadoDisparo());
+        System.out.println(json);
         
         partida.notificarAllSuscriptores("DISPARO", d);
     }
@@ -97,5 +100,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     
     public void abandonarLobby() {
         partida.abandonarLobby();
+    }
+
+    @Override
+    public JugadorDTO getJugador() {
+        return partida.getJugador();
     }
 }

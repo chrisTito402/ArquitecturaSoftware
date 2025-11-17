@@ -1,32 +1,20 @@
 package views.DTOs;
 
-import models.entidades.Casilla;
-
 /**
  *
  * @author daniel
  */
 public class TableroDTO {
     
-    private Casilla[][] casillas;
     private int limiteX;
     private int limiteY;
 
     public TableroDTO() {
     }
 
-    public TableroDTO(Casilla[][] casillas, int limiteX, int limiteY) {
-        this.casillas = casillas;
+    public TableroDTO(int limiteX, int limiteY) {
         this.limiteX = limiteX;
         this.limiteY = limiteY;
-    }
-
-    public Casilla[][] getCasillas() {
-        return casillas;
-    }
-
-    public void setCasillas(Casilla[][] casillas) {
-        this.casillas = casillas;
     }
 
     public int getLimiteX() {
@@ -47,7 +35,7 @@ public class TableroDTO {
 
     @Override
     public String toString() {
-        return "TableroDTO{" + "casillas=" + casillas + ", limiteX=" + limiteX + ", limiteY=" + limiteY + '}';
+        return "TableroDTO{" + "limiteX=" + limiteX + ", limiteY=" + limiteY + '}';
     }
     
 }

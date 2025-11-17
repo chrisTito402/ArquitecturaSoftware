@@ -1,5 +1,7 @@
 package buseventos;
 
+import com.google.gson.JsonElement;
+
 /**
  *
  * @author daniel
@@ -8,22 +10,17 @@ public class Mensaje {
     
     private TipoAccion accion;
     private String evento;
-    private Object data;
+    private JsonElement data;
     private String idPublicador;
 
     public Mensaje() {
     }
 
-    public Mensaje(TipoAccion accion, String evento, Object data, String idPublicador) {
+    public Mensaje(TipoAccion accion, String evento, JsonElement data, String idPublicador) {
         this.accion = accion;
         this.evento = evento;
         this.data = data;
         this.idPublicador = idPublicador;
-    }
-
-    public Mensaje(TipoAccion accion, String evento) {
-        this.accion = accion;
-        this.evento = evento;
     }
 
     public TipoAccion getAccion() {
@@ -42,11 +39,11 @@ public class Mensaje {
         this.evento = evento;
     }
 
-    public Object getData() {
+    public JsonElement getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(JsonElement data) {
         this.data = data;
     }
 

@@ -59,7 +59,7 @@ public class Partida implements IModeloServidor {
     @Override
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         jugadores.forEach(e -> System.out.println(e.getNombre()));
-        if (jugador.getNombre() != turno.getNombre()) {
+        if (!jugador.getNombre().equals(turno.getNombre())) {
             System.out.println("Error, no es el turno del jugador seleccionado");
             return null;
         }
@@ -98,7 +98,7 @@ public class Partida implements IModeloServidor {
             if (nave == null) {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
-                disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+                disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
                 return disparo;
             }
         }
@@ -111,7 +111,8 @@ public class Partida implements IModeloServidor {
             }
         }
 
-        disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+        disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
+        System.out.println("DISPARO AQUI " + disparo.getResultadoDisparo());
 
         return disparo;
     }

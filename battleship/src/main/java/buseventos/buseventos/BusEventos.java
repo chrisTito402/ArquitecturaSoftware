@@ -22,7 +22,7 @@ public class BusEventos {
         Gson gson = new Gson();
         String jsonMensaje = gson.toJson(mensaje);
         eventos.get(evento).forEach(s -> s.sendMessage(jsonMensaje));
-        System.out.println(eventos);
+        //System.out.println(eventos);
     }
     
     private void suscribirse(String evento, UserServerThread suscriptor) {

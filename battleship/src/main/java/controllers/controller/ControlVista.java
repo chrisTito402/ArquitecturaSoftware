@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
 import models.enums.EstadoPartida;
+import views.DTOs.DisparoDTO;
+import views.DTOs.JugadorDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -33,7 +35,6 @@ public class ControlVista implements ISuscriptor{
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
     private Timer timer;
-    private Jugador jugador;
     private Map<String, Consumer<Object>> manejadoresNoti;
 
     private ControlVista() {
@@ -61,10 +62,6 @@ public class ControlVista implements ISuscriptor{
         this.control = control;
     }
 
-    public void setJugador(Jugador jugador) {
-        this.jugador = jugador;
-    }
-
     public void setTimer(Timer timer) {
         this.timer = timer;
     }
@@ -77,9 +74,7 @@ public class ControlVista implements ISuscriptor{
         control.realizarDisparo(c);
     }
     
-    private Component getCasillaPropia(Disparo d) {
-        Coordenadas c = d.getCoordenadas();
-        
+    private Component getCasillaPropia(Coordenadas c) {
         Component cP = casillasPropias.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
                 && e.getCoordenadas().getY() == c.getY())
                 .findFirst()
@@ -88,9 +83,7 @@ public class ControlVista implements ISuscriptor{
         return cP;
     }
     
-    private Component getCasillaEnemiga(Disparo d) {
-        Coordenadas c = d.getCoordenadas();
-        
+    private Component getCasillaEnemiga(Coordenadas c) {  
         Component cB = casillasEnemigas.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
                 && e.getCoordenadas().getY() == c.getY())
                 .findFirst()
@@ -110,19 +103,21 @@ public class ControlVista implements ISuscriptor{
     }
     
     private void notificarDisparo(Object datos) {
-        if (!(datos instanceof Disparo)) {
-            System.out.println("Los datos no son un objeto Disparo");
+        if (!(datos instanceof DisparoDTO)) {
+            System.out.println("Los datos no son un objeto DisparoDTO");
             return;
         }
         
-        Disparo d = (Disparo) datos;
+        DisparoDTO d = (DisparoDTO) datos;
         Coordenadas c = d.getCoordenadas();
         
+        JugadorDTO jugador = control.getJugador();
+        
         Component componente;
-        if (d.getJugador().getNombre() == jugador.getNombre()) {
-            componente = getCasillaEnemiga(d);
+        if (d.getJugador().getNombre().equals(jugador.getNombre())) {
+            componente = getCasillaEnemiga(d.getCoordenadas());
         } else {
-            componente = getCasillaPropia(d);
+            componente = getCasillaPropia(d.getCoordenadas());
         }
         
         if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {

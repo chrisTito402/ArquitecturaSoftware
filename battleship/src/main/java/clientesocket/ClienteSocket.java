@@ -28,32 +28,9 @@ public class ClienteSocket implements IClienteSocket {
         this.port = port;
         this.control = control;
     }
-    
-    public static void main(String[] args) {
-        String hostname = "localhost";
-        int port = 5000;
-        
-        ClienteSocket client = new ClienteSocket(hostname, port, new Controlador());
-        client.execute();
-        
-        Mensaje mensaje = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null, "1");
-        Gson gson = new Gson();
-        String json = gson.toJson(mensaje);
-        client.enviarMensaje(json);
-        
-        String[] textos = {"pium pium", "mira como te esquivo", "ai me diste"};
-        for (int i = 0; i < 3; i++) {
-            Mensaje mensaje2 = new Mensaje(TipoAccion.PUBLICAR, "DISPARO", textos[i], "1");
-            String json2 = gson.toJson(mensaje2);
-            client.enviarMensaje(json2);
-            
-//            try {
-//                Thread.sleep(3000);
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-        }
-        
+
+    public void setControl(ManejadorRespuestaCliente control) {
+        this.control = control;
     }
     
     public void execute() {

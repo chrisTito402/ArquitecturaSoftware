@@ -4,11 +4,16 @@ import buseventos.Mensaje;
 import buseventos.TipoAccion;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
+import controllers.controller.ManejadorRespuestaCliente;
 import java.util.Map;
 import java.util.function.Consumer;
 import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
+import models.enums.ColorJugador;
+import models.enums.EstadoJugador;
+import models.enums.EstadoPartida;
+import models.enums.ResultadoDisparo;
 import servidor.modelo.IModeloServidor;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -17,7 +22,7 @@ import views.DTOs.JugadorDTO;
  *
  * @author daniel
  */
-public class ControladorServidor implements IControladorServidor {
+public class ControladorServidor implements ManejadorRespuestaCliente {
 
     private IModeloServidor servidor;
     private IClienteSocket cliente;
@@ -33,8 +38,8 @@ public class ControladorServidor implements IControladorServidor {
     
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, datos, null);
         Gson gson = new Gson();
+        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), null);
         String json = gson.toJson(mensaje);
         
         cliente.enviarMensaje(json);
@@ -43,6 +48,7 @@ public class ControladorServidor implements IControladorServidor {
     // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
+        System.out.println(json);
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
         
@@ -50,12 +56,8 @@ public class ControladorServidor implements IControladorServidor {
     }
     
     private void realizarDisparo(Mensaje mensaje) {
-        if (!(mensaje.getData() instanceof DisparoDTO)) {
-            System.out.println("El mensaje no contiene un DisparoDTO");
-            return;
-        }
-        
-        DisparoDTO disparoDTO = (DisparoDTO) mensaje.getData();
+        Gson gson = new Gson();
+        DisparoDTO disparoDTO = gson.fromJson(mensaje.getData(), DisparoDTO.class);
         
         Coordenadas coordenadas = disparoDTO.getCoordenadas();
         JugadorDTO jugadorDTO = disparoDTO.getJugador();
@@ -66,7 +68,24 @@ public class ControladorServidor implements IControladorServidor {
         );
         
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador);
-        enviarMensaje("RESULTADO_DISPARO", jugador);
+        
+        if (disparo == null) {
+            System.out.println("Error en el Servidor");
+            return;
+        }
+        
+        DisparoDTO resultado = new DisparoDTO(
+                new JugadorDTO(
+                        disparo.getJugador().getNombre(), 
+                        disparo.getJugador().getColor(), 
+                        disparo.getJugador().getEstado()), 
+                disparo.getCoordenadas(), 
+                disparo.getResultadoDisparo(), 
+                disparo.getEstadoPartida()
+        );
+        enviarMensaje("RESULTADO_DISPARO", resultado);
+        
+        System.out.println("RESULTADO DISPAROOOOOOOOO");
     }
     
 }
