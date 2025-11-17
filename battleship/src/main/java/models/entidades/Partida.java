@@ -54,7 +54,7 @@ public class Partida implements IModelo {
     public void addJugador(Jugador j) {
         jugadores.add(j);
     }
-    
+
     @Override
     public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         jugadores.forEach(e -> System.out.println(e.getNombre()));
@@ -122,14 +122,14 @@ public class Partida implements IModelo {
         Jugador j = jugadores.stream().filter(e -> e.getNombre() == jugador.getNombre())
                 .findFirst()
                 .orElse(null);
-        
+
         Tablero t = j.getTablero();
         t.addNave(nave, coordenadas);
         j.getNaves().add(nave);
-        
+
         // Provisional
         turno = j;
-        
+
         return false;
     }
 
@@ -137,7 +137,7 @@ public class Partida implements IModelo {
     public void crearTableros() {
         Director d = new Director();
         TableroBuilder builder = new TableroBuilder();
-        
+
         for (Jugador j : jugadores) {
             d.makeTablero(builder);
             j.setTablero(builder.getResult());
@@ -148,20 +148,59 @@ public class Partida implements IModelo {
     public void suscribirAPartida(ISuscriptor suscriptor) {
         suscriptores.add(suscriptor);
     }
-    
+
     // Caso de Uso: Unirse Partida
     @Override
-    public void unirsePartida() {
-        List<Jugador> jugadoresActuales = this.jugadores;
+    public void unirsePartida(Jugador jugador) {
+        // Validar estado
+        if (estado == EstadoPartida.EN_CURSO) {
+            System.out.println("La partida ya inicio. No se puede unir.");
+            return;
+        }
+
+        // Comprobar que no este llena
+        if (jugadores.size() >= 2) {
+            System.out.println("La partida ya tiene 2 jugadores.");
+            return;
+        }
+
+        // Agregar nuevo jugador (Pendiente para unir con el caso de uso: Gestionar jugador)
+        jugadores.add(jugador);
+        System.out.println(jugador.getNombre() + " se unio a la partida.");
+
+        // Notificar a observadores (socktes)
+        notificarAllSuscriptores("JUGADOR_UNIDO", jugador);
     }
-    
+
     @Override
     public void empezarPartida() {
-        
+        // Comprobar que este llena
+        if (jugadores.size() < 2) {
+            System.out.println("No hay suficientes jugadores para iniciar.");
+            return;
+        }
+
+        // Cambiar estado
+        estado = EstadoPartida.EN_CURSO;
+
+        // Crear tableros
+        this.crearTableros();
+
+        // Asignar turno inicial (jugador 0)
+        turno = jugadores.get(0);
+
+        // Notificar
+        System.out.println("La partida ha comenzado.");
+        notificarAllSuscriptores("PARTIDA_INICIADA", null);
     }
-    
+
     @Override
-    public void abandonarLobby() {
-        List<Jugador> jugadoresActuales = this.jugadores;
+    public void abandonarLobby(Jugador jugador) {
+        // Quitar al jugador que se va
+        jugadores.remove(jugador);
+
+        // Notificar
+        System.out.println(jugador.getNombre() + " abandonó el lobby.");
+        notificarAllSuscriptores("JUGADOR_ABANDONO", jugador);
     }
 }
