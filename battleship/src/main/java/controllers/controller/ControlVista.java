@@ -202,4 +202,16 @@ public class ControlVista implements ISuscriptor{
         new FrmPartidaEnCurso().setVisible(true);
     }
     
+    // Caso de Uso: Unirse Partida
+    public void unirsePartida(Jugador jugador) {
+        control.unirsePartida(jugador);
+    }
+    
+    public void empezarPartida() {
+        control.empezarPartida();
+    }
+    
+    public void abandonarLobby(Jugador jugador) {
+        control.abandonarLobby(jugador);
+    }
 }
