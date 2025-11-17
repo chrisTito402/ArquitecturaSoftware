@@ -3,9 +3,9 @@ package models.builder;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.enums.EstadoPartida;
-import models.control.IModelo;
 import models.observador.ISuscriptor;
 import java.util.List;
+import models.control.IModeloCliente;
 
 /**
  *
@@ -23,5 +23,5 @@ public interface IPartidaBuilder {
     public void setEstado(EstadoPartida estado);
     public void setDisparo(Disparo disparo);
     public void setSuscriptores(List<ISuscriptor> suscriptores);
-    public IModelo getResult();
+    public IModeloCliente getResult();
 }

@@ -1,5 +1,8 @@
-package buseventos;
+package buseventos.buseventos;
 
+import buseventos.Mensaje;
+import buseventos.TipoAccion;
+import buseventos.servidorsocket.UserServerThread;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +22,7 @@ public class BusEventos {
         Gson gson = new Gson();
         String jsonMensaje = gson.toJson(mensaje);
         eventos.get(evento).forEach(s -> s.sendMessage(jsonMensaje));
-        System.out.println(eventos);
+        //System.out.println(eventos);
     }
     
     private void suscribirse(String evento, UserServerThread suscriptor) {

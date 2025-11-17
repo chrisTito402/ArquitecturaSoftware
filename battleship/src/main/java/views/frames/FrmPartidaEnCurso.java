@@ -22,17 +22,17 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         
         int[] tiempo = {30};
 
-        Timer timer = cV.getTimer();
-        timer.addActionListener(e -> {
-            jlContador.setText("00:" + String.format("%02d", tiempo[0]));
-            tiempo[0]--;
-            if (tiempo[0] < 0) {
-                timer.stop();
-                tiempo[0] = 30;
-                timer.start();
-            }
-        });
-        timer.start();
+//        Timer timer = cV.getTimer();
+//        timer.addActionListener(e -> {
+//            jlContador.setText("00:" + String.format("%02d", tiempo[0]));
+//            tiempo[0]--;
+//            if (tiempo[0] < 0) {
+//                timer.stop();
+//                tiempo[0] = 30;
+//                timer.start();
+//            }
+//        });
+//        timer.start();
 
     }
 

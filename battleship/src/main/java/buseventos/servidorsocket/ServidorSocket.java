@@ -1,5 +1,6 @@
-package buseventos;
+package buseventos.servidorsocket;
 
+import buseventos.buseventos.BusEventos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,6 +24,7 @@ public class ServidorSocket {
     
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Servidor escuchando en el puerto " + port);
             while (true) {
                 Socket socket = serverSocket.accept();
                 UserServerThread newUser = new UserServerThread(socket, this);

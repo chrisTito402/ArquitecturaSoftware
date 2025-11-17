@@ -3,17 +3,17 @@ package models.entidades;
 import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
-import models.control.IModelo;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import servidor.modelo.IModeloServidor;
 
 /**
  *
  * @author daniel
  */
-public class Partida implements IModelo {
+public class Partida implements IModeloServidor {
 
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -46,6 +46,7 @@ public class Partida implements IModelo {
         this.jugadores = jugadores;
     }
 
+    @Override
     public void notificarAllSuscriptores(String contexto, Object datos) {
         suscriptores.forEach(s -> s.notificar(contexto, datos));
     }
@@ -56,9 +57,9 @@ public class Partida implements IModelo {
     }
 
     @Override
-    public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
         jugadores.forEach(e -> System.out.println(e.getNombre()));
-        if (jugador.getNombre() != turno.getNombre()) {
+        if (!jugador.getNombre().equals(turno.getNombre())) {
             System.out.println("Error, no es el turno del jugador seleccionado");
             return null;
         }
@@ -97,9 +98,8 @@ public class Partida implements IModelo {
             if (nave == null) {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
-                disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-                notificarAllSuscriptores("DISPARO", disparo);
-                return resultadoDisparo;
+                disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
+                return disparo;
             }
         }
 
@@ -111,10 +111,10 @@ public class Partida implements IModelo {
             }
         }
 
-        disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
-        notificarAllSuscriptores("DISPARO", disparo);
+        disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
+        System.out.println("DISPARO AQUI " + disparo.getResultadoDisparo());
 
-        return resultadoDisparo;
+        return disparo;
     }
 
     @Override

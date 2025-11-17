@@ -5,6 +5,7 @@ import models.entidades.Nave;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.entidades.Coordenadas;
+import views.DTOs.JugadorDTO;
 
 /**
  *
@@ -15,7 +16,8 @@ public interface IControlador {
     public void addJugador(Jugador j);
     public void crearTableros();
     public void suscribirAPartida(ISuscriptor suscriptor);
-    public void realizarDisparo(Coordenadas c, Jugador j);
+    public void realizarDisparo(Coordenadas c);
+    public JugadorDTO getJugador();
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     
     // Caso de Uso: Unirse Partida
