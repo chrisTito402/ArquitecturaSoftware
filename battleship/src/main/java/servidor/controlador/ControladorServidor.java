@@ -50,6 +50,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
         
         manejadoresEventos.get(mensaje.getEvento()).accept(mensaje);
+        
     }
     
     private void realizarDisparo(Mensaje mensaje) {

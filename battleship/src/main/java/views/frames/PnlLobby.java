@@ -4,17 +4,25 @@
  */
 package views.frames;
 
+import controllers.controller.IControlador;
+import models.control.IModeloCliente;
+import models.observador.ISuscriptor;
+
 /**
  *
  * @author Knocmare
  */
 public class PnlLobby extends javax.swing.JPanel {
-
+    private IControlador controlador; 
+    private IModeloCliente partida;
     /**
      * Creates new form PnlLobby
      */
     public PnlLobby() {
         initComponents();
+        this.controlador = controlador;
+        this.partida = partida;
+        this.partida.suscribirAPartida((ISuscriptor) this);
     }
 
     /**

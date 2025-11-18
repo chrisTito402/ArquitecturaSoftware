@@ -34,7 +34,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         this.manejadorEventos = mapa;
         
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
-        
+        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         
     }
     
@@ -78,6 +78,14 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         if (disparo != null) {
             enviarMensaje("DISPARO", disparo);
         }
+    }
+    
+    private void manejarJugadorUnido(Mensaje mensaje) {
+        System.out.println("Cliente: Recibido 'JUGADOR_UNIDO'.");
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+
+        partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
     
     
