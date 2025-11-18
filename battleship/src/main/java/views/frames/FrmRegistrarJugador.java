@@ -78,8 +78,10 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
 
         labelColor.setText("Color:");
 
+        cBoxRojo.setBackground(new java.awt.Color(255, 0, 51));
         cBoxRojo.setText("Rojo");
 
+        cBoxAzul.setBackground(new java.awt.Color(0, 0, 255));
         cBoxAzul.setText("Azul");
         cBoxAzul.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -87,6 +89,7 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
             }
         });
 
+        btnContinuar.setBackground(new java.awt.Color(0, 153, 0));
         btnContinuar.setText("Continuar");
         btnContinuar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -95,6 +98,11 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         });
 
         btnRegresar.setText("Regresar");
+        btnRegresar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegresarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -175,6 +183,14 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         this.controlador.unirsePartida(nuevoJugador);
         this.dispose();
     }//GEN-LAST:event_btnContinuarActionPerformed
+
+    private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
+        // TODO add your handling code here:
+        FrmMenuPrincipal m = new FrmMenuPrincipal();
+        m.setVisible(true);
+        m.setLocationRelativeTo(this);
+        dispose();
+    }//GEN-LAST:event_btnRegresarActionPerformed
 
     /**
      * @param args the command line arguments

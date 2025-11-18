@@ -41,6 +41,11 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
         btnJugar.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnJugar.setText("Jugar");
+        btnJugar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnJugarActionPerformed(evt);
+            }
+        });
 
         btnJugador.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnJugador.setText("Jugador");
@@ -95,6 +100,14 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
+        // TODO add your handling code here:
+        FrmRegistrarJugador r = new FrmRegistrarJugador();
+        r.setLocationRelativeTo(this);
+        r.setVisible(true);
+        dispose();
+    }//GEN-LAST:event_btnJugarActionPerformed
 
     /**
      * @param args the command line arguments
