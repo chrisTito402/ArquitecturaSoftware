@@ -30,6 +30,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         this.manejadoresEventos = mapa;
         
         mapa.put("DISPARO", this::realizarDisparo);
+        mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
     }
     
     // Metodo para enviar mensaje por la red.
@@ -81,5 +82,15 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         );
         enviarMensaje("RESULTADO_DISPARO", resultado);
     }
+    
+    private void manejarUnirsePartida(Mensaje mensaje) {
+        //unicamente para pruebas este print v
+        System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");
+        
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
+    }
+    
     
 }

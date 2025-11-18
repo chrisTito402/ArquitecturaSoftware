@@ -4,6 +4,7 @@ import models.entidades.Nave;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 import java.util.List;
+import models.entidades.Jugador;
 import models.entidades.Tablero;
 
 /**
@@ -17,4 +18,6 @@ public interface IJugadorBuilder {
     public void setNaves(List<Nave> naves);
     public void setTablero(Tablero tablero);
     public void setEstado(EstadoJugador estado);
+    public Jugador getResult();
+
 }

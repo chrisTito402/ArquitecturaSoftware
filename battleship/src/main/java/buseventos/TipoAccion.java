@@ -6,5 +6,6 @@ package buseventos;
  */
 public enum TipoAccion {
     PUBLICAR,
-    SUSCRIBIR
+    SUSCRIBIR,
+    
 }

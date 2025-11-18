@@ -1,5 +1,6 @@
 package controllers.controller;
 
+import buseventos.Mensaje;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.observador.ISuscriptor;
@@ -24,4 +25,7 @@ public interface IControlador {
     public void unirsePartida(Jugador jugador);
     public void empezarPartida();
     public void abandonarLobby(Jugador jugador);
+    
+    
+
 }

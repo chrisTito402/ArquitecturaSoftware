@@ -15,6 +15,8 @@ import models.builder.PartidaBuilder;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
+import models.enums.ColorJugador;
+import models.enums.EstadoJugador;
 import views.DTOs.JugadorDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente{
@@ -32,6 +34,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         this.manejadorEventos = mapa;
         
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
+        
+        
     }
     
     // Metodo para enviar mensaje por la red.
@@ -75,6 +79,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
             enviarMensaje("DISPARO", disparo);
         }
     }
+    
+    
 
     @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
@@ -101,6 +107,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     @Override
     public void unirsePartida(Jugador jugador) {
         partida.unirsePartida(jugador);
+        
+        JugadorDTO jugadorDTO = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
     
     @Override
