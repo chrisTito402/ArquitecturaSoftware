@@ -35,6 +35,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
+        manejadorEventos.put("ABANDONAR_EVENTO", this::manejarAbandonarPartida);
         
     }
     
@@ -64,6 +65,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         partida.notificarAllSuscriptores("DISPARO", d);
     }
     
+    public void manejarAbandonarPartida(Mensaje mensaje){
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono la partida." );
+        partida.notificarAllSuscriptores("ABANDONAR_PARTIDA", jugadorDTO);
+        
+    }
     @Override
     public String crearPartida(Jugador j) {
         Director d = new Director();

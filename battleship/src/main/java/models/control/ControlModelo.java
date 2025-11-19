@@ -30,7 +30,7 @@ public class ControlModelo implements IModeloCliente {
         this.turno = turno;
         this.suscriptores = suscriptores;
     }
-    
+
     @Override
     public DisparoDTO realizarDisparo(Coordenadas coordenadas) {
         if (!turno) {
@@ -45,7 +45,7 @@ public class ControlModelo implements IModeloCliente {
             System.out.println("Las coordenas en Y estan fuera del limite");
             return null;
         }
-        
+
         DisparoDTO disparo = new DisparoDTO(jugador, coordenadas, null, null, Instant.now().toEpochMilli());
         return disparo;
     }
@@ -87,12 +87,13 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void abandonarLobby(Jugador jugador) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
     }
 
     @Override
     public JugadorDTO getJugador() {
         return jugador;
     }
-    
+
 }
