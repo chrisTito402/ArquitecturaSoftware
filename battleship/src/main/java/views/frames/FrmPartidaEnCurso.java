@@ -1,7 +1,6 @@
 package views.frames;
 
 import controllers.controller.ControlVista;
-import java.awt.Color;
 import java.awt.Component;
 
 

@@ -79,7 +79,7 @@ public class PruebaServer {
                 0, 
                 EstadoPartida.EN_CURSO, 
                 new ArrayList<>(),
-                new Cronometro()
+                new Cronometro(30)
         );
         
         ClienteSocket cliente = new ClienteSocket("localhost", 5000, null);

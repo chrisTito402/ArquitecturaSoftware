@@ -41,9 +41,20 @@ public class Partida implements IModeloServidor {
         this.cronometro = cronometro;
         
         // PROVISIONAL para simular cuando empieza la patida
-        cronometro.initCronometro(30000);
+        cronometro.initCronometro();
     }
 
+    public boolean cambiarTurno() {
+        turno = jugadores.stream().filter(e -> e != turno)
+                .findFirst()
+                .orElse(null);
+        if (turno == null) {
+            return false;
+        }
+        System.out.println("SE CAMBIO EL TURNO");
+        return true;
+    }
+    
     public List<Jugador> getJugadores() {
         return jugadores;
     }
@@ -64,42 +75,31 @@ public class Partida implements IModeloServidor {
 
     @Override
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo) {
-        jugadores.forEach(e -> System.out.println(e.getNombre()));
-        
-        // Verificar el Cronometro
-        if (!cronometro.isInTime(tiempo)) {
-            turno = jugadores.stream().filter(e -> e != turno)
-                    .findFirst()
-                    .orElse(null);
-            cronometro.initCronometro(30000);
-            
-            System.out.println("Error, el disparo no fue hecho a tiempo.");
+        // Verificar Turno
+        if (!jugador.getNombre().equals(turno.getNombre())) {
+            System.out.println("Error, no es el turno del jugador seleccionado.");
             return null;
         }
         
-        // Verificar Turno
-        if (!jugador.getNombre().equals(turno.getNombre())) {
-            if (!cronometro.isInTime(tiempo)) {
-                turno = jugadores.stream().filter(e -> e != turno)
-                        .findFirst()
-                        .orElse(null);
-                cronometro.initCronometro(30000);
-            } else {
-                System.out.println("Error, no es el turno del jugador seleccionado.");
-                return null;
-            }
+        cronometro.setProcesandoDisparo(true);
+        // Verificar el Cronometro
+        if (!cronometro.isInTime(tiempo)) {
+            System.out.println("Error, el disparo no fue hecho a tiempo.");
+            cronometro.setProcesandoDisparo(false);
+            cronometro.initCronometro();
+            return null;
         }
 
         //Obtener al oponente
         Jugador j2 = jugadores.stream().filter(e -> e != turno)
                 .findFirst()
                 .orElse(null);
-
+        
         if (j2 == null) {
             System.out.println("Error, no se encontró al oponente.");
             return null;
         }
-
+        
         //Disparo del jugador actual
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
@@ -107,13 +107,6 @@ public class Partida implements IModeloServidor {
         // Si falla, pasa turno
         if (resultadoDisparo == ResultadoDisparo.AGUA) {
             turno = j2;
-
-            //Si el siguiente es un Bot, dispara automáticamente
-            if (turno instanceof Bot) {
-                System.out.println("ES UN BOT");
-                Bot bot = (Bot) turno;
-                //realizarDisparo(bot.getCoordenadas(), turno);
-            }
         }
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
             Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
@@ -129,16 +122,9 @@ public class Partida implements IModeloServidor {
             }
         }
 
-        if (turno instanceof Bot) {
-            if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO
-                    || resultadoDisparo == ResultadoDisparo.IMPACTO) {
-                Bot bot = (Bot) turno;
-                //realizarDisparo(bot.getCoordenadas(), turno);
-            }
-        }
-
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
-        cronometro.initCronometro(30000);
+        cronometro.initCronometro();
+        cronometro.setProcesandoDisparo(false);
         return disparo;
     }
 

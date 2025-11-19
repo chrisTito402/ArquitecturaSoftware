@@ -16,6 +16,9 @@ public class Disparo {
     private EstadoPartida estadoPartida;
     private Instant tiempo;
 
+    public Disparo() {
+    }
+
     public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, Instant tiempo) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
