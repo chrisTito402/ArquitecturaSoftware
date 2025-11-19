@@ -1,5 +1,6 @@
 package views.frames;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import javax.swing.JLabel;
@@ -13,15 +14,19 @@ public class TimerPanel extends JLabel {
     
     private Timer timer;
     private int[] tiempo;
+    private int total;
 
-    public TimerPanel(int seg) {
+    public TimerPanel(int delay, int total) {
         this.setPreferredSize(new Dimension(44, 25));
         this.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        this.setBackground(Color.GREEN);
+        this.setText("00:30");
         
+        this.total = total;
         this.tiempo = new int[1];
-        tiempo[0] = seg;
+        tiempo[0] = total;
         this.timer = new Timer(
-                seg,
+                delay,
                 e -> {
                     this.setText("00:" + String.format("%02d", tiempo[0]));
                     tiempo[0]--;
@@ -36,12 +41,11 @@ public class TimerPanel extends JLabel {
         this.setVisible(true);
     }
     
-    public void initTimer(int seg) {
+    public void initTimer(int milis) {
         if (!timer.isRunning()) {
             timer.start();
         } else {
-            timer.stop();
-            timer.start();
+            tiempo[0] = total;
         }
     }
     
@@ -49,8 +53,7 @@ public class TimerPanel extends JLabel {
         if (!timer.isRunning()) {
             timer.start();
         } else {
-            timer.stop();
-            timer.start();
+            tiempo[0] = total;
         }
     }
     

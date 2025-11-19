@@ -8,6 +8,7 @@ import controllers.controller.ControlVista;
 import controllers.controller.Controlador;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.Timer;
 import models.control.ControlModelo;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
@@ -35,7 +36,7 @@ public class PruebaCliente1 {
         cS.setControl(c);
         cV.setControl(c);
         
-        cV.setTimer(new TimerPanel(30));
+        cV.setTimer(new TimerPanel(1000, 30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
         cV.mostrarFrmPartidaEnCurso();

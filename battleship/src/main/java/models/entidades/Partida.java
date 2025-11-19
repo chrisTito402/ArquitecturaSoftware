@@ -68,14 +68,26 @@ public class Partida implements IModeloServidor {
         
         // Verificar el Cronometro
         if (!cronometro.isInTime(tiempo)) {
+            turno = jugadores.stream().filter(e -> e != turno)
+                    .findFirst()
+                    .orElse(null);
+            cronometro.initCronometro(30000);
+            
             System.out.println("Error, el disparo no fue hecho a tiempo.");
             return null;
         }
         
         // Verificar Turno
         if (!jugador.getNombre().equals(turno.getNombre())) {
-            System.out.println("Error, no es el turno del jugador seleccionado.");
-            return null;
+            if (!cronometro.isInTime(tiempo)) {
+                turno = jugadores.stream().filter(e -> e != turno)
+                        .findFirst()
+                        .orElse(null);
+                cronometro.initCronometro(30000);
+            } else {
+                System.out.println("Error, no es el turno del jugador seleccionado.");
+                return null;
+            }
         }
 
         //Obtener al oponente
@@ -126,8 +138,7 @@ public class Partida implements IModeloServidor {
         }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
-        System.out.println("DISPARO AQUI " + disparo.getResultadoDisparo());
-
+        cronometro.initCronometro(30000);
         return disparo;
     }
 

@@ -2,6 +2,7 @@ package views.frames;
 
 import controllers.controller.ControlVista;
 import java.awt.Color;
+import java.awt.Component;
 
 
 /**
@@ -21,7 +22,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         cV.getCasillasEnemigas().forEach(c -> jPanel2.add(c));
         cV.getCasillasPropias().forEach(c -> jPanel1.add(c));
         
-        pnlTimer.add(cV.getTimer());
+        Component a = pnlTimer.add(cV.getTimer());
         pnlTimer.revalidate();
         pnlTimer.repaint();
 
@@ -52,21 +53,11 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
         jPanel1.setLayout(new java.awt.GridLayout(10, 10));
 
-        pnlTimer.setMaximumSize(new java.awt.Dimension(44, 25));
-        pnlTimer.setMinimumSize(new java.awt.Dimension(44, 25));
+        pnlTimer.setMaximumSize(new java.awt.Dimension(100, 30));
+        pnlTimer.setMinimumSize(new java.awt.Dimension(100, 30));
         pnlTimer.setName(""); // NOI18N
         pnlTimer.setPreferredSize(new java.awt.Dimension(100, 30));
-
-        javax.swing.GroupLayout pnlTimerLayout = new javax.swing.GroupLayout(pnlTimer);
-        pnlTimer.setLayout(pnlTimerLayout);
-        pnlTimerLayout.setHorizontalGroup(
-            pnlTimerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 168, Short.MAX_VALUE)
-        );
-        pnlTimerLayout.setVerticalGroup(
-            pnlTimerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
+        pnlTimer.setLayout(new java.awt.GridLayout());
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Black", 2, 48)); // NOI18N
         jLabel1.setText("Battleship");
@@ -100,9 +91,9 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
+                    .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
