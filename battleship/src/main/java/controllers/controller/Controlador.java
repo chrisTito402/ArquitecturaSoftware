@@ -15,8 +15,6 @@ import models.builder.PartidaBuilder;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
 import views.DTOs.JugadorDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente{

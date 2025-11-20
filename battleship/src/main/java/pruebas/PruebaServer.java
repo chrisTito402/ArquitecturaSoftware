@@ -69,6 +69,7 @@ public class PruebaServer {
         jugadores.add(j1);
         jugadores.add(j2);
         
+        Cronometro cronometro = new Cronometro(5000);
         Partida p = new Partida(
                 j1, 
                 jugadores, 
@@ -79,8 +80,9 @@ public class PruebaServer {
                 0, 
                 EstadoPartida.EN_CURSO, 
                 new ArrayList<>(),
-                new Cronometro(30)
+                cronometro
         );
+        cronometro.setPartida(p);
         
         ClienteSocket cliente = new ClienteSocket("localhost", 5000, null);
         ControladorServidor control = new ControladorServidor(p, cliente, new HashMap<>());

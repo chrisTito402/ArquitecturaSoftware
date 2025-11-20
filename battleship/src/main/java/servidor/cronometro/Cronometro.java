@@ -16,15 +16,15 @@ public class Cronometro implements ICronometro {
     
     private Instant min;
     private Instant max;
-    private final int duracionTurnoSeg;
+    private final long duracionTurnoMili;
     private Partida partida;
     
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> tareaCambioTurno;
     private final AtomicBoolean procesandoDisparo;
     
-    public Cronometro(int seg) {
-        this.duracionTurnoSeg = seg;
+    public Cronometro(long mili) {
+        this.duracionTurnoMili = mili;
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.procesandoDisparo = new AtomicBoolean(false);
     }
@@ -36,25 +36,23 @@ public class Cronometro implements ICronometro {
     private void initInstance(long tiempo) {
         this.min = Instant.now();
         this.max = min.plusMillis(tiempo);
+        System.out.println("SE CAMBIO EL LAS INSTANCIAS UNIX");
     }
     
     @Override
     public void initCronometro() {
-        // 1. Si ya hay una tarea programada (el cambio de turno anterior), la cancelamos.
+        System.out.println("INIT CRONOMETRO");
         if (tareaCambioTurno != null && !tareaCambioTurno.isDone()) {
             tareaCambioTurno.cancel(false); 
         }
 
-        // 2. Definimos los Instants para validación
-        initInstance(30000);
+        initInstance(duracionTurnoMili);
 
-        // 3. Programamos el cambio de turno para dentro de 30 segundos EXACTOS
         tareaCambioTurno = scheduler.schedule(() -> {
-            // Verificamos si se está procesando un disparo antes de cambiar
             if (!procesandoDisparo.get()) {
                 partida.cambiarTurno();
             }
-        }, duracionTurnoSeg, TimeUnit.SECONDS);
+        }, duracionTurnoMili, TimeUnit.MILLISECONDS);
     }
     
     @Override

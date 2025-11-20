@@ -49,8 +49,11 @@ public class Partida implements IModeloServidor {
                 .findFirst()
                 .orElse(null);
         if (turno == null) {
+            System.out.println("Error al cambiar el turno");
             return false;
         }
+        cronometro.setProcesandoDisparo(false);
+        cronometro.initCronometro();
         System.out.println("SE CAMBIO EL TURNO");
         return true;
     }
@@ -84,9 +87,8 @@ public class Partida implements IModeloServidor {
         cronometro.setProcesandoDisparo(true);
         // Verificar el Cronometro
         if (!cronometro.isInTime(tiempo)) {
+            cambiarTurno();
             System.out.println("Error, el disparo no fue hecho a tiempo.");
-            cronometro.setProcesandoDisparo(false);
-            cronometro.initCronometro();
             return null;
         }
 
@@ -104,10 +106,6 @@ public class Partida implements IModeloServidor {
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
 
-        // Si falla, pasa turno
-        if (resultadoDisparo == ResultadoDisparo.AGUA) {
-            turno = j2;
-        }
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
             Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
                     || n.getEstado() == EstadoNave.AVERIADO)
@@ -123,8 +121,7 @@ public class Partida implements IModeloServidor {
         }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
-        cronometro.initCronometro();
-        cronometro.setProcesandoDisparo(false);
+        cambiarTurno();
         return disparo;
     }
 
