@@ -35,7 +35,6 @@ public class UserReadClientThread extends Thread {
             while (true) {
                 try {
                     String response = reader.readLine();
-                    System.out.println("RECIBIR MENSAJE EN CLIENTE");
                     client.manejarMensaje(response);
                 } catch (SocketException ex) {
                     socket.close();

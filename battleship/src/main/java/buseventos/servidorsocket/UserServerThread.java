@@ -37,9 +37,7 @@ public class UserServerThread extends Thread {
             String clientMessage;
             while (true) {
                 try {
-                    System.out.println("ESPERANDO MENSAJE EN SERVIDOR");
                     clientMessage = reader.readLine();
-                    System.out.println("RECIBIR MENSAJE EN SERVIDOR");
                     server.sendToBus(clientMessage, this);
                 } catch (SocketException ex) {
                     server.removeUser(this);

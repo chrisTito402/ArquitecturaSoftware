@@ -81,7 +81,8 @@ public class Partida implements IModeloServidor {
         // Verificar Turno
         if (!jugador.getNombre().equals(turno.getNombre())) {
             System.out.println("Error, no es el turno del jugador seleccionado.");
-            return null;
+            disparo = new Disparo(jugador, coordenadas, ResultadoDisparo.TURNO_INCORRECTO, estado);
+            return disparo;
         }
         
         cronometro.setProcesandoDisparo(true);
@@ -89,7 +90,8 @@ public class Partida implements IModeloServidor {
         if (!cronometro.isInTime(tiempo)) {
             cambiarTurno();
             System.out.println("Error, el disparo no fue hecho a tiempo.");
-            return null;
+            disparo = new Disparo(jugador, coordenadas, ResultadoDisparo.DISPARO_FUERA_TIEMPO, estado);
+            return disparo;
         }
 
         //Obtener al oponente

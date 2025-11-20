@@ -38,8 +38,7 @@ public class ControlVista implements ISuscriptor{
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
-        manejadoresNoti.put("DISPARO", this::manejarDisparo);
-        
+        manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
     }
     
     public static ControlVista getInstancia() {

@@ -26,4 +26,7 @@ public interface IModeloCliente {
     public void unirsePartida(Jugador jugador);
     public void empezarPartida();
     public void abandonarLobby(Jugador jugador);
+    
+    // Manejadores de Resultados
+    public void manejarResultadoDisparo(DisparoDTO disparo);
 }

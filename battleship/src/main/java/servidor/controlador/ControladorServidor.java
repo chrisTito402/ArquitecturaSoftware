@@ -46,7 +46,6 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
-        System.out.println(json);
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
         
@@ -67,11 +66,6 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         );
         
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
-        
-        if (disparo == null) {
-            System.out.println("Error en el Servidor");
-            return;
-        }
         
         DisparoDTO resultado = new DisparoDTO(
                 new JugadorDTO(

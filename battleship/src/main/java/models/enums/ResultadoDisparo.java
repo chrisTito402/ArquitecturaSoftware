@@ -9,5 +9,7 @@ public enum ResultadoDisparo {
     AGUA,
     IMPACTO,
     YA_DISPARADO,
-    HUNDIMIENTO;
+    HUNDIMIENTO,
+    DISPARO_FUERA_TIEMPO,
+    TURNO_INCORRECTO;
 }

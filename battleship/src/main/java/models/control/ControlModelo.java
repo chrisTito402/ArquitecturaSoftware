@@ -5,6 +5,7 @@ import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
+import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -48,6 +49,20 @@ public class ControlModelo implements IModeloCliente {
 
         DisparoDTO disparo = new DisparoDTO(jugador, coordenadas, null, null, Instant.now().toEpochMilli());
         return disparo;
+    }
+    
+    @Override
+    public void manejarResultadoDisparo(DisparoDTO disparo) {
+        if (disparo.getResultadoDisparo() == ResultadoDisparo.DISPARO_FUERA_TIEMPO) {
+            System.out.println(disparo.getResultadoDisparo());
+            return;
+        }
+        if (disparo.getResultadoDisparo() == ResultadoDisparo.TURNO_INCORRECTO) {
+            System.out.println(disparo.getResultadoDisparo());
+            return;
+        }
+        
+        notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
     }
 
     @Override

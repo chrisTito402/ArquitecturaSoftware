@@ -46,7 +46,6 @@ public class ClienteSocket implements IClienteSocket {
     
     @Override
     public void enviarMensaje(String json) {
-        System.out.println("ENVIAR MENSAJE A SERVIDOR");
         writer.println(json);
     }
     

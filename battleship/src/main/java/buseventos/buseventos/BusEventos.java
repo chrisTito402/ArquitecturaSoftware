@@ -4,7 +4,6 @@ import buseventos.Mensaje;
 import buseventos.TipoAccion;
 import buseventos.servidorsocket.UserServerThread;
 import com.google.gson.Gson;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +14,11 @@ import java.util.Set;
  */
 public class BusEventos {
     
-    private Map<String, Set<UserServerThread>> eventos = new HashMap<>();
+    private Map<String, Set<UserServerThread>> eventos;
+
+    public BusEventos(Map mapa) {
+        this.eventos = mapa;
+    }
     
     private void publicar(String evento, Mensaje mensaje) {
         System.out.println("PUBLICAR");

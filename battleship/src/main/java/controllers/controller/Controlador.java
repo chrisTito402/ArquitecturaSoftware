@@ -58,9 +58,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     private void manejarResultadoDisparo(Mensaje mensaje) {
         Gson gson = new Gson();
         DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
-        System.out.println(d.getResultadoDisparo());
         
-        partida.notificarAllSuscriptores("DISPARO", d);
+        partida.manejarResultadoDisparo(d);
     }
     
     public void manejarAbandonarPartida(Mensaje mensaje){
