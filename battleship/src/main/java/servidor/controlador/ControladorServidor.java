@@ -31,6 +31,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         
         mapa.put("DISPARO", this::realizarDisparo);
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        mapa.put("ABANDONO_PARTIDA", this::manejarAbandonarPartidaSv);
     }
     
     // Metodo para enviar mensaje por la red.
@@ -91,6 +92,12 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
+    }
+    
+    private void manejarAbandonarPartidaSv(Mensaje mensaje){
+        Gson g = new Gson();
+        JugadorDTO jugador = g.fromJson(mensaje.getData(), JugadorDTO.class);
+        enviarMensaje("ABANDONO", jugador);
     }
     
     
