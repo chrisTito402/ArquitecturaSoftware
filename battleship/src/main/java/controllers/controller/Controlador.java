@@ -66,7 +66,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono la partida." );
-//        partida.notificarAllSuscriptores("ABANDONAR_PARTIDA", jugadorDTO);
+        partida.notificarAllSuscriptores("ABANDONAR_PARTIDA", jugadorDTO);
         
     }
     @Override
@@ -90,7 +90,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
 
-//        partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
+        partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
     
     
@@ -104,6 +104,16 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     @Override
     public void addJugador(Jugador jugador) {
         partida.addJugador(jugador);
+    }
+
+    @Override
+    public void crearTableros() {
+        partida.crearTableros();
+    }
+
+    @Override
+    public void suscribirAPartida(ISuscriptor suscriptor) {
+        partida.suscribirAPartida(suscriptor);
     }
     
     // Caso de Uso: Unirse Partida

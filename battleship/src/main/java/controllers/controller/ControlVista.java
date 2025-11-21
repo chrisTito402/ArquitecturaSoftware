@@ -191,6 +191,14 @@ public class ControlVista implements ISuscriptor{
         control.addJugador(j);
     }
     
+    public void crearTableros() {
+        control.crearTableros();
+    }
+    
+    public void suscribirAModelo() {
+        control.suscribirAPartida(this);
+    }
+    
     public void mostrarFrmPartidaEnCurso() {
         new FrmPartidaEnCurso().setVisible(true);
         timer.initTimer();
