@@ -29,7 +29,7 @@ public class PruebaCliente1 {
         TableroDTO tablero = new TableroDTO(10, 10);
         
         ControlModelo cM = new ControlModelo(jugador, tablero, new ArrayList<>(), true, new ArrayList<>());
-        cM.suscribirAPartida(cV);
+//        cM.suscribirAPartida(cV);
         
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);
         Controlador c = new Controlador(cM, cS, new HashMap<>());

@@ -67,11 +67,6 @@ public class Partida implements IModeloServidor {
     }
 
     @Override
-    public void notificarAllSuscriptores(String contexto, Object datos) {
-        suscriptores.forEach(s -> s.notificar(contexto, datos));
-    }
-
-    @Override
     public void addJugador(Jugador j) {
         jugadores.add(j);
     }
@@ -143,22 +138,6 @@ public class Partida implements IModeloServidor {
         return false;
     }
 
-    @Override
-    public void crearTableros() {
-        Director d = new Director();
-        TableroBuilder builder = new TableroBuilder();
-
-        for (Jugador j : jugadores) {
-            d.makeTablero(builder);
-            j.setTablero(builder.getResult());
-        }
-    }
-
-    @Override
-    public void suscribirAPartida(ISuscriptor suscriptor) {
-        suscriptores.add(suscriptor);
-    }
-
     // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(Jugador jugador) {
@@ -175,11 +154,11 @@ public class Partida implements IModeloServidor {
         }
 
         // Agregar nuevo jugador (Pendiente para unir con el caso de uso: Gestionar jugador)
-        jugadores.add(jugador);
+        this.addJugador(jugador);
         System.out.println(jugador.getNombre() + " se unio a la partida.");
 
         // Notificar a observadores (socktes)
-        notificarAllSuscriptores("JUGADOR_UNIDO", jugador);
+//        notificarAllSuscriptores("JUGADOR_UNIDO", jugador);
     }
 
     @Override
@@ -192,16 +171,16 @@ public class Partida implements IModeloServidor {
 
         // Cambiar estado
         estado = EstadoPartida.EN_CURSO;
-
+        
         // Crear tableros
-        this.crearTableros();
-
+//        this.crearTableros();
+        
         // Asignar turno inicial (jugador 0)
         turno = jugadores.get(0);
 
         // Notificar
         System.out.println("La partida ha comenzado.");
-        notificarAllSuscriptores("PARTIDA_INICIADA", null);
+//        notificarAllSuscriptores("PARTIDA_INICIADA", null);
     }
 
     @Override
@@ -211,6 +190,6 @@ public class Partida implements IModeloServidor {
 
         // Notificar
         System.out.println(jugador.getNombre() + " abandonó el lobby.");
-        notificarAllSuscriptores("JUGADOR_ABANDONO", jugador);
+//        notificarAllSuscriptores("JUGADOR_ABANDONO", jugador);
     }
 }

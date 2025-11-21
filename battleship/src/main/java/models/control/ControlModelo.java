@@ -62,7 +62,7 @@ public class ControlModelo implements IModeloCliente {
             return;
         }
         
-        notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
+//        notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
     }
 
     @Override
@@ -73,21 +73,6 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void addJugador(Jugador j) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void crearTableros() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void suscribirAPartida(ISuscriptor suscriptor) {
-        suscriptores.add(suscriptor);
-    }
-
-    @Override
-    public void notificarAllSuscriptores(String contexto, Object datos) {
-        suscriptores.forEach(s -> s.notificar(contexto, datos));
     }
 
     @Override
@@ -103,7 +88,7 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void abandonarLobby(Jugador jugador) {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-        notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
+//        notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
     }
 
     @Override

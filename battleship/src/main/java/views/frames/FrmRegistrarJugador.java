@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views.frames;
 
 import controllers.controller.IControlador;
@@ -181,6 +177,10 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         builder.setEstado(EstadoJugador.JUGANDO); 
         Jugador nuevoJugador = builder.getResult();
         this.controlador.unirsePartida(nuevoJugador);
+        
+        FrmLobby lobby = new FrmLobby();
+        lobby.setLocationRelativeTo(this);
+        lobby.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnContinuarActionPerformed
 

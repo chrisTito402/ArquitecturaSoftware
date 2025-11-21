@@ -17,9 +17,6 @@ public interface IModeloCliente {
     public DisparoDTO realizarDisparo(Coordenadas coordenadas);
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
-    public void crearTableros();
-    public void suscribirAPartida(ISuscriptor suscriptor);
-    public void notificarAllSuscriptores(String contexto, Object datos);
     public JugadorDTO getJugador();
     
     // Caso de Uso: Unirse Partida
