@@ -7,11 +7,15 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import models.entidades.Barco;
 import models.entidades.Casilla;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
+import models.entidades.Nave;
 import models.entidades.Partida;
+import models.entidades.Submarino;
 import models.entidades.Tablero;
 import models.enums.ColorJugador;
 import models.enums.EstadoCasilla;
@@ -35,7 +39,8 @@ public class PruebaServer {
             }
         }
         
-        casilla1[0][0].setNave(new Barco(OrientacionNave.HORIZONTAL));
+        Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
+        casilla1[0][0].setNave(n1);
         
         Tablero t1 = new Tablero(casilla1, 10, 10);
         
@@ -45,6 +50,7 @@ public class PruebaServer {
                 new ArrayList<>(), 
                 t1, 
                 EstadoJugador.JUGANDO);
+        j1.getNaves().add(n1);
         
         // JUGADOR 2 ---------------------------------------------------
         Casilla[][] casilla2 = new Casilla[10][10];
@@ -54,16 +60,18 @@ public class PruebaServer {
             }
         }
         
-        casilla2[0][0].setNave(new Barco(OrientacionNave.HORIZONTAL));
+        Nave n2 = new Barco(OrientacionNave.HORIZONTAL);
+        casilla2[0][0].setNave(n2);
         
-        Tablero t2 = new Tablero(casilla1, 10, 10);
+        Tablero t2 = new Tablero(casilla2, 10, 10);
         
         Jugador j2 = new Jugador(
                 "J2", 
                 ColorJugador.ROJO, 
                 new ArrayList<>(), 
-                t1, 
+                t2, 
                 EstadoJugador.JUGANDO);
+        j2.getNaves().add(n2);
         
         List<Jugador> jugadores = new ArrayList<>();
         jugadores.add(j1);
@@ -89,9 +97,23 @@ public class PruebaServer {
         cliente.setControl(control);
         cliente.execute();
         
-        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null, "1");
-        Gson gson = new Gson();
-        String json = gson.toJson(m);
-        cliente.enviarMensaje(json);
+//        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null, "1");
+//        Gson gson = new Gson();
+//        String json = gson.toJson(m);
+//        cliente.enviarMensaje(json);
+        
+        List<Coordenadas> cords = new ArrayList<>();
+        cords.add(
+                new Coordenadas(2, 1)
+        );
+        cords.add(
+                new Coordenadas(4, 1)
+        );
+        
+        System.out.println("ADD NAVE: " + p.addNave(
+                    j1, 
+                    new Submarino(OrientacionNave.VERTICAL), 
+                    cords
+                    ));
     }
 }
