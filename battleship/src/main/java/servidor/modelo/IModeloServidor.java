@@ -5,7 +5,7 @@ import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import models.observador.ISuscriptor;
+import models.enums.ResultadoAddNave;
 
 /**
  *
@@ -13,7 +13,7 @@ import models.observador.ISuscriptor;
  */
 public interface IModeloServidor {
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
-    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+    public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
     
     // Caso de Uso: Unirse Partida

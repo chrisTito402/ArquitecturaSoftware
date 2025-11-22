@@ -97,7 +97,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
 
     @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        partida.addNave(jugador, nave, coordenadas);
         return true;
     }
 

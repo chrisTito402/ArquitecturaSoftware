@@ -12,14 +12,16 @@ public class NaveDTO {
     private EstadoNave estado;
     private OrientacionNave orientacion;
     private TipoNaveDTO tipo;
+    private int tamanio;
 
     public NaveDTO() {
     }
 
-    public NaveDTO(EstadoNave estado, OrientacionNave orientacion, TipoNaveDTO tipo) {
+    public NaveDTO(EstadoNave estado, OrientacionNave orientacion, TipoNaveDTO tipo, int tamanio) {
         this.estado = estado;
         this.orientacion = orientacion;
         this.tipo = tipo;
+        this.tamanio = tamanio;
     }
 
     public EstadoNave getEstado() {
@@ -46,9 +48,17 @@ public class NaveDTO {
         this.tipo = tipo;
     }
 
+    public int getTamanio() {
+        return tamanio;
+    }
+
+    public void setTamanio(int tamanio) {
+        this.tamanio = tamanio;
+    }
+
     @Override
     public String toString() {
-        return "NaveDTO{" + "estado=" + estado + ", orientacion=" + orientacion + ", tipo=" + tipo + '}';
+        return "NaveDTO{" + "estado=" + estado + ", orientacion=" + orientacion + ", tipo=" + tipo + ", tamanio=" + tamanio + '}';
     }
     
 }

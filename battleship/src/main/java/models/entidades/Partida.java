@@ -9,6 +9,7 @@ import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
 import models.enums.OrientacionNave;
+import models.enums.ResultadoAddNave;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
 
@@ -125,7 +126,22 @@ public class Partida implements IModeloServidor {
     }
 
     @Override
-    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+    public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+        if (jugador == null || jugador.getNombre() == null || jugador.getNombre().isBlank()) {
+            System.out.println("Error: Informacion insuficiente del Jugador.");
+            return ResultadoAddNave.JUGADOR_NULL;
+        }
+        
+        if (nave == null) {
+            System.out.println("Error: Informacion insuficiente de la Nave");
+            return ResultadoAddNave.NAVE_NULL;
+        }
+        
+        if (coordenadas == null || coordenadas.isEmpty()) {
+            System.out.println("Error: Informacion insuficiente de las Coordenadas");
+            return ResultadoAddNave.COORDENADAS_NULL;
+        }
+
         // Verificar que el jugador existe.
         Jugador j = jugadores.stream()
                 .filter(e -> e.getNombre().equals(jugador.getNombre()))
@@ -134,13 +150,13 @@ public class Partida implements IModeloServidor {
 
         if (j == null) {
             System.out.println("Error: No se encontro al Jugador.");
-            return false;
+            return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
         }
         
         // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
         if (coordenadas.size() != nave.getTamanio()) {
             System.out.println("Error: Coordenadas extra para la nave.");
-            return false;
+            return ResultadoAddNave.COORDENADAS_EXTRA;
         }
         
         // Verificar que las coordenadas no se salen del limite del tablero.
@@ -149,7 +165,7 @@ public class Partida implements IModeloServidor {
             if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY() ||
                     coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
                 System.out.println("Error: La nave se sale de los limites del tablero.");
-                return false;
+                return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
             }
         }
         
@@ -159,7 +175,7 @@ public class Partida implements IModeloServidor {
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getY() != y) {
                     System.out.println("Error: La nave no esta ordenada Verticalmente");
-                    return false;
+                    return ResultadoAddNave.NO_ORDENADA_VERTICLMENTE;
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
@@ -167,7 +183,7 @@ public class Partida implements IModeloServidor {
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getX() != x) {
                     System.out.println("Error: La nave no esta ordenada Horizontalmente.");
-                    return false;
+                    return ResultadoAddNave.NO_ORDENADA_HORIZONTALMENTE;
                 }
             }
         }
@@ -184,7 +200,7 @@ public class Partida implements IModeloServidor {
                 }
                 if (coordenadas.get(i - 1).getX() != coordenadas.get(i).getX() - 1) {
                     System.out.println("Error: Coordenas no consecutivas en 'X'");
-                    return false;
+                    return ResultadoAddNave.NO_CONSECUTIVO_X;
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
@@ -194,7 +210,7 @@ public class Partida implements IModeloServidor {
                 }
                 if (coordenadas.get(i - 1).getY() != coordenadas.get(i).getY() - 1) {
                     System.out.println("Error: Coordenas no consecutivas en 'Y'");
-                    return false;
+                    return ResultadoAddNave.NO_CONSECUTIVO_Y;
                 }
             }
         }
@@ -209,7 +225,7 @@ public class Partida implements IModeloServidor {
                         if (n != null) {
                             if (n != nave) {
                                 System.out.println("Error: Nave encima de otra.");
-                                return false;
+                                return ResultadoAddNave.ESPACIO_YA_OCUPADO;
                             }
                         }
                     }
@@ -220,7 +236,7 @@ public class Partida implements IModeloServidor {
         t.addNave(nave, coordenadas);
         j.getNaves().add(nave);
 
-        return true;
+        return ResultadoAddNave.NAVE_AÑADIDA;
     }
 
     // Caso de Uso: Unirse Partida

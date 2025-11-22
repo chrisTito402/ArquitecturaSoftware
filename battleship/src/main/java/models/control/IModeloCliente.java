@@ -2,11 +2,12 @@ package models.control;
 
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.entidades.Nave;
 import java.util.List;
 import models.observador.ISuscriptor;
+import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 
 /**
  *
@@ -15,7 +16,7 @@ import views.DTOs.JugadorDTO;
 public interface IModeloCliente {
     
     public DisparoDTO realizarDisparo(Coordenadas coordenadas);
-    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+    public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
     public void crearTableros();
     public void suscribirAPartida(ISuscriptor suscriptor);

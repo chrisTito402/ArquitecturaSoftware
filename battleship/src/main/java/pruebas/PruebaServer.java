@@ -101,7 +101,12 @@ public class PruebaServer {
 //        Gson gson = new Gson();
 //        String json = gson.toJson(m);
 //        cliente.enviarMensaje(json);
-        
+
+//        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "ADD_NAVE", null, "1");
+//        Gson gson = new Gson();
+//        String json = gson.toJson(m);
+//        cliente.enviarMensaje(json);
+
         List<Coordenadas> cords = new ArrayList<>();
         cords.add(
                 new Coordenadas(2, 1)
