@@ -60,4 +60,16 @@ public class Tablero {
         return true;
     }
 
+    public Casilla[][] getCasillas() {
+        return casillas;
+    }
+
+    public int getLimiteX() {
+        return limiteX;
+    }
+
+    public int getLimiteY() {
+        return limiteY;
+    }
+
 }

@@ -1,5 +1,6 @@
 package models.entidades;
 
+import java.util.Comparator;
 import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
@@ -7,6 +8,7 @@ import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import models.enums.OrientacionNave;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
 
@@ -129,18 +131,60 @@ public class Partida implements IModeloServidor {
 
     @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        Jugador j = jugadores.stream().filter(e -> e.getNombre() == jugador.getNombre())
+        // Verificar que el jugador existe.
+        Jugador j = jugadores.stream().filter(e -> e.getNombre().equals(jugador.getNombre()))
                 .findFirst()
                 .orElse(null);
 
+        if (j == null) {
+            return false;
+        }
+        
+        // Verificar que las coordenadas no se salen del limite del tablero.
         Tablero t = j.getTablero();
+        for (Coordenadas coordenada : coordenadas) {
+            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY() ||
+                    coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
+                return false;
+            }
+        }
+        
+        // Verificar que todas las coordenas esten con la misma orientacion.
+        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
+            int y = coordenadas.getFirst().getY();
+            for (Coordenadas coordenada : coordenadas) {
+                if (coordenada.getY() != y) {
+                    return false;
+                }
+            }
+        } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
+            int x = coordenadas.getFirst().getX();
+            for (Coordenadas coordenada : coordenadas) {
+                if (coordenada.getX() != x) {
+                    return false;
+                }
+            }
+        }
+        
+        // Ordenar lista por "X" y "Y".
+        coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
+              .thenComparingInt(Coordenadas::getY));
+        
+        // Verificar que no haya una nave en las coordenadas seleccionadas o alrededor de estas.
+        Casilla[][] casillas = j.getTablero().getCasillas();
+        
+        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
+            for (int i = 0; i < nave.getTamanio(); i++) {
+            }
+        }
+        
         t.addNave(nave, coordenadas);
         j.getNaves().add(nave);
 
         // Provisional
         turno = j;
 
-        return false;
+        return true;
     }
 
     @Override

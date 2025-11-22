@@ -37,5 +37,9 @@ public abstract class Nave {
     public EstadoNave getEstado() {
         return estado;
     }
+
+    public OrientacionNave getOrientacion() {
+        return orientacion;
+    }
     
 }
