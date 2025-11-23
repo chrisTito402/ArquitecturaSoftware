@@ -7,5 +7,5 @@ package buseventos;
 public enum TipoAccion {
     PUBLICAR,
     SUSCRIBIR,
-    
+    SEND_UNICAST
 }

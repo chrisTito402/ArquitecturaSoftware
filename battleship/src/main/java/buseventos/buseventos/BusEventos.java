@@ -15,6 +15,8 @@ import java.util.Set;
 public class BusEventos {
     
     private Map<String, Set<UserServerThread>> eventos;
+    private Map<Integer, UserServerThread> idClientes;
+    private Map<UserServerThread, Integer> clienteIds;
 
     public BusEventos(Map mapa) {
         this.eventos = mapa;
@@ -55,5 +57,9 @@ public class BusEventos {
                 users.remove(user);
             }
         }
+    }
+    
+    public void addCliente() {
+        
     }
 }
