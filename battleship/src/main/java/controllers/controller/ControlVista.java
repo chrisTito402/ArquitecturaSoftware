@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -26,10 +27,10 @@ import views.frames.TimerPanel;
  *
  * @author daniel
  */
-public class ControlVista implements ISuscriptor{
-    
+public class ControlVista implements ISuscriptor {
+
     private static ControlVista controlVista;
-    
+
     private IControlador control;
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
@@ -39,13 +40,19 @@ public class ControlVista implements ISuscriptor{
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
+        manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
     }
-    
+
     public static ControlVista getInstancia() {
         if (controlVista == null) {
             controlVista = new ControlVista();
         }
         return controlVista;
+    }
+
+    
+    public IControlador getControl() {
+        return this.control;
     }
 
     public List<CasillaPanel> getCasillasPropias() {
@@ -67,29 +74,29 @@ public class ControlVista implements ISuscriptor{
     public void setTimer(TimerPanel timer) {
         this.timer = timer;
     }
-    
+
     public void realizarDisparo(Coordenadas c) {
         control.realizarDisparo(c);
     }
-    
+
     private Component getCasillaPropia(Coordenadas c) {
         Component cP = casillasPropias.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
                 && e.getCoordenadas().getY() == c.getY())
                 .findFirst()
                 .orElse(null);
-        
+
         return cP;
     }
-    
-    private Component getCasillaEnemiga(Coordenadas c) {  
+
+    private Component getCasillaEnemiga(Coordenadas c) {
         Component cB = casillasEnemigas.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
                 && e.getCoordenadas().getY() == c.getY())
                 .findFirst()
                 .orElse(null);
-        
+
         return cB;
     }
-    
+
     @Override
     public void notificar(String contexto, Object datos) {
         if (datos == null) {
@@ -99,28 +106,28 @@ public class ControlVista implements ISuscriptor{
             manejadoresNoti.get(contexto).accept(datos);
         }
     }
-    
+
     private void manejarDisparo(Object datos) {
         if (!(datos instanceof DisparoDTO)) {
             System.out.println("Los datos no son un objeto DisparoDTO");
             return;
         }
-        
+
         // Reiniciar Temporizador
         timer.initTimer();
-        
+
         DisparoDTO d = (DisparoDTO) datos;
         Coordenadas c = d.getCoordenadas();
-        
+
         JugadorDTO jugador = control.getJugador();
-        
+
         Component componente;
         if (d.getJugador().getNombre().equals(jugador.getNombre())) {
             componente = getCasillaEnemiga(d.getCoordenadas());
         } else {
             componente = getCasillaPropia(d.getCoordenadas());
         }
-        
+
         if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
             componente.setBackground(Color.YELLOW);
         }
@@ -130,21 +137,35 @@ public class ControlVista implements ISuscriptor{
         if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
             componente.setBackground(Color.BLUE);
         }
-        
+
         System.out.println(c.getX() + " " + c.getY());
-        
+
         System.out.println(d.getResultadoDisparo().toString());
-        
+
         if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
         }
     }
-    
+
+    private void manejarAbandono(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null,
+                "El jugador " + dto.getNombre() + " abandonó la partida.");
+
+        // Deshabilitar tablero enemigo
+        casillasEnemigas.forEach(c -> c.setEnabled(false));
+
+        // Detener cronómetro
+        timer.stopTimer();
+
+        // Aquí puedes regresar al menú o cerrar ventana
+    }
+
     public void initTableroPropio() {
         casillasPropias = new ArrayList<>();
-        
+
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
@@ -155,10 +176,10 @@ public class ControlVista implements ISuscriptor{
             }
         }
     }
-    
+
     public void initTableroEnemigo() {
         casillasEnemigas = new ArrayList<>();
-        
+
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 Coordenadas coordenadas = new Coordenadas(i, j);
@@ -175,48 +196,48 @@ public class ControlVista implements ISuscriptor{
             }
         }
     }
-    
+
     public void crearPartida(Jugador j) {
         control.crearPartida(j);
     }
-    
+
     public void addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         boolean resultado = control.addNave(jugador, nave, coordenadas);
         if (!resultado) {
             System.out.println("No se pudo agregar la Nave.");
         }
     }
-    
+
     public void addJugador(Jugador j) {
         control.addJugador(j);
     }
-    
+
     public void crearTableros() {
         control.crearTableros();
     }
-    
+
     public void suscribirAModelo() {
         control.suscribirAPartida(this);
     }
-    
+
     public void mostrarFrmPartidaEnCurso() {
         new FrmPartidaEnCurso().setVisible(true);
         timer.initTimer();
     }
-    
+
     // Caso de Uso: Unirse Partida
     public void unirsePartida(Jugador jugador) {
         control.unirsePartida(jugador);
     }
-    
+
     public void empezarPartida() {
         control.empezarPartida();
     }
-    
+
     public void abandonarLobby(Jugador jugador) {
         control.abandonarLobby(jugador);
     }
-    
+
     public List<Jugador> getJugadores() {
         return control.getJugadores();
     }
