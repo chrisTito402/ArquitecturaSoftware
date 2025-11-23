@@ -19,5 +19,5 @@ public interface IModeloServidor {
     // Caso de Uso: Unirse Partida
     public void unirsePartida(Jugador jugador);
     public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
+    public void abandonarPartida(Jugador jugadorQueSeVa);
 }

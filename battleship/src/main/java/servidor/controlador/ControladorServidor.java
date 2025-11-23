@@ -37,36 +37,36 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         this.servidor = servidor;
         this.cliente = cliente;
         this.manejadoresEventos = mapa;
-        
+
         mapa.put("DISPARO", this::realizarDisparo);
         mapa.put("ADD_NAVE", this::addNave);
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        mapa.put("ABANDONO_PARTIDA", this::manejarAbandonarPartidaSv);
+        mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
     }
-    
+
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
         Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), null);
         String json = gson.toJson(mensaje);
-        
+
         cliente.enviarMensaje(json);
     }
-    
+
     // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
-        
+
         manejadoresEventos.get(mensaje.getEvento()).accept(mensaje);
-        
+
     }
-    
+
     private void addNave(Mensaje mensaje) {
         Gson gson = new Gson();
         AddNaveDTO dto = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
-        
+
         List<Coordenadas> coordenadas = dto.getCoordenadases();
         JugadorDTO jugadorDTO = dto.getJugador();
         Jugador jugador = new Jugador(
@@ -76,25 +76,31 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         );
         NaveDTO naveDTO = dto.getNave();
         Nave nave = null;
-        
-        if (null != naveDTO.getTipo()) switch (naveDTO.getTipo()) {
-            case BARCO -> nave = new Barco(naveDTO.getOrientacion());
-            case SUBMARINO -> nave = new Submarino(naveDTO.getOrientacion());
-            case CRUCERO -> nave = new Crucero(naveDTO.getOrientacion());
-            case PORTAAVIONES -> nave = new PortaAviones(naveDTO.getOrientacion());
-            default -> {
+
+        if (null != naveDTO.getTipo()) {
+            switch (naveDTO.getTipo()) {
+                case BARCO ->
+                    nave = new Barco(naveDTO.getOrientacion());
+                case SUBMARINO ->
+                    nave = new Submarino(naveDTO.getOrientacion());
+                case CRUCERO ->
+                    nave = new Crucero(naveDTO.getOrientacion());
+                case PORTAAVIONES ->
+                    nave = new PortaAviones(naveDTO.getOrientacion());
+                default -> {
+                }
             }
         }
-        
+
         ResultadoAddNave resultado = servidor.addNave(jugador, nave, coordenadas);
-        
+
         enviarMensaje("RESULTADO_ADD_NAVE", resultado);
     }
-    
+
     private void realizarDisparo(Mensaje mensaje) {
         Gson gson = new Gson();
         DisparoDTO disparoDTO = gson.fromJson(mensaje.getData(), DisparoDTO.class);
-        
+
         Coordenadas coordenadas = disparoDTO.getCoordenadas();
         JugadorDTO jugadorDTO = disparoDTO.getJugador();
         Jugador jugador = new Jugador(
@@ -102,35 +108,47 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
                 jugadorDTO.getColor(),
                 jugadorDTO.getEstado()
         );
-        
+
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
-        
+
         DisparoDTO resultado = new DisparoDTO(
                 new JugadorDTO(
-                        disparo.getJugador().getNombre(), 
-                        disparo.getJugador().getColor(), 
-                        disparo.getJugador().getEstado()), 
-                disparo.getCoordenadas(), 
-                disparo.getResultadoDisparo(), 
+                        disparo.getJugador().getNombre(),
+                        disparo.getJugador().getColor(),
+                        disparo.getJugador().getEstado()),
+                disparo.getCoordenadas(),
+                disparo.getResultadoDisparo(),
                 disparo.getEstadoPartida()
         );
         enviarMensaje("RESULTADO_DISPARO", resultado);
     }
-    
+
     private void manejarUnirsePartida(Mensaje mensaje) {
         //unicamente para pruebas este print v
         System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");
-        
+
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
     }
-    
-    private void manejarAbandonarPartidaSv(Mensaje mensaje){
-        Gson g = new Gson();
-        JugadorDTO jugador = g.fromJson(mensaje.getData(), JugadorDTO.class);
-        enviarMensaje("ABANDONO", jugador);
+
+    //Recibe el mensaje enviado por el cliente
+    private void manejarAbandonarPartidaSv(Mensaje mensaje) {
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+
+        // Convertir DTO a entidad real
+        Jugador jugador = new Jugador(
+                jugadorDTO.getNombre(),
+                jugadorDTO.getColor(),
+                jugadorDTO.getEstado()
+        );
+
+        // 1. Lógica REAL del servidor
+        servidor.abandonarPartida(jugador);
+
+        // 2. Notificar al otro jugador
+        enviarMensaje("JUGADOR_ABANDONO", jugadorDTO);
     }
-    
-    
+
 }

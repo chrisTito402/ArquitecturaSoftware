@@ -8,6 +8,7 @@ import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import models.enums.EstadoJugador;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
 import servidor.cronometro.ICronometro;
@@ -42,7 +43,7 @@ public class Partida implements IModeloServidor {
         this.estado = estado;
         this.suscriptores = suscriptores;
         this.cronometro = cronometro;
-        
+
         // PROVISIONAL para simular cuando empieza la patida
         cronometro.initCronometro();
     }
@@ -60,7 +61,7 @@ public class Partida implements IModeloServidor {
         System.out.println("SE CAMBIO EL TURNO");
         return true;
     }
-    
+
     public List<Jugador> getJugadores() {
         return jugadores;
     }
@@ -82,7 +83,7 @@ public class Partida implements IModeloServidor {
             disparo = new Disparo(jugador, coordenadas, ResultadoDisparo.TURNO_INCORRECTO, estado);
             return disparo;
         }
-        
+
         cronometro.setProcesandoDisparo(true);
         // Verificar el Cronometro
         if (!cronometro.isInTime(tiempo)) {
@@ -96,12 +97,12 @@ public class Partida implements IModeloServidor {
         Jugador j2 = jugadores.stream().filter(e -> e != turno)
                 .findFirst()
                 .orElse(null);
-        
+
         if (j2 == null) {
             System.out.println("Error, no se encontró al oponente.");
             return null;
         }
-        
+
         //Disparo del jugador actual
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
@@ -131,12 +132,12 @@ public class Partida implements IModeloServidor {
             System.out.println("Error: Informacion insuficiente del Jugador.");
             return ResultadoAddNave.JUGADOR_NULL;
         }
-        
+
         if (nave == null) {
             System.out.println("Error: Informacion insuficiente de la Nave");
             return ResultadoAddNave.NAVE_NULL;
         }
-        
+
         if (coordenadas == null || coordenadas.isEmpty()) {
             System.out.println("Error: Informacion insuficiente de las Coordenadas");
             return ResultadoAddNave.COORDENADAS_NULL;
@@ -152,23 +153,23 @@ public class Partida implements IModeloServidor {
             System.out.println("Error: No se encontro al Jugador.");
             return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
         }
-        
+
         // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
         if (coordenadas.size() != nave.getTamanio()) {
             System.out.println("Error: Coordenadas extra para la nave.");
             return ResultadoAddNave.COORDENADAS_EXTRA;
         }
-        
+
         // Verificar que las coordenadas no se salen del limite del tablero.
         Tablero t = j.getTablero();
         for (Coordenadas coordenada : coordenadas) {
-            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY() ||
-                    coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
+            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY()
+                    || coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
                 System.out.println("Error: La nave se sale de los limites del tablero.");
                 return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
             }
         }
-        
+
         // Verificar que todas las coordenas esten con la misma orientacion.
         if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
             int y = coordenadas.getFirst().getY();
@@ -187,11 +188,11 @@ public class Partida implements IModeloServidor {
                 }
             }
         }
-        
+
         // Ordenar lista por "X" y "Y".
         coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
-              .thenComparingInt(Coordenadas::getY));
-        
+                .thenComparingInt(Coordenadas::getY));
+
         // Verificar que cada Coordenada este consecutiva de la otra.
         if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
             for (int i = coordenadas.size() - 1; i >= 0; i--) {
@@ -214,7 +215,7 @@ public class Partida implements IModeloServidor {
                 }
             }
         }
-        
+
         // Verificar que no haya una nave en las coordenadas seleccionadas o alrededor de estas.
         Casilla[][] casillas = t.getCasillas();
         for (Coordenadas c : coordenadas) {
@@ -232,7 +233,7 @@ public class Partida implements IModeloServidor {
                 }
             }
         }
-        
+
         t.addNave(nave, coordenadas);
         j.getNaves().add(nave);
 
@@ -272,10 +273,9 @@ public class Partida implements IModeloServidor {
 
         // Cambiar estado
         estado = EstadoPartida.EN_CURSO;
-        
+
         // Crear tableros
 //        this.crearTableros();
-        
         // Asignar turno inicial (jugador 0)
         turno = jugadores.get(0);
 
@@ -285,12 +285,49 @@ public class Partida implements IModeloServidor {
     }
 
     @Override
-    public void abandonarLobby(Jugador jugador) {
-        // Quitar al jugador que se va
-        jugadores.remove(jugador);
+    public void abandonarPartida(Jugador jugadorQueSeVa) {
 
-        // Notificar
-        System.out.println(jugador.getNombre() + " abandonó el lobby.");
-//        notificarAllSuscriptores("JUGADOR_ABANDONO", jugador);
+        System.out.println("Servidor: " + jugadorQueSeVa.getNombre() + " abandonó la partida.");
+
+        // 1. Marcar su estado como ABANDONO
+        jugadorQueSeVa.setEstado(EstadoJugador.ABANDONO);
+
+        // 2. Eliminar al jugador de la lista
+        jugadores.removeIf(j -> j.getNombre().equals(jugadorQueSeVa.getNombre()));
+
+        // 3. Si queda un jugador -> ese gana automáticamente
+        if (jugadores.size() == 1) {
+            Jugador ganador = jugadores.get(0);
+
+            // El ganador sigue en estado "JUGANDO" (no tienes estado GANADOR)
+            ganador.setEstado(EstadoJugador.JUGANDO);
+
+            estado = EstadoPartida.FINALIZADA;
+
+            System.out.println("Servidor: " + ganador.getNombre() + " gana por abandono.");
+
+            // Detener el cronómetro si existe
+            try {
+                cronometro.stop();
+            } catch (Exception e) {
+            }
+
+            return;
+        }
+
+        // 4. Si no queda nadie -> resetear la partida
+        if (jugadores.isEmpty()) {
+            estado = EstadoPartida.POR_EMPEZAR;
+
+            System.out.println("Servidor: no quedan jugadores, partida reseteada.");
+
+            try {
+                cronometro.stop();
+            } catch (Exception e) {
+            }
+
+            return;
+        }
     }
+
 }
