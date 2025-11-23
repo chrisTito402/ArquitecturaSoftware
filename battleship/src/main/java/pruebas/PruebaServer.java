@@ -112,7 +112,7 @@ public class PruebaServer {
                 new Coordenadas(2, 1)
         );
         cords.add(
-                new Coordenadas(4, 1)
+                new Coordenadas(3, 1)
         );
         
         System.out.println("ADD NAVE: " + p.addNave(
