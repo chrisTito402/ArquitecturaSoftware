@@ -178,10 +178,10 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         Jugador nuevoJugador = builder.getResult();
         this.controlador.unirsePartida(nuevoJugador);
         
-        FrmLobby lobby = new FrmLobby();
-        lobby.setLocationRelativeTo(this);
-        lobby.setVisible(true);
-        this.dispose();
+//        FrmLobby lobby = new FrmLobby(ControlVista cv);
+//        lobby.setLocationRelativeTo(this);
+//        lobby.setVisible(true);
+//        this.dispose();
     }//GEN-LAST:event_btnContinuarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed

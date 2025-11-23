@@ -1,23 +1,44 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package views.frames;
+
+import buseventos.buseventos.BusEventos;
+import buseventos.servidorsocket.ServidorSocket;
+import clientesocket.ClienteSocket;
+import controllers.controller.ControlVista;
+import controllers.controller.Controlador;
+import java.util.HashMap;
+import models.control.ControlModelo;
 
 /**
  *
  * @author Knocmare
  */
 public class FrmMenuPrincipal extends javax.swing.JFrame {
-    
-    
-    
+
+    private static boolean iniciado = false;
+
+    ControlVista cv = ControlVista.getInstancia();
+    ControlModelo cm;
+    Controlador c;
+
+    ClienteSocket cliente;
+
     /**
      * Creates new form FrmMenuPrincipal
      */
     public FrmMenuPrincipal() {
         initComponents();
     }
+
+//    private void server() {
+//        if (!iniciado) {
+//            BusEventos bus = new BusEventos(new HashMap());
+//            ServidorSocket server = new ServidorSocket(5000, bus);
+//            server.start();
+//            iniciado = true;
+//        } else {
+//            System.out.println("Servidor ya estaba escuchando en el puerto");
+//        }
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -51,12 +72,27 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
         btnJugador.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnJugador.setText("Jugador");
+        btnJugador.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnJugadorActionPerformed(evt);
+            }
+        });
 
         btnPuntaje.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnPuntaje.setText("Puntaje");
+        btnPuntaje.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPuntajeActionPerformed(evt);
+            }
+        });
 
         btnSalir.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlCambianteLayout = new javax.swing.GroupLayout(pnlCambiante);
         pnlCambiante.setLayout(pnlCambianteLayout);
@@ -104,12 +140,23 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
-        // TODO add your handling code here:
         FrmRegistrarJugador r = new FrmRegistrarJugador();
         r.setLocationRelativeTo(this);
         r.setVisible(true);
         dispose();
     }//GEN-LAST:event_btnJugarActionPerformed
+
+    private void btnJugadorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugadorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnJugadorActionPerformed
+
+    private void btnPuntajeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPuntajeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnPuntajeActionPerformed
+
+    private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSalirActionPerformed
 
     /**
      * @param args the command line arguments

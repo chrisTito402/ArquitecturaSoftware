@@ -1,18 +1,48 @@
 package views.frames;
 
+import controllers.controller.ControlVista;
+import java.awt.Color;
+import java.util.List;
+import models.entidades.Jugador;
+import models.entidades.Partida;
+
 /**
  *
  * @author Knocmare
  */
 public class FrmLobby extends javax.swing.JFrame {
-
+    
+    Partida p;
+    List<Jugador> jugadores;
+    
     /**
      * Creates new form FrmLobby
      */
-    public FrmLobby() {
+    public FrmLobby(Partida p) {
+        this.p = p;
         initComponents();
+        cargarLobby();
     }
-
+    
+    private void cargarLobby() {
+        jugadores = p.getJugadores();
+        
+        if (jugadores.size() > 1) {
+            // Jugador 1
+            lblJugadorUno.setText(jugadores.getFirst().getNombre());
+            pnlEstadoUno.setBackground(Color.green);
+            // Jugador 2
+            lblJugadorDos.setText(jugadores.getLast().getNombre());
+            pnlEstadoDos.setBackground(Color.green);
+        } else {
+            // Jugador 1
+            lblJugadorUno.setText(jugadores.getFirst().getNombre());
+            pnlEstadoUno.setBackground(Color.green);
+            // Jugador 2
+            lblJugadorDos.setText("(Buscando)");
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -24,44 +54,98 @@ public class FrmLobby extends javax.swing.JFrame {
 
         pnlFondo = new javax.swing.JPanel();
         pnlJugadorUno = new javax.swing.JPanel();
+        lblJugadorUno = new javax.swing.JLabel();
+        pnlEstadoUno = new javax.swing.JPanel();
         pnlJugadorDos = new javax.swing.JPanel();
-        btnEmpezar = new javax.swing.JButton();
+        lblJugadorDos = new javax.swing.JLabel();
+        pnlEstadoDos = new javax.swing.JPanel();
         btnRegresar = new javax.swing.JButton();
+        btnEmpezar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
         pnlFondo.setBackground(new java.awt.Color(255, 255, 255));
 
+        pnlJugadorUno.setBackground(new java.awt.Color(255, 255, 255));
+        pnlJugadorUno.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        lblJugadorUno.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        lblJugadorUno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblJugadorUno.setText("JUGADOR 1");
+
+        pnlEstadoUno.setBackground(new java.awt.Color(255, 0, 0));
+
+        javax.swing.GroupLayout pnlEstadoUnoLayout = new javax.swing.GroupLayout(pnlEstadoUno);
+        pnlEstadoUno.setLayout(pnlEstadoUnoLayout);
+        pnlEstadoUnoLayout.setHorizontalGroup(
+            pnlEstadoUnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        pnlEstadoUnoLayout.setVerticalGroup(
+            pnlEstadoUnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout pnlJugadorUnoLayout = new javax.swing.GroupLayout(pnlJugadorUno);
         pnlJugadorUno.setLayout(pnlJugadorUnoLayout);
         pnlJugadorUnoLayout.setHorizontalGroup(
             pnlJugadorUnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 334, Short.MAX_VALUE)
+            .addComponent(lblJugadorUno, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(pnlJugadorUnoLayout.createSequentialGroup()
+                .addGap(103, 103, 103)
+                .addComponent(pnlEstadoUno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(107, Short.MAX_VALUE))
         );
         pnlJugadorUnoLayout.setVerticalGroup(
             pnlJugadorUnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 290, Short.MAX_VALUE)
+            .addGroup(pnlJugadorUnoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblJugadorUno)
+                .addGap(48, 48, 48)
+                .addComponent(pnlEstadoUno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(72, Short.MAX_VALUE))
+        );
+
+        pnlJugadorDos.setBackground(new java.awt.Color(255, 255, 255));
+        pnlJugadorDos.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        lblJugadorDos.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        lblJugadorDos.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblJugadorDos.setText("JUGADOR 2");
+
+        pnlEstadoDos.setBackground(new java.awt.Color(255, 0, 0));
+
+        javax.swing.GroupLayout pnlEstadoDosLayout = new javax.swing.GroupLayout(pnlEstadoDos);
+        pnlEstadoDos.setLayout(pnlEstadoDosLayout);
+        pnlEstadoDosLayout.setHorizontalGroup(
+            pnlEstadoDosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        pnlEstadoDosLayout.setVerticalGroup(
+            pnlEstadoDosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout pnlJugadorDosLayout = new javax.swing.GroupLayout(pnlJugadorDos);
         pnlJugadorDos.setLayout(pnlJugadorDosLayout);
         pnlJugadorDosLayout.setHorizontalGroup(
             pnlJugadorDosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 334, Short.MAX_VALUE)
+            .addComponent(lblJugadorDos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlJugadorDosLayout.createSequentialGroup()
+                .addContainerGap(108, Short.MAX_VALUE)
+                .addComponent(pnlEstadoDos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(102, 102, 102))
         );
         pnlJugadorDosLayout.setVerticalGroup(
             pnlJugadorDosLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 290, Short.MAX_VALUE)
+            .addGroup(pnlJugadorDosLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblJugadorDos)
+                .addGap(48, 48, 48)
+                .addComponent(pnlEstadoDos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(72, Short.MAX_VALUE))
         );
-
-        btnEmpezar.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        btnEmpezar.setText("Empezar");
-        btnEmpezar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEmpezarActionPerformed(evt);
-            }
-        });
 
         btnRegresar.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnRegresar.setText("Regresar");
@@ -71,54 +155,52 @@ public class FrmLobby extends javax.swing.JFrame {
             }
         });
 
+        btnEmpezar.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnEmpezar.setText("Empezar");
+        btnEmpezar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEmpezarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlFondoLayout = new javax.swing.GroupLayout(pnlFondo);
         pnlFondo.setLayout(pnlFondoLayout);
         pnlFondoLayout.setHorizontalGroup(
             pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFondoLayout.createSequentialGroup()
-                .addGap(97, 97, 97)
-                .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlJugadorUno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnEmpezar, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
+                .addContainerGap(145, Short.MAX_VALUE)
+                .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlJugadorUno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEmpezar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(80, 80, 80)
                 .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlJugadorDos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnRegresar, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(97, 97, 97))
+                    .addComponent(btnRegresar, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(145, 145, 145))
         );
         pnlFondoLayout.setVerticalGroup(
             pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFondoLayout.createSequentialGroup()
-                .addGap(43, 43, 43)
-                .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(86, 86, 86)
+                .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlJugadorUno, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(pnlJugadorDos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(42, 42, 42)
+                .addGap(34, 34, 34)
                 .addGroup(pnlFondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnEmpezar)
-                    .addComponent(btnRegresar))
-                .addContainerGap(45, Short.MAX_VALUE))
+                    .addComponent(btnRegresar)
+                    .addComponent(btnEmpezar))
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 994, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(pnlFondo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+            .addComponent(pnlFondo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 452, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(pnlFondo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 0, Short.MAX_VALUE)))
+            .addComponent(pnlFondo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -137,6 +219,10 @@ public class FrmLobby extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEmpezar;
     private javax.swing.JButton btnRegresar;
+    private javax.swing.JLabel lblJugadorDos;
+    private javax.swing.JLabel lblJugadorUno;
+    private javax.swing.JPanel pnlEstadoDos;
+    private javax.swing.JPanel pnlEstadoUno;
     private javax.swing.JPanel pnlFondo;
     private javax.swing.JPanel pnlJugadorDos;
     private javax.swing.JPanel pnlJugadorUno;

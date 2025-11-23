@@ -25,7 +25,6 @@ public interface IControlador {
     public void unirsePartida(Jugador jugador);
     public void empezarPartida();
     public void abandonarLobby(Jugador jugador);
+    public List<Jugador> getJugadores();
     
-    
-
 }

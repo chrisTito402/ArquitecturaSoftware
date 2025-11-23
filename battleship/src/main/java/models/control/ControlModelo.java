@@ -106,10 +106,14 @@ public class ControlModelo implements IModeloCliente {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
     }
+    
+    @Override
+    public List<Jugador> getJugadores() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 
     @Override
     public JugadorDTO getJugador() {
         return jugador;
     }
-
 }

@@ -133,6 +133,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente{
     public void abandonarLobby(Jugador jugador) {
         partida.abandonarLobby(jugador);
     }
+    
+    @Override
+    public List<Jugador> getJugadores() {
+        return partida.getJugadores();
+    }
 
     @Override
     public JugadorDTO getJugador() {

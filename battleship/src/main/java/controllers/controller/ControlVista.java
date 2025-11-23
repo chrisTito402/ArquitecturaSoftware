@@ -216,4 +216,8 @@ public class ControlVista implements ISuscriptor{
     public void abandonarLobby(Jugador jugador) {
         control.abandonarLobby(jugador);
     }
+    
+    public List<Jugador> getJugadores() {
+        return control.getJugadores();
+    }
 }
