@@ -15,6 +15,7 @@ public class Jugador {
     private List<Nave> naves;
     private Tablero tablero;
     private EstadoJugador estado;
+    private Puntaje puntaje;
 
     public Jugador(String nombre, ColorJugador color, List<Nave> naves, Tablero tablero, EstadoJugador estado) {
         this.nombre = nombre;
@@ -22,14 +23,25 @@ public class Jugador {
         this.naves = naves;
         this.tablero = tablero;
         this.estado = estado;
+        this.puntaje = new Puntaje();
     }
+
 
     public Jugador(String nombre, ColorJugador color, EstadoJugador estado) {
         this.nombre = nombre;
         this.color = color;
         this.estado = estado;
+        this.puntaje = new Puntaje();
     }
 
+    public Puntaje getPuntaje() {
+        return puntaje;
+    }
+
+    public void setPuntaje(Puntaje puntaje) {
+        this.puntaje = puntaje;
+    }
+    
     public String getNombre() {
         return nombre;
     }

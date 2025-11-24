@@ -15,6 +15,7 @@ import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.entidades.PortaAviones;
+import models.entidades.Puntaje;
 import models.entidades.Submarino;
 import models.enums.ResultadoAddNave;
 import servidor.modelo.IModeloServidor;
@@ -22,6 +23,7 @@ import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
+import views.DTOs.PuntajeDTO;
 
 /**
  *
@@ -111,6 +113,23 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
 
+        PuntajeDTO puntajeDTO = null;
+        Jugador jugadorConPuntaje = servidor.getJugadores().stream()
+                .filter(j -> j.getNombre().equals(jugador.getNombre()))
+                .findFirst()
+                .orElse(null);
+
+        if (jugadorConPuntaje != null && jugadorConPuntaje.getPuntaje() != null) {
+            Puntaje p = jugadorConPuntaje.getPuntaje();
+            puntajeDTO = new PuntajeDTO(
+                    p.getPuntosTotales(),
+                    p.getDisparosAcertados(),
+                    p.getDisparosFallados(),
+                    p.getNavesHundidas(),
+                    p.getPrecision()
+            );
+        }
+        
         DisparoDTO resultado = new DisparoDTO(
                 new JugadorDTO(
                         disparo.getJugador().getNombre(),
@@ -120,6 +139,9 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
                 disparo.getResultadoDisparo(),
                 disparo.getEstadoPartida()
         );
+
+        resultado.setPuntaje(puntajeDTO);
+
         enviarMensaje("RESULTADO_DISPARO", resultado);
     }
 

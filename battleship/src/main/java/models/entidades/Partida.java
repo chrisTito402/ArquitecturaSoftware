@@ -85,6 +85,7 @@ public class Partida implements IModeloServidor {
         }
 
         cronometro.setProcesandoDisparo(true);
+
         // Verificar el Cronometro
         if (!cronometro.isInTime(tiempo)) {
             cambiarTurno();
@@ -93,7 +94,7 @@ public class Partida implements IModeloServidor {
             return disparo;
         }
 
-        //Obtener al oponente
+        // Obtener al oponente
         Jugador j2 = jugadores.stream().filter(e -> e != turno)
                 .findFirst()
                 .orElse(null);
@@ -103,9 +104,22 @@ public class Partida implements IModeloServidor {
             return null;
         }
 
-        //Disparo del jugador actual
+        // Disparo del jugador actual
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
+
+        //Puntaje
+        Jugador jugadorActual = jugadores.stream()
+                .filter(e -> e.getNombre().equals(jugador.getNombre()))
+                .findFirst()
+                .orElse(null);
+
+        if (jugadorActual != null && jugadorActual.getPuntaje() != null) {
+            int puntosObtenidos = jugadorActual.getPuntaje().calcularPuntos(resultadoDisparo);
+            System.out.println("Jugador " + jugadorActual.getNombre()
+                    + " obtuvo " + puntosObtenidos + " puntos. "
+                    + "Total: " + jugadorActual.getPuntaje().getPuntosTotales());
+        }
 
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
             Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
@@ -116,6 +130,13 @@ public class Partida implements IModeloServidor {
             if (nave == null) {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
+
+                if (jugadorActual != null && jugadorActual.getPuntaje() != null) {
+                    jugadorActual.getPuntaje().sumarVictoria();
+                    System.out.println("Puntaje final de " + jugadorActual.getNombre()
+                            + ": " + jugadorActual.getPuntaje().getPuntosTotales());
+                }
+
                 disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
                 return disparo;
             }
