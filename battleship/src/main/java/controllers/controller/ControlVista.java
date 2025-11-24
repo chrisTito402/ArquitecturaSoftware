@@ -81,8 +81,13 @@ public class ControlVista implements ISuscriptor {
         return puntajePanel;
     }
 
-    public void setPuntajePanel(PuntajePanel puntajePanel) {
-        this.puntajePanel = puntajePanel;
+    public void setPuntajePanel(javax.swing.JPanel panel) {  //Para que acepte JPanel Generico
+        if (panel instanceof PuntajePanel) {
+            this.puntajePanel = (PuntajePanel) panel;
+            System.out.println("PuntajePanel registrado correctamente");
+        } else {
+            System.err.println("ERROR: El panel no es de tipo PuntajePanel");
+        }
     }
 
     public void realizarDisparo(Coordenadas c) {
@@ -160,7 +165,6 @@ public class ControlVista implements ISuscriptor {
             timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
             
-            // ========== NUEVO: MOSTRAR PUNTAJE FINAL ==========
             if (d.getPuntaje() != null) {
                 String mensaje = String.format(
                     "¡Partida terminada!\n\n" +

@@ -24,7 +24,9 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         Component a = pnlTimer.add(cV.getTimer());
         pnlTimer.revalidate();
         pnlTimer.repaint();
-
+        
+        cV.setPuntajePanel(pnlPuntaje);
+        
     }
     
     
@@ -43,6 +45,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTimer = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         btnAbandonar = new javax.swing.JButton();
+        pnlPuntaje = new views.frames.PuntajePanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -56,13 +59,24 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTimer.setMinimumSize(new java.awt.Dimension(100, 30));
         pnlTimer.setName(""); // NOI18N
         pnlTimer.setPreferredSize(new java.awt.Dimension(100, 30));
-        pnlTimer.setLayout(new java.awt.GridLayout());
+        pnlTimer.setLayout(new java.awt.GridLayout(1, 0));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Black", 2, 48)); // NOI18N
         jLabel1.setText("Battleship");
 
         btnAbandonar.setBackground(new java.awt.Color(204, 0, 51));
         btnAbandonar.setText("Abandonar partida");
+
+        javax.swing.GroupLayout pnlPuntajeLayout = new javax.swing.GroupLayout(pnlPuntaje);
+        pnlPuntaje.setLayout(pnlPuntajeLayout);
+        pnlPuntajeLayout.setHorizontalGroup(
+            pnlPuntajeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 168, Short.MAX_VALUE)
+        );
+        pnlPuntajeLayout.setVerticalGroup(
+            pnlPuntajeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 50, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -73,8 +87,10 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(160, 160, 160)
-                        .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlPuntaje, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(29, 29, 29)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 451, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -92,7 +108,8 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel1)
-                    .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlPuntaje, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -110,6 +127,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel pnlPuntaje;
     private javax.swing.JPanel pnlTimer;
     // End of variables declaration//GEN-END:variables
 }
