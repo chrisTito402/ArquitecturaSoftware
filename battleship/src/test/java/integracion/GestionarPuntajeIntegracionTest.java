@@ -1,8 +1,11 @@
 package integracion;
 
+import dtos.CoordenadasDTO;
 import dtos.DisparoDTO;
 import dtos.JugadorDTO;
 import dtos.PuntajeDTO;
+import dtos.enums.EstadoPartidaDTO;
+import dtos.enums.ResultadoDisparoDTO;
 import dtos.mappers.JugadorMapper;
 import dtos.mappers.PuntajeMapper;
 import models.builder.Director;
@@ -175,7 +178,7 @@ class GestionarPuntajeIntegracionTest {
 
             assertNotNull(dto);
             assertEquals("Jugador1", dto.getNombre());
-            assertEquals(ColorJugador.ROJO, dto.getColor());
+            assertEquals(dtos.enums.ColorJugadorDTO.ROJO, dto.getColor());
         }
 
         @Test
@@ -188,9 +191,9 @@ class GestionarPuntajeIntegracionTest {
 
             DisparoDTO disparoDTO = new DisparoDTO(
                     jugadorDTO,
-                    new Coordenadas(0, 0),
-                    ResultadoDisparo.IMPACTO,
-                    EstadoPartida.EN_CURSO
+                    new CoordenadasDTO(0, 0),
+                    ResultadoDisparoDTO.IMPACTO,
+                    EstadoPartidaDTO.EN_CURSO
             );
             disparoDTO.setPuntaje(puntajeDTO);
 

@@ -1,9 +1,9 @@
 package buseventos.buseventos;
 
+import buseventos.IBusEventos;
 import buseventos.IEventSuscriptor;
 import buseventos.Mensaje;
 import buseventos.TipoAccion;
-import buseventos.servidorsocket.UserServerThread;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BusEventos {
+public class BusEventos implements IBusEventos {
+
+    private static final Gson GSON = new Gson();
 
     private final Map<String, Set<IEventSuscriptor>> eventos;
     private final Map<String, IEventSuscriptor> suscriptoresPorId;
@@ -20,30 +22,32 @@ public class BusEventos {
         this.eventos = new ConcurrentHashMap<>();
         this.suscriptoresPorId = new ConcurrentHashMap<>();
     }
-    
-    private synchronized void publicar(String evento, Mensaje mensaje) {
+
+    @Override
+    public void publicar(String evento, Mensaje mensaje) {
         Set<IEventSuscriptor> suscriptores = eventos.get(evento);
         if (suscriptores == null || suscriptores.isEmpty()) {
             return;
         }
 
-        Gson gson = new Gson();
-        String jsonMensaje = gson.toJson(mensaje);
-
+        String jsonMensaje = GSON.toJson(mensaje);
         List<IEventSuscriptor> fallidos = new ArrayList<>();
 
-        suscriptores.forEach(suscriptor -> {
+        for (IEventSuscriptor suscriptor : suscriptores) {
             try {
                 suscriptor.recibirEvento(jsonMensaje);
             } catch (Exception e) {
+                System.err.println("[BusEventos] Error al enviar evento '" + evento
+                        + "' a suscriptor " + suscriptor.getSuscriptorId() + ": " + e.getMessage());
                 fallidos.add(suscriptor);
             }
-        });
+        }
 
         fallidos.forEach(this::removeSuscriptor);
     }
-    
-    public synchronized void suscribirse(String evento, IEventSuscriptor suscriptor) {
+
+    @Override
+    public void suscribirse(String evento, IEventSuscriptor suscriptor) {
         if (suscriptor == null) {
             return;
         }
@@ -51,19 +55,36 @@ public class BusEventos {
         eventos.computeIfAbsent(evento, k -> ConcurrentHashMap.newKeySet()).add(suscriptor);
         suscriptoresPorId.put(suscriptor.getSuscriptorId(), suscriptor);
     }
-    
-    public void manejarEvento(String json, UserServerThread cliente) {
-        Gson gson = new Gson();
-        Mensaje mensaje = gson.fromJson(json, Mensaje.class);
-        
+
+    @Override
+    public void manejarEvento(String json, IEventSuscriptor cliente) {
+        Mensaje mensaje = GSON.fromJson(json, Mensaje.class);
+
         if (mensaje.getAccion() == TipoAccion.SUSCRIBIR) {
             suscribirse(mensaje.getEvento(), cliente);
         } else if (mensaje.getAccion() == TipoAccion.PUBLICAR) {
             publicar(mensaje.getEvento(), mensaje);
+        } else if (mensaje.getAccion() == TipoAccion.SEND_UNICAST) {
+            enviarUnicast(mensaje);
         }
     }
-    
-    public synchronized void removeSuscriptor(IEventSuscriptor suscriptor) {
+
+    private void enviarUnicast(Mensaje mensaje) {
+        String destinatarioId = mensaje.getIdPublicador();
+        IEventSuscriptor destinatario = suscriptoresPorId.get(destinatarioId);
+
+        if (destinatario != null) {
+            try {
+                destinatario.recibirEvento(GSON.toJson(mensaje));
+            } catch (Exception e) {
+                System.err.println("[BusEventos] Error en unicast a " + destinatarioId + ": " + e.getMessage());
+                removeSuscriptor(destinatario);
+            }
+        }
+    }
+
+    @Override
+    public void removeSuscriptor(IEventSuscriptor suscriptor) {
         if (suscriptor == null) {
             return;
         }
@@ -75,11 +96,20 @@ public class BusEventos {
         suscriptoresPorId.remove(suscriptor.getSuscriptorId());
     }
 
-    public synchronized void removeSuscriptor(UserServerThread user) {
-        removeSuscriptor((IEventSuscriptor) user);
+
+    @Override
+    public IEventSuscriptor getSuscriptor(String id) {
+        return suscriptoresPorId.get(id);
     }
 
-    public synchronized IEventSuscriptor getSuscriptor(String id) {
-        return suscriptoresPorId.get(id);
+    @Override
+    public int getCantidadSuscriptores(String evento) {
+        Set<IEventSuscriptor> suscriptores = eventos.get(evento);
+        return suscriptores != null ? suscriptores.size() : 0;
+    }
+
+    @Override
+    public boolean existeEvento(String evento) {
+        return eventos.containsKey(evento) && !eventos.get(evento).isEmpty();
     }
 }

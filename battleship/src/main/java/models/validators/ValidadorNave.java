@@ -7,6 +7,7 @@ import models.entidades.Nave;
 import models.entidades.Tablero;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -17,12 +18,9 @@ public class ValidadorNave {
             return ResultadoAddNave.JUGADOR_NULL;
         }
 
-        Jugador j = jugadores.stream()
-                .filter(e -> e.getNombre().equals(jugador.getNombre()))
-                .findFirst()
-                .orElse(null);
+        boolean existe = jugadores.stream().anyMatch(e -> e.equals(jugador));
 
-        if (j == null) {
+        if (!existe) {
             return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
         }
 
@@ -52,16 +50,25 @@ public class ValidadorNave {
 
     public ResultadoAddNave validarLimites(Tablero tablero, List<Coordenadas> coordenadas) {
         for (Coordenadas coordenada : coordenadas) {
-            if (coordenada.getY() < 0 || coordenada.getY() > tablero.getLimiteY()
-                    || coordenada.getX() < 0 || coordenada.getX() > tablero.getLimiteX()) {
+            if (coordenada.getY() < 0 || coordenada.getY() >= tablero.getLimiteY()
+                    || coordenada.getX() < 0 || coordenada.getX() >= tablero.getLimiteX()) {
                 return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
             }
         }
         return null;
     }
 
+    /**
+     * Valida que la nave tenga la orientación correcta según sus coordenadas.
+     *
+     * VERTICAL: Las coordenadas deben estar en la misma columna (Y constante),
+     *           variando en X (filas).
+     * HORIZONTAL: Las coordenadas deben estar en la misma fila (X constante),
+     *             variando en Y (columnas).
+     */
     public ResultadoAddNave validarOrientacion(Nave nave, List<Coordenadas> coordenadas) {
         if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
+            // VERTICAL: misma columna (Y constante), diferentes filas (X varía)
             int y = coordenadas.getFirst().getY();
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getY() != y) {
@@ -69,6 +76,7 @@ public class ValidadorNave {
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
+            // HORIZONTAL: misma fila (X constante), diferentes columnas (Y varía)
             int x = coordenadas.getFirst().getX();
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getX() != x) {
@@ -79,25 +87,26 @@ public class ValidadorNave {
         return null;
     }
 
+    /**
+     * Valida que las coordenadas sean consecutivas según la orientación.
+     *
+     * VERTICAL: Las coordenadas X deben ser consecutivas (0,1,2,3...)
+     * HORIZONTAL: Las coordenadas Y deben ser consecutivas (0,1,2,3...)
+     */
     public ResultadoAddNave validarConsecutividad(Nave nave, List<Coordenadas> coordenadas) {
-        coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
-                .thenComparingInt(Coordenadas::getY));
+        List<Coordenadas> coordenadasOrdenadas = new ArrayList<>(coordenadas);
 
         if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getX() != coordenadas.get(i).getX() - 1) {
+            coordenadasOrdenadas.sort(Comparator.comparingInt(Coordenadas::getX));
+            for (int i = 1; i < coordenadasOrdenadas.size(); i++) {
+                if (coordenadasOrdenadas.get(i).getX() != coordenadasOrdenadas.get(i - 1).getX() + 1) {
                     return ResultadoAddNave.NO_CONSECUTIVO_X;
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getY() != coordenadas.get(i).getY() - 1) {
+            coordenadasOrdenadas.sort(Comparator.comparingInt(Coordenadas::getY));
+            for (int i = 1; i < coordenadasOrdenadas.size(); i++) {
+                if (coordenadasOrdenadas.get(i).getY() != coordenadasOrdenadas.get(i - 1).getY() + 1) {
                     return ResultadoAddNave.NO_CONSECUTIVO_Y;
                 }
             }
@@ -107,10 +116,13 @@ public class ValidadorNave {
 
     public ResultadoAddNave validarEspacioLibre(Tablero tablero, Nave nave, List<Coordenadas> coordenadas) {
         Casilla[][] casillas = tablero.getCasillas();
+        int limiteX = tablero.getLimiteX();
+        int limiteY = tablero.getLimiteY();
+
         for (Coordenadas c : coordenadas) {
-            for (int i = c.getX() - 1; i < c.getX() + 2; i++) {
-                for (int k = c.getY() - 1; k < c.getY() + 2; k++) {
-                    if (i >= 0 && k >= 0) {
+            for (int i = c.getX() - 1; i <= c.getX() + 1; i++) {
+                for (int k = c.getY() - 1; k <= c.getY() + 1; k++) {
+                    if (i >= 0 && k >= 0 && i < limiteX && k < limiteY) {
                         Nave n = casillas[i][k].getNave();
                         if (n != null && n != nave) {
                             return ResultadoAddNave.ESPACIO_YA_OCUPADO;

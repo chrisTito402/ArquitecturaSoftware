@@ -22,10 +22,12 @@ public class Tablero {
     }
     
     public ResultadoDisparo realizarDisparo(Coordenadas c) {
-        // Validar que las coordenadas estén dentro del rango
+        if (c == null) {
+            return ResultadoDisparo.COORDENADAS_INVALIDAS;
+        }
+
         if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
-            System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
-            return null;
+            return ResultadoDisparo.COORDENADAS_INVALIDAS;
         }
 
         Casilla casilla = casillas[c.getX()][c.getY()];

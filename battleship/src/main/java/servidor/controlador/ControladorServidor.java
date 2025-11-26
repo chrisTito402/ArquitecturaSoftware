@@ -2,8 +2,18 @@ package servidor.controlador;
 
 import buseventos.Mensaje;
 import buseventos.util.MensajeriaHelper;
-import clientesocket.IClienteSocket;
 import controllers.controller.ManejadorRespuestaCliente;
+import dtos.AddNaveDTO;
+import dtos.DisparoDTO;
+import dtos.JugadorDTO;
+import dtos.NaveDTO;
+import dtos.PuntajeDTO;
+import dtos.mappers.CoordenadasMapper;
+import dtos.mappers.DisparoMapper;
+import dtos.mappers.JugadorMapper;
+import dtos.mappers.NaveMapper;
+import dtos.mappers.PuntajeMapper;
+import dtos.mappers.ResultadoAddNaveMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -12,27 +22,17 @@ import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoAddNave;
-import models.factories.NaveFactory;
 import servidor.modelo.IModeloServidor;
-import dtos.AddNaveDTO;
-import dtos.DisparoDTO;
-import dtos.JugadorDTO;
-import dtos.NaveDTO;
-import dtos.PuntajeDTO;
 
-/**
- *
- * @author daniel
- */
 public class ControladorServidor implements ManejadorRespuestaCliente {
 
     private IModeloServidor servidor;
-    private IClienteSocket cliente;
+    private IOutputChannel outputChannel;
     private Map<String, Consumer<Mensaje>> manejadoresEventos;
 
-    public ControladorServidor(IModeloServidor servidor, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
+    public ControladorServidor(IModeloServidor servidor, IOutputChannel outputChannel, Map<String, Consumer<Mensaje>> mapa) {
         this.servidor = servidor;
-        this.cliente = cliente;
+        this.outputChannel = outputChannel;
         this.manejadoresEventos = mapa;
 
         mapa.put("DISPARO", this::realizarDisparo);
@@ -41,15 +41,21 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
     }
 
-    // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         String json = MensajeriaHelper.crearMensajeJSON(evento, datos);
-        cliente.enviarMensaje(json);
+        outputChannel.enviarMensaje(json);
     }
 
     @Override
     public void manejarMensaje(String json) {
+        if (json == null || json.isBlank()) {
+            return;
+        }
+
         Mensaje mensaje = MensajeriaHelper.parsearMensaje(json);
+        if (mensaje == null || mensaje.getEvento() == null) {
+            return;
+        }
 
         Consumer<Mensaje> handler = manejadoresEventos.get(mensaje.getEvento());
         if (handler != null) {
@@ -60,61 +66,35 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     private void addNave(Mensaje mensaje) {
         AddNaveDTO dto = MensajeriaHelper.extraerDatos(mensaje, AddNaveDTO.class);
 
-        List<Coordenadas> coordenadas = dto.getCoordenadases();
-
-        // Usar JugadorMapper para convertir DTO a entidad
-        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(dto.getJugador());
-
-        // Crear nave según el tipo especificado
+        List<Coordenadas> coordenadas = CoordenadasMapper.toEntityList(dto.getCoordenadas());
+        Jugador jugador = JugadorMapper.toEntity(dto.getJugador());
         NaveDTO naveDTO = dto.getNave();
-        Nave nave = crearNave(naveDTO);
+        Nave nave = NaveMapper.toEntity(naveDTO);
 
         ResultadoAddNave resultado = servidor.addNave(jugador, nave, coordenadas);
 
-        enviarMensaje("RESULTADO_ADD_NAVE", resultado);
-    }
-
-    private Nave crearNave(NaveDTO naveDTO) {
-        if (naveDTO == null || naveDTO.getTipo() == null) {
-            return null;
-        }
-
-        // Convertir TipoNaveDTO a TipoNave
-        models.enums.TipoNave tipoNave = models.enums.TipoNave.valueOf(naveDTO.getTipo().name());
-        return NaveFactory.crear(tipoNave, naveDTO.getOrientacion());
+        enviarMensaje("RESULTADO_ADD_NAVE", ResultadoAddNaveMapper.toDTO(resultado));
     }
 
     private void realizarDisparo(Mensaje mensaje) {
         DisparoDTO disparoDTO = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
 
-        Coordenadas coordenadas = disparoDTO.getCoordenadas();
+        Coordenadas coordenadas = CoordenadasMapper.toEntity(disparoDTO.getCoordenadas());
+        Jugador jugador = JugadorMapper.toEntity(disparoDTO.getJugador());
 
-        // Usar JugadorMapper para convertir DTO a entidad
-        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(disparoDTO.getJugador());
-
-        // Realizar el disparo en el servidor
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
 
-        // Obtener el puntaje actualizado del jugador usando el Mapper
         PuntajeDTO puntajeDTO = null;
         Jugador jugadorConPuntaje = servidor.getJugadores().stream()
-                .filter(j -> j.getNombre().equals(jugador.getNombre()))
+                .filter(j -> j.equals(jugador))
                 .findFirst()
                 .orElse(null);
 
         if (jugadorConPuntaje != null && jugadorConPuntaje.getPuntaje() != null) {
-            // Usar PuntajeMapper para convertir entidad a DTO
-            puntajeDTO = dtos.mappers.PuntajeMapper.toDTO(jugadorConPuntaje.getPuntaje());
+            puntajeDTO = PuntajeMapper.toDTO(jugadorConPuntaje.getPuntaje());
         }
 
-        // Construir el DisparoDTO de respuesta usando Mappers
-        DisparoDTO resultado = new DisparoDTO(
-                dtos.mappers.JugadorMapper.toDTO(disparo.getJugador()),
-                disparo.getCoordenadas(),
-                disparo.getResultadoDisparo(),
-                disparo.getEstadoPartida()
-        );
-
+        DisparoDTO resultado = DisparoMapper.toDTO(disparo);
         resultado.setPuntaje(puntajeDTO);
 
         enviarMensaje("RESULTADO_DISPARO", resultado);
@@ -127,15 +107,10 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
     private void manejarAbandonarPartidaSv(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
+        Jugador jugador = JugadorMapper.toEntity(jugadorDTO);
 
-        // Usar JugadorMapper para convertir DTO a entidad
-        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(jugadorDTO);
-
-        // 1. Lógica REAL del servidor
         servidor.abandonarPartida(jugador);
 
-        // 2. Notificar al otro jugador
         enviarMensaje("JUGADOR_ABANDONO", jugadorDTO);
     }
-
 }

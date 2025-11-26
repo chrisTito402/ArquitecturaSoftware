@@ -1,15 +1,10 @@
-/*
- * Servicio para la gestión de puntajes en el juego Battleship.
- * Proporciona operaciones de alto nivel sobre puntajes.
- */
 package models.services;
 
 import models.entidades.Jugador;
 import models.entidades.Puntaje;
 import models.enums.ResultadoDisparo;
-import dtos.PuntajeDTO;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 public class PuntajeService implements IPuntajeService {
 
@@ -38,12 +33,6 @@ public class PuntajeService implements IPuntajeService {
         }
 
         puntaje.resetear();
-    }
-
-    @Override
-    public PuntajeDTO convertirADTO(Puntaje puntaje) {
-        // Delegar al PuntajeMapper para mantener la conversión centralizada
-        return dtos.mappers.PuntajeMapper.toDTO(puntaje);
     }
 
     @Override
@@ -76,7 +65,6 @@ public class PuntajeService implements IPuntajeService {
         StringBuilder reporte = new StringBuilder();
         reporte.append("===== REPORTE DE PUNTAJES =====\n\n");
 
-        // Ordenar jugadores por puntaje (mayor a menor)
         jugadores.stream()
                 .filter(j -> j.getPuntaje() != null)
                 .sorted((j1, j2) -> Integer.compare(
@@ -88,7 +76,7 @@ public class PuntajeService implements IPuntajeService {
                     reporte.append(String.format(
                             "Jugador: %s\n" +
                             "  Puntos: %d\n" +
-                            "  Precisión: %.2f%%\n" +
+                            "  Precision: %.2f%%\n" +
                             "  Aciertos: %d\n" +
                             "  Fallos: %d\n" +
                             "  Naves Hundidas: %d\n\n",

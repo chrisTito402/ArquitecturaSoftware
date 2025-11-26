@@ -1,13 +1,12 @@
 package views;
 
+import dtos.CoordenadasDTO;
 import dtos.PuntajeDTO;
-import models.entidades.Coordenadas;
-import models.enums.EstadoPartida;
-import models.enums.ResultadoDisparo;
+import dtos.enums.ResultadoDisparoDTO;
 
 public interface IVistaPartida {
 
-    void mostrarCasillaImpactada(Coordenadas coordenadas, ResultadoDisparo resultado, boolean esCasillaPropia);
+    void mostrarCasillaImpactada(CoordenadasDTO coordenadas, ResultadoDisparoDTO resultado, boolean esCasillaPropia);
 
     void actualizarPuntaje(PuntajeDTO puntaje);
 

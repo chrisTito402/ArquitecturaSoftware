@@ -1,33 +1,22 @@
 package models.entidades;
 
-import java.util.Comparator;
-import models.enums.EstadoNave;
-import models.enums.EstadoPartida;
-import models.enums.ResultadoDisparo;
-import models.observador.ISuscriptor;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import models.builder.Director;
 import models.builder.TableroBuilder;
 import models.enums.EstadoJugador;
-import models.enums.OrientacionNave;
+import models.enums.EstadoNave;
+import models.enums.EstadoPartida;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoDisparo;
+import models.observador.GestorSuscriptores;
+import models.observador.ISuscriptor;
+import models.validators.ValidadorNave;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
-import models.control.IModeloCliente;
-import dtos.AddNaveDTO;
-import dtos.DisparoDTO;
-import dtos.JugadorDTO;
-import dtos.NaveDTO;
-import models.validators.ValidadorNave;
 
-/**
- * Clase Partida que representa una partida de Battleship.
- * Implementa tanto IModeloServidor como IModeloCliente para permitir
- * su uso en ambos contextos (arquitectura cliente-servidor).
- *
- * @author daniel
- */
-public class Partida implements IModeloServidor, IModeloCliente {
+public class Partida implements IModeloServidor {
 
     private Jugador turno;
     private List<Jugador> jugadores;
@@ -38,20 +27,20 @@ public class Partida implements IModeloServidor, IModeloCliente {
     private int totalNaves;
     private EstadoPartida estado;
     private Disparo disparo;
-    private List<ISuscriptor> suscriptores;
+    private GestorSuscriptores gestorSuscriptores;
     private ICronometro cronometro;
     private ValidadorNave validadorNave;
 
     public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores, ICronometro cronometro) {
         this.turno = turno;
-        this.jugadores = jugadores;
+        this.jugadores = new CopyOnWriteArrayList<>(jugadores);
         this.cantBarcos = cantBarcos;
         this.cantSubmarinos = cantSubmarinos;
         this.cantCruceros = cantCruceros;
         this.cantPortaAviones = cantPortaAviones;
         this.totalNaves = totalNaves;
         this.estado = estado;
-        this.suscriptores = suscriptores;
+        this.gestorSuscriptores = new GestorSuscriptores(suscriptores);
         this.cronometro = cronometro;
         this.validadorNave = new ValidadorNave();
 
@@ -60,23 +49,23 @@ public class Partida implements IModeloServidor, IModeloCliente {
         }
     }
 
-    // Constructor sobrecargado sin cronómetro (para uso del Builder)
     public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores) {
         this.turno = turno;
-        this.jugadores = jugadores;
+        this.jugadores = new CopyOnWriteArrayList<>(jugadores);
         this.cantBarcos = cantBarcos;
         this.cantSubmarinos = cantSubmarinos;
         this.cantCruceros = cantCruceros;
         this.cantPortaAviones = cantPortaAviones;
         this.totalNaves = totalNaves;
         this.estado = estado;
-        this.suscriptores = suscriptores;
+        this.gestorSuscriptores = new GestorSuscriptores(suscriptores);
         this.cronometro = null;
         this.validadorNave = new ValidadorNave();
     }
 
     public boolean cambiarTurno() {
-        turno = jugadores.stream().filter(e -> e != turno)
+        turno = jugadores.stream()
+                .filter(e -> !e.equals(turno))
                 .findFirst()
                 .orElse(null);
         if (turno == null) {
@@ -104,8 +93,7 @@ public class Partida implements IModeloServidor, IModeloCliente {
 
     @Override
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo) {
-        // Verificar Turno
-        if (!jugador.getNombre().equals(turno.getNombre())) {
+        if (!jugador.equals(turno)) {
             disparo = new Disparo(jugador, coordenadas, ResultadoDisparo.TURNO_INCORRECTO, estado);
             return disparo;
         }
@@ -113,7 +101,6 @@ public class Partida implements IModeloServidor, IModeloCliente {
         if (cronometro != null) {
             cronometro.setProcesandoDisparo(true);
 
-            // Verificar el Cronometro
             if (!cronometro.isInTime(tiempo)) {
                 cambiarTurno();
                 disparo = new Disparo(jugador, coordenadas, ResultadoDisparo.DISPARO_FUERA_TIEMPO, estado);
@@ -121,8 +108,8 @@ public class Partida implements IModeloServidor, IModeloCliente {
             }
         }
 
-        // Obtener al oponente
-        Jugador j2 = jugadores.stream().filter(e -> e != turno)
+        Jugador j2 = jugadores.stream()
+                .filter(e -> !e.equals(turno))
                 .findFirst()
                 .orElse(null);
 
@@ -130,13 +117,11 @@ public class Partida implements IModeloServidor, IModeloCliente {
             return null;
         }
 
-        // Disparo del jugador actual
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
 
-        // Gestionar Puntaje: Calcular puntos del disparo
         Jugador jugadorActual = jugadores.stream()
-                .filter(e -> e.getNombre().equals(jugador.getNombre()))
+                .filter(e -> e.equals(jugador))
                 .findFirst()
                 .orElse(null);
 
@@ -144,18 +129,14 @@ public class Partida implements IModeloServidor, IModeloCliente {
             jugadorActual.getPuntaje().calcularPuntos(resultadoDisparo);
         }
 
-        // Si el disparo resultó en hundimiento, verificar si el oponente perdió todas sus naves
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
-            // Contar cuántas naves del oponente aún NO están hundidas
             long navesVivas = j2.getNaves().stream()
                     .filter(n -> n.getEstado() != EstadoNave.HUNDIDO)
                     .count();
 
-            // Si no quedan naves vivas, el jugador actual GANA
             if (navesVivas == 0) {
                 estado = EstadoPartida.FINALIZADA;
 
-                // Gestionar Puntaje: Sumar bonus de victoria
                 if (jugadorActual != null && jugadorActual.getPuntaje() != null) {
                     jugadorActual.getPuntaje().sumarVictoria();
                 }
@@ -166,14 +147,25 @@ public class Partida implements IModeloServidor, IModeloCliente {
         }
 
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
-        cambiarTurno();
+
+        if (resultadoDisparo == ResultadoDisparo.AGUA
+                || resultadoDisparo == ResultadoDisparo.YA_DISPARADO
+                || resultadoDisparo == ResultadoDisparo.COORDENADAS_INVALIDAS) {
+            cambiarTurno();
+        } else {
+            if (cronometro != null) {
+                cronometro.setProcesandoDisparo(false);
+                cronometro.initCronometro();
+            }
+        }
+
         return disparo;
     }
 
     @Override
     public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         Jugador j = jugadores.stream()
-                .filter(e -> e.getNombre().equals(jugador.getNombre()))
+                .filter(e -> e.equals(jugador))
                 .findFirst()
                 .orElse(null);
 
@@ -194,52 +186,40 @@ public class Partida implements IModeloServidor, IModeloCliente {
         return ResultadoAddNave.NAVE_AÑADIDA;
     }
 
-    // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(Jugador jugador) {
-        // Validar estado
         if (estado == EstadoPartida.EN_CURSO) {
             return;
         }
 
-        // Comprobar que no este llena
         if (jugadores.size() >= 2) {
             return;
         }
 
-        // Agregar nuevo jugador
         this.addJugador(jugador);
     }
 
     @Override
     public void empezarPartida() {
-        // Comprobar que este llena
         if (jugadores.size() < 2) {
             return;
         }
 
-        // Cambiar estado
         estado = EstadoPartida.EN_CURSO;
-
-        // Asignar turno inicial (jugador 0)
-        turno = jugadores.get(0);
+        Random random = new Random();
+        turno = jugadores.get(random.nextInt(jugadores.size()));
     }
 
     @Override
     public void abandonarPartida(Jugador jugadorQueSeVa) {
-        // 1. Marcar su estado como ABANDONO
         jugadorQueSeVa.setEstado(EstadoJugador.ABANDONO);
+        jugadores.removeIf(j -> j.equals(jugadorQueSeVa));
 
-        // 2. Eliminar al jugador de la lista
-        jugadores.removeIf(j -> j.getNombre().equals(jugadorQueSeVa.getNombre()));
-
-        // 3. Si queda un jugador -> ese gana automáticamente
         if (jugadores.size() == 1) {
             Jugador ganador = jugadores.get(0);
             ganador.setEstado(EstadoJugador.JUGANDO);
             estado = EstadoPartida.FINALIZADA;
 
-            // Detener el cronómetro si existe
             if (cronometro != null) {
                 try {
                     cronometro.stop();
@@ -249,7 +229,6 @@ public class Partida implements IModeloServidor, IModeloCliente {
             return;
         }
 
-        // 4. Si no queda nadie -> resetear la partida
         if (jugadores.isEmpty()) {
             estado = EstadoPartida.POR_EMPEZAR;
 
@@ -262,42 +241,14 @@ public class Partida implements IModeloServidor, IModeloCliente {
         }
     }
 
-    // ==================== IMPLEMENTACIÓN DE IModeloCliente ====================
-
-    /**
-     * Método del cliente para realizar disparo.
-     * Retorna un DTO en lugar de un objeto Disparo.
-     */
-    @Override
-    public DisparoDTO realizarDisparo(Coordenadas coordenadas) {
-        // Este método es usado por el cliente para crear un DTO de disparo
-        // No ejecuta la lógica completa, solo crea el DTO para enviar al servidor
-        if (turno == null || jugadores.isEmpty()) {
-            return null;
-        }
-
-        JugadorDTO jugadorDTO = new JugadorDTO(
-            turno.getNombre(),
-            turno.getColor(),
-            turno.getEstado()
-        );
-
-        return new DisparoDTO(jugadorDTO, coordenadas, null, estado, System.currentTimeMillis());
+    public Jugador getTurno() {
+        return turno;
     }
 
-    /**
-     * Método del cliente para agregar nave.
-     */
-    @Override
-    public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
-        // Implementación del cliente - crea DTO para enviar al servidor
-        return new AddNaveDTO(getJugador(), nave, coordenadas, null);
+    public EstadoPartida getEstado() {
+        return estado;
     }
 
-    /**
-     * Crea los tableros para los jugadores.
-     */
-    @Override
     public void crearTableros() {
         Director director = new Director();
         for (Jugador jugador : jugadores) {
@@ -310,53 +261,16 @@ public class Partida implements IModeloServidor, IModeloCliente {
         }
     }
 
-    /**
-     * Suscribe un observador a la partida.
-     */
-    @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
-        if (!suscriptores.contains(suscriptor)) {
-            suscriptores.add(suscriptor);
-        }
+        gestorSuscriptores.suscribir(suscriptor);
     }
 
-    /**
-     * Notifica a todos los suscriptores de un evento.
-     */
-    @Override
     public void notificarAllSuscriptores(String contexto, Object datos) {
-        for (ISuscriptor suscriptor : suscriptores) {
-            suscriptor.notificar(contexto, datos);
-        }
+        gestorSuscriptores.notificarTodos(contexto, datos);
     }
 
-    /**
-     * Obtiene el jugador actual como DTO.
-     */
-    @Override
-    public JugadorDTO getJugador() {
-        if (turno != null) {
-            return new JugadorDTO(turno.getNombre(), turno.getColor(), turno.getEstado());
-        }
-        return null;
-    }
-
-    /**
-     * Maneja el resultado de un disparo recibido del servidor.
-     */
-    @Override
-    public void manejarResultadoDisparo(DisparoDTO disparo) {
-        // Notificar a los suscriptores (vistas) del resultado
-        notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
-    }
-
-    /**
-     * Abandona el lobby (antes de empezar la partida).
-     */
-    @Override
     public void abandonarLobby(Jugador jugador) {
-        jugadores.removeIf(j -> j.getNombre().equals(jugador.getNombre()));
+        jugadores.removeIf(j -> j.equals(jugador));
         notificarAllSuscriptores("JUGADOR_ABANDONO_LOBBY", jugador);
     }
-
 }

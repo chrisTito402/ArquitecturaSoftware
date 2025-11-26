@@ -1,43 +1,39 @@
 package dtos;
 
-import models.enums.EstadoNave;
-import models.enums.OrientacionNave;
+import dtos.enums.EstadoNaveDTO;
+import dtos.enums.OrientacionNaveDTO;
+import dtos.enums.TipoNaveDTO;
 
-/**
- * Data Transfer Object para Nave.
- *
- * @author daniel
- */
 public class NaveDTO {
 
-    private EstadoNave estado;
-    private OrientacionNave orientacion;
+    private EstadoNaveDTO estado;
+    private OrientacionNaveDTO orientacion;
     private TipoNaveDTO tipo;
     private int tamanio;
 
     public NaveDTO() {
     }
 
-    public NaveDTO(EstadoNave estado, OrientacionNave orientacion, TipoNaveDTO tipo, int tamanio) {
+    public NaveDTO(EstadoNaveDTO estado, OrientacionNaveDTO orientacion, TipoNaveDTO tipo, int tamanio) {
         this.estado = estado;
         this.orientacion = orientacion;
         this.tipo = tipo;
         this.tamanio = tamanio;
     }
 
-    public EstadoNave getEstado() {
+    public EstadoNaveDTO getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoNave estado) {
+    public void setEstado(EstadoNaveDTO estado) {
         this.estado = estado;
     }
 
-    public OrientacionNave getOrientacion() {
+    public OrientacionNaveDTO getOrientacion() {
         return orientacion;
     }
 
-    public void setOrientacion(OrientacionNave orientacion) {
+    public void setOrientacion(OrientacionNaveDTO orientacion) {
         this.orientacion = orientacion;
     }
 
@@ -61,5 +57,4 @@ public class NaveDTO {
     public String toString() {
         return "NaveDTO{" + "estado=" + estado + ", orientacion=" + orientacion + ", tipo=" + tipo + ", tamanio=" + tamanio + '}';
     }
-
 }

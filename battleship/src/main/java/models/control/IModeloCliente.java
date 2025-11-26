@@ -1,34 +1,26 @@
 package models.control;
 
-import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import java.util.List;
 import models.observador.ISuscriptor;
-import dtos.AddNaveDTO;
-import dtos.DisparoDTO;
-import dtos.JugadorDTO;
-import dtos.NaveDTO;
 
-/**
- *
- * @author daniel
- */
 public interface IModeloCliente {
-    
-    public DisparoDTO realizarDisparo(Coordenadas coordenadas);
-    public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas);
-    public void addJugador(Jugador j);
-    public void crearTableros();
-    public void suscribirAPartida(ISuscriptor suscriptor);
-    public void notificarAllSuscriptores(String contexto, Object datos);
-    public JugadorDTO getJugador();
-    
-    // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
-    public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
-    public List<Jugador> getJugadores();
-    
-    // Manejadores de Resultados
-    public void manejarResultadoDisparo(DisparoDTO disparo);
+
+    Jugador getTurno();
+
+    void addJugador(Jugador j);
+
+    void crearTableros();
+
+    void suscribirAPartida(ISuscriptor suscriptor);
+
+    void notificarAllSuscriptores(String contexto, Object datos);
+
+    void unirsePartida(Jugador jugador);
+
+    void empezarPartida();
+
+    void abandonarLobby(Jugador jugador);
+
+    List<Jugador> getJugadores();
 }

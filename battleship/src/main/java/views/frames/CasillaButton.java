@@ -1,40 +1,24 @@
 package views.frames;
 
-import models.entidades.Coordenadas;
-import models.enums.ResultadoDisparo;
+import dtos.CoordenadasDTO;
+import dtos.enums.ResultadoDisparoDTO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-/**
- * Botón mejorado para representar casillas del tablero enemigo.
- * Incluye estados visuales claros y efectos hover.
- *
- * Estados:
- * - NO_DISPARADO: Azul (agua)
- * - AGUA: Gris (disparo fallado)
- * - IMPACTO: Naranja (nave tocada)
- * - HUNDIDO: Rojo (nave hundida)
- *
- * @author daniel
- */
 public class CasillaButton extends JButton {
 
-    // Colores para estados
-    private static final Color COLOR_NO_DISPARADO = new Color(70, 130, 180);     // Azul océano
-    private static final Color COLOR_AGUA = new Color(100, 149, 237);            // Azul claro (miss)
-    private static final Color COLOR_IMPACTO = new Color(255, 140, 0);           // Naranja (hit)
-    private static final Color COLOR_HUNDIDO = new Color(220, 20, 60);           // Rojo (sunk)
-    private static final Color COLOR_HOVER = new Color(30, 144, 255);            // Azul brillante
-    private static final Color COLOR_BORDE = new Color(25, 25, 112);             // Azul marino oscuro
+    private static final Color COLOR_NO_DISPARADO = new Color(70, 130, 180);
+    private static final Color COLOR_AGUA = new Color(100, 149, 237);
+    private static final Color COLOR_IMPACTO = new Color(255, 140, 0);
+    private static final Color COLOR_HUNDIDO = new Color(220, 20, 60);
+    private static final Color COLOR_HOVER = new Color(30, 144, 255);
+    private static final Color COLOR_BORDE = new Color(25, 25, 112);
 
-    private Coordenadas coordenadas;
+    private CoordenadasDTO coordenadas;
     private EstadoCasilla estado;
 
-    /**
-     * Estados posibles de una casilla del tablero enemigo.
-     */
     public enum EstadoCasilla {
         NO_DISPARADO,
         AGUA,
@@ -42,16 +26,13 @@ public class CasillaButton extends JButton {
         HUNDIDO
     }
 
-    public CasillaButton(Coordenadas coordenadas) {
+    public CasillaButton(CoordenadasDTO coordenadas) {
         this.coordenadas = coordenadas;
         this.estado = EstadoCasilla.NO_DISPARADO;
         configurarEstilo();
         agregarEfectosHover();
     }
 
-    /**
-     * Configura el estilo inicial del botón.
-     */
     private void configurarEstilo() {
         this.setPreferredSize(new Dimension(40, 40));
         this.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -61,9 +42,6 @@ public class CasillaButton extends JButton {
         actualizarApariencia();
     }
 
-    /**
-     * Agrega efectos visuales al pasar el mouse (solo si no se ha disparado).
-     */
     private void agregarEfectosHover() {
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -80,9 +58,6 @@ public class CasillaButton extends JButton {
         });
     }
 
-    /**
-     * Actualiza la apariencia del botón según su estado.
-     */
     private void actualizarApariencia() {
         switch (estado) {
             case NO_DISPARADO:
@@ -94,32 +69,27 @@ public class CasillaButton extends JButton {
 
             case AGUA:
                 setBackground(COLOR_AGUA);
-                setText("○");  // Círculo vacío (miss)
+                setText("O");
                 setForeground(Color.WHITE);
                 setEnabled(false);
                 break;
 
             case IMPACTO:
                 setBackground(COLOR_IMPACTO);
-                setText("✖");  // X (hit)
+                setText("X");
                 setForeground(Color.WHITE);
                 setEnabled(false);
                 break;
 
             case HUNDIDO:
                 setBackground(COLOR_HUNDIDO);
-                setText("💥"); // Explosión (sunk)
+                setText("!");
                 setEnabled(false);
                 break;
         }
     }
 
-    /**
-     * Marca la casilla con el resultado del disparo y anima el cambio.
-     *
-     * @param resultado El resultado del disparo
-     */
-    public void marcarResultado(ResultadoDisparo resultado) {
+    public void marcarResultado(ResultadoDisparoDTO resultado) {
         if (resultado == null) {
             return;
         }
@@ -146,9 +116,6 @@ public class CasillaButton extends JButton {
         actualizarApariencia();
     }
 
-    /**
-     * Animación de impacto (parpadeo naranja).
-     */
     private void animarImpacto() {
         Timer timer = new Timer(100, null);
         final int[] contador = {0};
@@ -169,9 +136,6 @@ public class CasillaButton extends JButton {
         timer.start();
     }
 
-    /**
-     * Animación de hundimiento (parpadeo rojo intenso).
-     */
     private void animarHundimiento() {
         Timer timer = new Timer(100, null);
         final int[] contador = {0};
@@ -192,7 +156,7 @@ public class CasillaButton extends JButton {
         timer.start();
     }
 
-    public Coordenadas getCoordenadas() {
+    public CoordenadasDTO getCoordenadas() {
         return coordenadas;
     }
 

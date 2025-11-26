@@ -3,46 +3,30 @@ package models.builder;
 import java.util.ArrayList;
 import models.entidades.Casilla;
 import models.entidades.Coordenadas;
-import models.entidades.Jugador;
 import models.entidades.Partida;
-import models.entidades.Tablero;
-import models.enums.ColorJugador;
 import models.enums.EstadoCasilla;
-import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
-import models.control.IModeloCliente;
 
-/**
- * Director del patrón Builder.
- * Orquesta la construcción de objetos complejos.
- *
- * @author daniel
- */
 public class Director {
 
-    public IModeloCliente makePartida(IPartidaBuilder builder) {
+    public Partida makePartida(IPartidaBuilder builder) {
         builder.setCantBarcos(0);
         builder.setCantSubmarinos(0);
         builder.setCantCruceros(0);
         builder.setCantPortaAviones(0);
         builder.setTotalNaves(0);
-        builder.setEstado(EstadoPartida.EN_CURSO);
+        builder.setEstado(EstadoPartida.POR_EMPEZAR);
         builder.setJugadores(new ArrayList<>());
         builder.setSuscriptores(new ArrayList<>());
 
         return builder.getResult();
     }
-    
-    public void makeJugador(IJugadorBuilder builder) {
-        builder.setColor(ColorJugador.AZUL);
-        builder.setEstado(EstadoJugador.JUGANDO);
-        builder.setNombre("Jugador1");
+
+    public void makeJugador(IJugadorBuilder builder, String nombre) {
+        builder.setNombre(nombre);
+        builder.setNaves(new ArrayList<>());
     }
-    
-    public void makeBot(IJugadorBuilder builder) {
-        
-    }
-    
+
     public void makeTablero(ITableroBuilder builder) {
         builder.setLimiteX(10);
         builder.setLimiteY(10);

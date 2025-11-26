@@ -3,49 +3,69 @@ package controllers.controller;
 import buseventos.Mensaje;
 import buseventos.util.MensajeriaHelper;
 import clientesocket.IClienteSocket;
-import models.entidades.Coordenadas;
-import models.entidades.Jugador;
-import models.entidades.Nave;
-import models.builder.Director;
+import dtos.AddNaveDTO;
+import dtos.CoordenadasDTO;
+import dtos.DisparoDTO;
+import dtos.JugadorDTO;
+import dtos.NaveDTO;
+import dtos.mappers.CoordenadasMapper;
+import dtos.mappers.JugadorMapper;
+import dtos.mappers.NaveMapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import models.builder.PartidaBuilder;
-import models.observador.ISuscriptor;
-import dtos.DisparoDTO;
+import models.control.ControlModelo;
 import models.control.IModeloCliente;
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
-import dtos.JugadorDTO;
+import models.entidades.Coordenadas;
+import models.entidades.Jugador;
+import models.entidades.Nave;
+import models.observador.ISuscriptor;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
-    private IModeloCliente partida;
+    private IModeloCliente modelo;
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadorEventos;
 
     public Controlador() {
     }
 
-    public Controlador(IModeloCliente partida, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
-        this.partida = partida;
+    public Controlador(IModeloCliente modelo, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
+        this.modelo = modelo;
         this.cliente = cliente;
         this.manejadorEventos = mapa;
 
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-
     }
 
     private void enviarMensaje(String evento, Object datos) {
-        String json = MensajeriaHelper.crearMensajeJSON(evento, datos, "1");
+        if (cliente == null) {
+            return;
+        }
+        String idJugador = obtenerIdJugadorLocal();
+        String json = MensajeriaHelper.crearMensajeJSON(evento, datos, idJugador);
         cliente.enviarMensaje(json);
+    }
+
+    private String obtenerIdJugadorLocal() {
+        if (modelo != null && modelo.getJugadores() != null && !modelo.getJugadores().isEmpty()) {
+            Jugador jugadorLocal = modelo.getJugadores().get(0);
+            if (jugadorLocal != null && jugadorLocal.getNombre() != null) {
+                return jugadorLocal.getNombre();
+            }
+        }
+        return "cliente-" + System.currentTimeMillis();
     }
 
     @Override
     public void manejarMensaje(String json) {
         Mensaje mensaje = MensajeriaHelper.parsearMensaje(json);
+        if (mensaje == null) {
+            return;
+        }
 
         Consumer<Mensaje> handler = manejadorEventos.get(mensaje.getEvento());
         if (handler != null) {
@@ -54,40 +74,60 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     private void manejarResultadoDisparo(Mensaje mensaje) {
-        DisparoDTO d = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
-        partida.manejarResultadoDisparo(d);
+        DisparoDTO disparoDTO = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
+        if (disparoDTO != null) {
+            modelo.notificarAllSuscriptores("RESULTADO_DISPARO", disparoDTO);
+        }
     }
 
     public void manejarAbandonarPartida(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
-        partida.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
+        if (jugadorDTO != null) {
+            modelo.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
+        }
     }
+
     @Override
     public void abandonarLobby(Jugador jugador) {
-        partida.abandonarLobby(jugador);
-        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        modelo.abandonarLobby(jugador);
+        JugadorDTO dto = JugadorMapper.toDTO(jugador);
         enviarMensaje("ABANDONAR_PARTIDA", dto);
     }
 
     @Override
     public String crearPartida(Jugador j) {
-        Director d = new Director();
-        IModeloCliente modelo = d.makePartida(new PartidaBuilder());
-        this.partida = modelo;
+        this.modelo = new ControlModelo(new ArrayList<>());
         return "Partida creada correctamente";
     }
 
     @Override
     public void realizarDisparo(Coordenadas coordenadas) {
-        DisparoDTO disparo = partida.realizarDisparo(coordenadas);
-        if (disparo != null) {
-            enviarMensaje("DISPARO", disparo);
+        if (coordenadas == null || modelo == null) {
+            return;
         }
+
+        Jugador turno = modelo.getTurno();
+        if (turno == null) {
+            return;
+        }
+
+        JugadorDTO jugadorDTO = JugadorMapper.toDTO(turno);
+        DisparoDTO disparoDTO = new DisparoDTO(
+                jugadorDTO,
+                CoordenadasMapper.toDTO(coordenadas),
+                null,
+                null,
+                System.currentTimeMillis()
+        );
+
+        enviarMensaje("DISPARO", disparoDTO);
     }
 
     private void manejarJugadorUnido(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
-        partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
+        if (jugadorDTO != null) {
+            modelo.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
+        }
     }
 
     @Override
@@ -96,14 +136,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
             return false;
         }
 
-        dtos.NaveDTO naveDTO = dtos.mappers.NaveMapper.toDTO(nave);
-        JugadorDTO jugadorDTO = dtos.mappers.JugadorMapper.toDTO(jugador);
+        NaveDTO naveDTO = NaveMapper.toDTO(nave);
+        JugadorDTO jugadorDTO = JugadorMapper.toDTO(jugador);
+        List<CoordenadasDTO> coordenadasDTO = CoordenadasMapper.toDTOList(coordenadas);
 
-        dtos.AddNaveDTO addNaveDTO = new dtos.AddNaveDTO(
-            jugadorDTO,
-            naveDTO,
-            coordenadas,
-            null
+        AddNaveDTO addNaveDTO = new AddNaveDTO(
+                jugadorDTO,
+                naveDTO,
+                coordenadasDTO,
+                null
         );
 
         enviarMensaje("ADD_NAVE", addNaveDTO);
@@ -112,40 +153,42 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     @Override
     public void addJugador(Jugador jugador) {
-        partida.addJugador(jugador);
+        modelo.addJugador(jugador);
     }
 
     @Override
     public void crearTableros() {
-        partida.crearTableros();
+        modelo.crearTableros();
     }
 
     @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
-        partida.suscribirAPartida(suscriptor);
+        modelo.suscribirAPartida(suscriptor);
     }
 
-    // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(Jugador jugador) {
-        partida.unirsePartida(jugador);
-
-        JugadorDTO jugadorDTO = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        modelo.unirsePartida(jugador);
+        JugadorDTO jugadorDTO = JugadorMapper.toDTO(jugador);
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
 
     @Override
     public void empezarPartida() {
-        partida.empezarPartida();
+        modelo.empezarPartida();
     }
 
     @Override
     public List<Jugador> getJugadores() {
-        return partida.getJugadores();
+        return modelo.getJugadores();
     }
 
     @Override
     public JugadorDTO getJugador() {
-        return partida.getJugador();
+        Jugador turno = modelo.getTurno();
+        if (turno != null) {
+            return JugadorMapper.toDTO(turno);
+        }
+        return null;
     }
 }

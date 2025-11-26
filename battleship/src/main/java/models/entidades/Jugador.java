@@ -2,7 +2,9 @@ package models.entidades;
 
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -32,6 +34,7 @@ public class Jugador {
         this.color = color;
         this.estado = estado;
         this.puntaje = new Puntaje();
+        this.naves = new ArrayList<>();
     }
 
     public Puntaje getPuntaje() {
@@ -81,5 +84,21 @@ public class Jugador {
     public void setEstado(EstadoJugador estado) {
         this.estado = estado;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Jugador otro = (Jugador) obj;
+        return Objects.equals(nombre, otro.nombre);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nombre);
+    }
 }

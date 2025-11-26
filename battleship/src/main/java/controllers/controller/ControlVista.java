@@ -1,229 +1,62 @@
 package controllers.controller;
 
 import dtos.CoordenadasDTO;
+import dtos.mappers.CoordenadasMapper;
+import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
-import java.awt.Color;
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
-import models.enums.EstadoPartida;
-import dtos.DisparoDTO;
-import dtos.JugadorDTO;
-import views.frames.CasillaButton;
-import views.frames.CasillaPanel;
-import views.frames.FrmPartidaEnCurso;
-import views.frames.PuntajePanel;
-import views.frames.TimerPanel;
+import views.IVistaPartida;
 
-/**
- *
- * @author daniel
- */
 public class ControlVista implements ISuscriptor {
 
-    private static ControlVista controlVista;
-
     private IControlador control;
-    private List<CasillaPanel> casillasPropias;
-    private List<CasillaButton> casillasEnemigas;
-    private TimerPanel timer;
-    private PuntajePanel puntajePanel;
-    private Map<String, Consumer<Object>> manejadoresNoti;
+    private IVistaPartida vista;
+    private final ManejadorNotificacionesVista manejadorNotificaciones;
 
     private ControlVista() {
-        manejadoresNoti = new HashMap<>();
-        manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
-        manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
+        this.manejadorNotificaciones = new ManejadorNotificacionesVista();
+    }
+
+    private static class SingletonHolder {
+        private static final ControlVista INSTANCIA = new ControlVista();
     }
 
     public static ControlVista getInstancia() {
-        if (controlVista == null) {
-            controlVista = new ControlVista();
-        }
-        return controlVista;
+        return SingletonHolder.INSTANCIA;
     }
 
-    
     public IControlador getControl() {
         return this.control;
     }
 
-    public List<CasillaPanel> getCasillasPropias() {
-        return casillasPropias;
-    }
-
-    public List<CasillaButton> getCasillasEnemigas() {
-        return casillasEnemigas;
-    }
-
     public void setControl(IControlador control) {
         this.control = control;
+        manejadorNotificaciones.setControlador(control);
     }
 
-    public TimerPanel getTimer() {
-        return timer;
+    public void setVista(IVistaPartida vista) {
+        this.vista = vista;
+        manejadorNotificaciones.setVista(vista);
     }
 
-    public void setTimer(TimerPanel timer) {
-        this.timer = timer;
-    }
-
-    public PuntajePanel getPuntajePanel() {
-        return puntajePanel;
-    }
-
-    public void setPuntajePanel(javax.swing.JPanel panel) {
-        if (panel instanceof PuntajePanel) {
-            this.puntajePanel = (PuntajePanel) panel;
-        }
+    public IVistaPartida getVista() {
+        return this.vista;
     }
 
     public void realizarDisparo(Coordenadas c) {
         control.realizarDisparo(c);
     }
 
-    private Component getCasillaPropia(Coordenadas c) {
-        Component cP = casillasPropias.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
-                && e.getCoordenadas().getY() == c.getY())
-                .findFirst()
-                .orElse(null);
-
-        return cP;
-    }
-
-    private Component getCasillaEnemiga(Coordenadas c) {
-        Component cB = casillasEnemigas.stream().filter(e -> e.getCoordenadas().getX() == c.getX()
-                && e.getCoordenadas().getY() == c.getY())
-                .findFirst()
-                .orElse(null);
-
-        return cB;
+    public void realizarDisparoDTO(CoordenadasDTO coordenadasDTO) {
+        Coordenadas coordenadas = CoordenadasMapper.toEntity(coordenadasDTO);
+        control.realizarDisparo(coordenadas);
     }
 
     @Override
     public void notificar(String contexto, Object datos) {
-        if (datos == null) {
-            return;
-        }
-
-        Consumer<Object> manejador = manejadoresNoti.get(contexto);
-        if (manejador == null) {
-            return;
-        }
-
-        manejador.accept(datos);
-    }
-
-    private void manejarDisparo(Object datos) {
-        if (!(datos instanceof DisparoDTO)) {
-            return;
-        }
-
-        // Reiniciar Temporizador
-        timer.initTimer();
-
-        DisparoDTO d = (DisparoDTO) datos;
-        JugadorDTO jugador = control.getJugador();
-
-        Component componente;
-        if (d.getJugador().getNombre().equals(jugador.getNombre())) {
-            componente = getCasillaEnemiga(d.getCoordenadas());
-            // Gestionar Puntaje: Actualizar panel de puntaje en la UI
-            if (puntajePanel != null && d.getPuntaje() != null) {
-                puntajePanel.actualizarPuntaje(d.getPuntaje());
-            }
-        } else {
-            componente = getCasillaPropia(d.getCoordenadas());
-        }
-
-        // Actualizar color de casilla según resultado
-        if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
-            componente.setBackground(Color.YELLOW);
-        } else if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
-            componente.setBackground(Color.RED);
-        } else if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
-            componente.setBackground(Color.BLUE);
-        }
-
-        // Gestionar Puntaje: Mostrar resumen al finalizar partida
-        if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
-            casillasEnemigas.forEach(e -> e.setEnabled(false));
-            timer.stopTimer();
-
-            if (d.getPuntaje() != null) {
-                String mensaje = String.format(
-                    "Partida terminada!\n\n" +
-                    "Ganador: %s\n" +
-                    "Puntaje final: %d puntos\n" +
-                    "Aciertos: %d\n" +
-                    "Fallos: %d\n" +
-                    "Naves hundidas: %d\n" +
-                    "Precision: %.2f%%",
-                    d.getJugador().getNombre(),
-                    d.getPuntaje().getPuntosTotales(),
-                    d.getPuntaje().getDisparosAcertados(),
-                    d.getPuntaje().getDisparosFallados(),
-                    d.getPuntaje().getNavesHundidas(),
-                    d.getPuntaje().getPrecision()
-                );
-
-                JOptionPane.showMessageDialog(null, mensaje, "Fin de Partida", JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-    }
-
-    private void manejarAbandono(Object datos) {
-        JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null,
-                "El jugador " + dto.getNombre() + " abandonó la partida.");
-
-        casillasEnemigas.forEach(c -> c.setEnabled(false));
-
-        timer.stopTimer();
-
-    }
-
-    public void initTableroPropio() {
-        casillasPropias = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
-                CasillaPanel cP = new CasillaPanel(coordenadas);
-                cP.setBackground(new Color(242, 242, 242)); // O cualquier color que necesites
-                cP.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                casillasPropias.add(cP);
-            }
-        }
-    }
-
-    public void initTableroEnemigo() {
-        casillasEnemigas = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                Coordenadas coordenadas = new Coordenadas(i, j);
-                CasillaButton cB = new CasillaButton(coordenadas);
-                cB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                cB.addActionListener(new java.awt.event.ActionListener() {
-                    @Override
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        realizarDisparo(coordenadas);
-                        //cB.setEnabled(false);
-                    }
-                });
-                casillasEnemigas.add(cB);
-            }
-        }
+        manejadorNotificaciones.manejar(contexto, datos);
     }
 
     public void crearPartida(Jugador j) {
@@ -246,12 +79,6 @@ public class ControlVista implements ISuscriptor {
         control.suscribirAPartida(this);
     }
 
-    public void mostrarFrmPartidaEnCurso() {
-        new FrmPartidaEnCurso().setVisible(true);
-        timer.initTimer();
-    }
-
-    // Caso de Uso: Unirse Partida
     public void unirsePartida(Jugador jugador) {
         control.unirsePartida(jugador);
     }

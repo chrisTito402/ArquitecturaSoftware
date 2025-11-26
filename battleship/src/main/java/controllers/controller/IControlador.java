@@ -1,30 +1,33 @@
 package controllers.controller;
 
-import buseventos.Mensaje;
+import dtos.JugadorDTO;
+import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.observador.ISuscriptor;
 import java.util.List;
-import models.entidades.Coordenadas;
-import dtos.JugadorDTO;
 
-/**
- *
- * @author daniel
- */
 public interface IControlador {
-    public String crearPartida(Jugador j);
-    public void addJugador(Jugador j);
-    public void crearTableros();
-    public void suscribirAPartida(ISuscriptor suscriptor);
-    public void realizarDisparo(Coordenadas c);
-    public JugadorDTO getJugador();
-    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
-    
-    // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
-    public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
-    public List<Jugador> getJugadores();
-    
+
+    String crearPartida(Jugador j);
+
+    void addJugador(Jugador j);
+
+    void crearTableros();
+
+    void suscribirAPartida(ISuscriptor suscriptor);
+
+    void realizarDisparo(Coordenadas c);
+
+    JugadorDTO getJugador();
+
+    boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+
+    void unirsePartida(Jugador jugador);
+
+    void empezarPartida();
+
+    void abandonarLobby(Jugador jugador);
+
+    List<Jugador> getJugadores();
 }

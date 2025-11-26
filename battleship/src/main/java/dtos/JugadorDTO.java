@@ -1,23 +1,18 @@
 package dtos;
 
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
+import dtos.enums.ColorJugadorDTO;
+import dtos.enums.EstadoJugadorDTO;
 
-/**
- * Data Transfer Object para Jugador.
- *
- * @author daniel
- */
 public class JugadorDTO {
 
     private String nombre;
-    private ColorJugador color;
-    private EstadoJugador estado;
+    private ColorJugadorDTO color;
+    private EstadoJugadorDTO estado;
 
     public JugadorDTO() {
     }
 
-    public JugadorDTO(String nombre, ColorJugador color, EstadoJugador estado) {
+    public JugadorDTO(String nombre, ColorJugadorDTO color, EstadoJugadorDTO estado) {
         this.nombre = nombre;
         this.color = color;
         this.estado = estado;
@@ -31,19 +26,19 @@ public class JugadorDTO {
         this.nombre = nombre;
     }
 
-    public ColorJugador getColor() {
+    public ColorJugadorDTO getColor() {
         return color;
     }
 
-    public void setColor(ColorJugador color) {
+    public void setColor(ColorJugadorDTO color) {
         this.color = color;
     }
 
-    public EstadoJugador getEstado() {
+    public EstadoJugadorDTO getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoJugador estado) {
+    public void setEstado(EstadoJugadorDTO estado) {
         this.estado = estado;
     }
 
@@ -51,5 +46,4 @@ public class JugadorDTO {
     public String toString() {
         return "JugadorDTO{" + "nombre=" + nombre + ", color=" + color + ", estado=" + estado + '}';
     }
-
 }

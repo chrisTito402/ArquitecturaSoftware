@@ -36,14 +36,12 @@ public class Cronometro implements ICronometro {
     private void initInstance(long tiempo) {
         this.min = Instant.now();
         this.max = min.plusMillis(tiempo);
-        System.out.println("SE CAMBIO EL LAS INSTANCIAS UNIX");
     }
     
     @Override
     public void initCronometro() {
-        System.out.println("INIT CRONOMETRO");
         if (tareaCambioTurno != null && !tareaCambioTurno.isDone()) {
-            tareaCambioTurno.cancel(false); 
+            tareaCambioTurno.cancel(false);
         }
 
         initInstance(duracionTurnoMili);
@@ -72,5 +70,13 @@ public class Cronometro implements ICronometro {
             tareaCambioTurno.cancel(true);
         }
         scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

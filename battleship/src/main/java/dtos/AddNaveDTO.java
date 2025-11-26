@@ -1,28 +1,22 @@
 package dtos;
 
+import dtos.enums.ResultadoAddNaveDTO;
 import java.util.List;
-import models.entidades.Coordenadas;
-import models.enums.ResultadoAddNave;
 
-/**
- * Data Transfer Object para agregar una nave al tablero.
- *
- * @author daniel
- */
 public class AddNaveDTO {
 
     private JugadorDTO jugador;
     private NaveDTO nave;
-    private List<Coordenadas> coordenadases;
-    private ResultadoAddNave resultado;
+    private List<CoordenadasDTO> coordenadas;
+    private ResultadoAddNaveDTO resultado;
 
     public AddNaveDTO() {
     }
 
-    public AddNaveDTO(JugadorDTO jugador, NaveDTO nave, List<Coordenadas> coordenadases, ResultadoAddNave resultado) {
+    public AddNaveDTO(JugadorDTO jugador, NaveDTO nave, List<CoordenadasDTO> coordenadas, ResultadoAddNaveDTO resultado) {
         this.jugador = jugador;
         this.nave = nave;
-        this.coordenadases = coordenadases;
+        this.coordenadas = coordenadas;
         this.resultado = resultado;
     }
 
@@ -42,25 +36,24 @@ public class AddNaveDTO {
         this.nave = nave;
     }
 
-    public List<Coordenadas> getCoordenadases() {
-        return coordenadases;
+    public List<CoordenadasDTO> getCoordenadas() {
+        return coordenadas;
     }
 
-    public void setCoordenadases(List<Coordenadas> coordenadases) {
-        this.coordenadases = coordenadases;
+    public void setCoordenadas(List<CoordenadasDTO> coordenadas) {
+        this.coordenadas = coordenadas;
     }
 
-    public ResultadoAddNave getResultado() {
+    public ResultadoAddNaveDTO getResultado() {
         return resultado;
     }
 
-    public void setResultado(ResultadoAddNave resultado) {
+    public void setResultado(ResultadoAddNaveDTO resultado) {
         this.resultado = resultado;
     }
 
     @Override
     public String toString() {
-        return "AddNaveDTO{" + "jugador=" + jugador + ", nave=" + nave + ", coordenadases=" + coordenadases + ", resultado=" + resultado + '}';
+        return "AddNaveDTO{" + "jugador=" + jugador + ", nave=" + nave + ", coordenadas=" + coordenadas + ", resultado=" + resultado + '}';
     }
-
 }

@@ -1,9 +1,6 @@
 package clientesocket;
 
-/**
- *
- * @author daniel
- */
-public interface IClienteSocket {
-    public void enviarMensaje(String json);
+import servidor.controlador.IOutputChannel;
+
+public interface IClienteSocket extends IOutputChannel {
 }

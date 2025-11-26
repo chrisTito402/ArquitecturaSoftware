@@ -46,6 +46,13 @@ public class ClienteSocket implements IClienteSocket {
     
     @Override
     public void enviarMensaje(String json) {
+        if (writer == null) {
+            System.err.println("[ClienteSocket] Error: No hay conexion establecida");
+            return;
+        }
+        if (json == null || json.isEmpty()) {
+            return;
+        }
         writer.println(json);
     }
     

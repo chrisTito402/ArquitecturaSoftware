@@ -1,28 +1,21 @@
 package dtos;
 
-import models.entidades.Coordenadas;
-import models.enums.EstadoPartida;
-import models.enums.ResultadoDisparo;
+import dtos.enums.EstadoPartidaDTO;
+import dtos.enums.ResultadoDisparoDTO;
 
-/**
- * Data Transfer Object para Disparo.
- * Incluye información del puntaje obtenido en el disparo.
- *
- * @author daniel
- */
 public class DisparoDTO {
 
     private JugadorDTO jugador;
-    private Coordenadas coordenadas;
-    private ResultadoDisparo resultadoDisparo;
-    private EstadoPartida estadoPartida;
+    private CoordenadasDTO coordenadas;
+    private ResultadoDisparoDTO resultadoDisparo;
+    private EstadoPartidaDTO estadoPartida;
     private long tiempo;
     private PuntajeDTO puntaje;
 
     public DisparoDTO() {
     }
 
-    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo, PuntajeDTO puntaje) {
+    public DisparoDTO(JugadorDTO jugador, CoordenadasDTO coordenadas, ResultadoDisparoDTO resultadoDisparo, EstadoPartidaDTO estadoPartida, long tiempo, PuntajeDTO puntaje) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
@@ -31,7 +24,7 @@ public class DisparoDTO {
         this.puntaje = puntaje;
     }
 
-    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo) {
+    public DisparoDTO(JugadorDTO jugador, CoordenadasDTO coordenadas, ResultadoDisparoDTO resultadoDisparo, EstadoPartidaDTO estadoPartida, long tiempo) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
@@ -39,7 +32,7 @@ public class DisparoDTO {
         this.tiempo = tiempo;
     }
 
-    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida) {
+    public DisparoDTO(JugadorDTO jugador, CoordenadasDTO coordenadas, ResultadoDisparoDTO resultadoDisparo, EstadoPartidaDTO estadoPartida) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
@@ -62,27 +55,27 @@ public class DisparoDTO {
         this.jugador = jugador;
     }
 
-    public Coordenadas getCoordenadas() {
+    public CoordenadasDTO getCoordenadas() {
         return coordenadas;
     }
 
-    public void setCoordenadas(Coordenadas coordenadas) {
+    public void setCoordenadas(CoordenadasDTO coordenadas) {
         this.coordenadas = coordenadas;
     }
 
-    public ResultadoDisparo getResultadoDisparo() {
+    public ResultadoDisparoDTO getResultadoDisparo() {
         return resultadoDisparo;
     }
 
-    public void setResultadoDisparo(ResultadoDisparo resultadoDisparo) {
+    public void setResultadoDisparo(ResultadoDisparoDTO resultadoDisparo) {
         this.resultadoDisparo = resultadoDisparo;
     }
 
-    public EstadoPartida getEstadoPartida() {
+    public EstadoPartidaDTO getEstadoPartida() {
         return estadoPartida;
     }
 
-    public void setEstadoPartida(EstadoPartida estadoPartida) {
+    public void setEstadoPartida(EstadoPartidaDTO estadoPartida) {
         this.estadoPartida = estadoPartida;
     }
 

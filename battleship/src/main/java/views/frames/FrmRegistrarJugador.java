@@ -1,6 +1,11 @@
 package views.frames;
 
+import clientesocket.ClienteSocket;
+import config.ConfiguracionRed;
+import controllers.controller.ControlVista;
+import controllers.controller.Controlador;
 import controllers.controller.IControlador;
+import java.util.HashMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import models.builder.IJugadorBuilder;
@@ -174,14 +179,46 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         IJugadorBuilder builder = new JugadorBuilder();
         builder.setNombre(nombre);
         builder.setColor(colorSeleccionado);
-        builder.setEstado(EstadoJugador.JUGANDO); 
+        builder.setEstado(EstadoJugador.JUGANDO);
         Jugador nuevoJugador = builder.getResult();
-        this.controlador.unirsePartida(nuevoJugador);
-        
-//        FrmLobby lobby = new FrmLobby(ControlVista cv);
-//        lobby.setLocationRelativeTo(this);
-//        lobby.setVisible(true);
-//        this.dispose();
+
+        // Configurar conexion al servidor
+        Controlador controladorImpl = new Controlador();
+        ClienteSocket cliente = new ClienteSocket(
+                ConfiguracionRed.SERVIDOR_HOST,
+                ConfiguracionRed.SERVIDOR_PUERTO,
+                controladorImpl
+        );
+
+        // Intentar conectar al servidor
+        try {
+            cliente.execute();
+
+            // Configurar controlador con el modelo y cliente
+            controladorImpl = new Controlador(
+                    new models.control.ControlModelo(new java.util.ArrayList<>()),
+                    cliente,
+                    new HashMap<>()
+            );
+
+            // Configurar ControlVista
+            ControlVista.getInstancia().setControl(controladorImpl);
+
+            // Unirse a la partida
+            ControlVista.getInstancia().unirsePartida(nuevoJugador);
+
+            FrmLobbyMejorado lobby = new FrmLobbyMejorado(nuevoJugador);
+            lobby.setVisible(true);
+            this.dispose();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "No se pudo conectar al servidor en " +
+                            ConfiguracionRed.SERVIDOR_HOST + ":" +
+                            ConfiguracionRed.SERVIDOR_PUERTO +
+                            "\n\nAsegurate de que el servidor este corriendo.",
+                    "Error de conexion",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnContinuarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed

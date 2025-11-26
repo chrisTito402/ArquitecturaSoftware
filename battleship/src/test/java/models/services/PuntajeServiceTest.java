@@ -118,16 +118,18 @@ class PuntajeServiceTest {
     }
 
     @Nested
-    @DisplayName("Pruebas de convertirADTO")
-    class ConvertirADTOTests {
+    @DisplayName("Pruebas de conversion a DTO usando PuntajeMapper")
+    class ConversionDTOTests {
 
         @Test
-        @DisplayName("Convertir puntaje a DTO correctamente")
-        void convertirPuntajeADTO() {
+        @DisplayName("PuntajeMapper convierte puntaje a DTO correctamente")
+        void mapperConviertePuntajeADTO() {
             puntaje.calcularPuntos(ResultadoDisparo.IMPACTO);
             puntaje.calcularPuntos(ResultadoDisparo.AGUA);
 
-            PuntajeDTO dto = puntajeService.convertirADTO(puntaje);
+            // La conversion se hace mediante el Mapper, no el Service
+            // Esto respeta la arquitectura en capas
+            PuntajeDTO dto = dtos.mappers.PuntajeMapper.toDTO(puntaje);
 
             assertNotNull(dto);
             assertEquals(10, dto.getPuntosTotales());
@@ -137,9 +139,9 @@ class PuntajeServiceTest {
         }
 
         @Test
-        @DisplayName("Convertir puntaje null retorna DTO vacio")
-        void convertirPuntajeNullRetornaDTOVacio() {
-            PuntajeDTO dto = puntajeService.convertirADTO(null);
+        @DisplayName("PuntajeMapper maneja puntaje null")
+        void mapperManejaNull() {
+            PuntajeDTO dto = dtos.mappers.PuntajeMapper.toDTO(null);
 
             assertNotNull(dto);
             assertEquals(0, dto.getPuntosTotales());
