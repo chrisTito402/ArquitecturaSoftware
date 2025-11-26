@@ -3,13 +3,14 @@ package views.frames;
 import controllers.controller.ControlVista;
 import dtos.JugadorDTO;
 import models.entidades.Jugador;
+import models.observador.ISuscriptor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
 
-public class FrmLobbyMejorado extends JFrame {
+public class FrmLobbyMejorado extends JFrame implements ISuscriptor {
 
     private Jugador jugadorLocal;
     private JPanel panelJugador1;
@@ -227,6 +228,16 @@ public class FrmLobbyMejorado extends JFrame {
             FrmMenuPrincipal menu = new FrmMenuPrincipal();
             menu.setVisible(true);
             this.dispose();
+        }
+    }
+
+    @Override
+    public void notificar(String contexto, Object datos) {
+        if ("JUGADOR_UNIDO".equals(contexto) && datos instanceof JugadorDTO) {
+            JugadorDTO jugadorDTO = (JugadorDTO) datos;
+            if (!jugadorDTO.getNombre().equals(jugadorLocal.getNombre())) {
+                SwingUtilities.invokeLater(() -> actualizarJugador2(jugadorDTO.getNombre()));
+            }
         }
     }
 

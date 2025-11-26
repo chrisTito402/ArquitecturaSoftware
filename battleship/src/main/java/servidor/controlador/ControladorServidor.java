@@ -102,6 +102,14 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
     private void manejarUnirsePartida(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
+        Jugador jugador = JugadorMapper.toEntity(jugadorDTO);
+
+        servidor.unirsePartida(jugador);
+        servidor.crearTableros();
+
+        System.out.println("[Servidor] Jugador unido: " + jugador.getNombre());
+        System.out.println("[Servidor] Jugadores en partida: " + servidor.getJugadores().size());
+
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
     }
 

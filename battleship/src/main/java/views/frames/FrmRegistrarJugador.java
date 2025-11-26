@@ -1,11 +1,13 @@
 package views.frames;
 
+import buseventos.Mensaje;
 import clientesocket.ClienteSocket;
 import config.ConfiguracionRed;
 import controllers.controller.ControlVista;
 import controllers.controller.Controlador;
 import controllers.controller.IControlador;
 import java.util.HashMap;
+import java.util.function.Consumer;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import models.builder.IJugadorBuilder;
@@ -182,32 +184,38 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         builder.setEstado(EstadoJugador.JUGANDO);
         Jugador nuevoJugador = builder.getResult();
 
-        // Configurar conexion al servidor
-        Controlador controladorImpl = new Controlador();
-        ClienteSocket cliente = new ClienteSocket(
-                ConfiguracionRed.SERVIDOR_HOST,
-                ConfiguracionRed.SERVIDOR_PUERTO,
-                controladorImpl
-        );
-
         // Intentar conectar al servidor
         try {
+            // Crear modelo
+            models.control.ControlModelo modelo = new models.control.ControlModelo(new java.util.ArrayList<>());
+            HashMap<String, Consumer<Mensaje>> manejadores = new HashMap<>();
+
+            // Crear cliente con controlador temporal (null)
+            ClienteSocket cliente = new ClienteSocket(
+                    ConfiguracionRed.SERVIDOR_HOST,
+                    ConfiguracionRed.SERVIDOR_PUERTO,
+                    null
+            );
+
+            // Conectar al servidor
             cliente.execute();
 
-            // Configurar controlador con el modelo y cliente
-            controladorImpl = new Controlador(
-                    new models.control.ControlModelo(new java.util.ArrayList<>()),
-                    cliente,
-                    new HashMap<>()
-            );
+            // Crear controlador con modelo y cliente ya conectado
+            Controlador controladorImpl = new Controlador(modelo, cliente, manejadores);
+
+            // Actualizar el cliente con el controlador correcto
+            cliente.setControl(controladorImpl);
 
             // Configurar ControlVista
             ControlVista.getInstancia().setControl(controladorImpl);
 
+            // Crear lobby y suscribirlo al modelo
+            FrmLobbyMejorado lobby = new FrmLobbyMejorado(nuevoJugador);
+            modelo.suscribirAPartida(lobby);
+
             // Unirse a la partida
             ControlVista.getInstancia().unirsePartida(nuevoJugador);
 
-            FrmLobbyMejorado lobby = new FrmLobbyMejorado(nuevoJugador);
             lobby.setVisible(true);
             this.dispose();
         } catch (Exception e) {

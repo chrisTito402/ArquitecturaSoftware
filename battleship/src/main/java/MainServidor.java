@@ -1,16 +1,29 @@
+import buseventos.IEventSuscriptor;
+import buseventos.Mensaje;
+import buseventos.TipoAccion;
 import buseventos.buseventos.BusEventos;
 import buseventos.servidorsocket.ServidorSocket;
 import config.ConfiguracionRed;
+import models.entidades.Partida;
+import models.enums.EstadoPartida;
+import servidor.controlador.ControladorServidor;
+import servidor.controlador.IOutputChannel;
+import servidor.cronometro.Cronometro;
+
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class MainServidor {
+
+    private static BusEventos busEventos;
 
     public static void main(String[] args) {
         System.out.println("=================================");
         System.out.println("   BATTLESHIP - SERVIDOR");
         System.out.println("=================================");
 
-        // Mostrar IPs disponibles para conexion
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             System.out.println("IP del servidor: " + localHost.getHostAddress());
@@ -21,12 +34,51 @@ public class MainServidor {
 
         System.out.println("Puerto: " + ConfiguracionRed.SERVIDOR_PUERTO);
         System.out.println("---------------------------------");
-        System.out.println("Para conectar desde otra maquina:");
-        System.out.println("1. Edita ConfiguracionRed.java");
-        System.out.println("2. Cambia SERVIDOR_HOST a la IP mostrada arriba");
-        System.out.println("---------------------------------");
 
-        BusEventos busEventos = new BusEventos();
+        busEventos = new BusEventos();
+
+        Cronometro cronometro = new Cronometro(30000);
+        Partida partida = new Partida(
+                null,
+                new ArrayList<>(),
+                3, 4, 2, 2, 11,
+                EstadoPartida.POR_EMPEZAR,
+                new ArrayList<>(),
+                cronometro
+        );
+        cronometro.setPartida(partida);
+
+        IOutputChannel outputChannel = json -> {
+            Mensaje mensaje = new Mensaje(
+                    TipoAccion.PUBLICAR,
+                    "BROADCAST",
+                    com.google.gson.JsonParser.parseString(json),
+                    "servidor"
+            );
+            busEventos.publicar("BROADCAST", mensaje);
+        };
+
+        HashMap<String, Consumer<Mensaje>> manejadores = new HashMap<>();
+        ControladorServidor controladorServidor = new ControladorServidor(partida, outputChannel, manejadores);
+
+        IEventSuscriptor suscriptorServidor = new IEventSuscriptor() {
+            @Override
+            public void recibirEvento(String eventoJSON) {
+                controladorServidor.manejarMensaje(eventoJSON);
+            }
+
+            @Override
+            public String getSuscriptorId() {
+                return "servidor-principal";
+            }
+        };
+
+        busEventos.suscribirse("DISPARO", suscriptorServidor);
+        busEventos.suscribirse("ADD_NAVE", suscriptorServidor);
+        busEventos.suscribirse("UNIRSE_PARTIDA", suscriptorServidor);
+        busEventos.suscribirse("ABANDONAR_PARTIDA", suscriptorServidor);
+        busEventos.suscribirse("BROADCAST", suscriptorServidor);
+
         ServidorSocket servidor = new ServidorSocket(ConfiguracionRed.SERVIDOR_PUERTO, busEventos);
 
         System.out.println("Servidor listo. Esperando jugadores...");
