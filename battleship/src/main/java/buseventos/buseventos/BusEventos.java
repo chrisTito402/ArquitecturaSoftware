@@ -63,6 +63,10 @@ public class BusEventos implements IBusEventos {
         if (mensaje.getAccion() == TipoAccion.SUSCRIBIR) {
             suscribirse(mensaje.getEvento(), cliente);
         } else if (mensaje.getAccion() == TipoAccion.PUBLICAR) {
+            // Auto-suscribir al cliente a BROADCAST cuando se une a la partida
+            if ("UNIRSE_PARTIDA".equals(mensaje.getEvento())) {
+                suscribirse("BROADCAST", cliente);
+            }
             publicar(mensaje.getEvento(), mensaje);
         } else if (mensaje.getAccion() == TipoAccion.SEND_UNICAST) {
             enviarUnicast(mensaje);
@@ -100,6 +104,11 @@ public class BusEventos implements IBusEventos {
     @Override
     public IEventSuscriptor getSuscriptor(String id) {
         return suscriptoresPorId.get(id);
+    }
+
+    @Override
+    public Set<IEventSuscriptor> getSuscriptores(String evento) {
+        return eventos.get(evento);
     }
 
     @Override

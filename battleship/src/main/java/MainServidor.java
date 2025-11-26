@@ -49,13 +49,17 @@ public class MainServidor {
         cronometro.setPartida(partida);
 
         IOutputChannel outputChannel = json -> {
-            Mensaje mensaje = new Mensaje(
-                    TipoAccion.PUBLICAR,
-                    "BROADCAST",
-                    com.google.gson.JsonParser.parseString(json),
-                    "servidor"
-            );
-            busEventos.publicar("BROADCAST", mensaje);
+            // Enviar directamente el JSON a todos los suscriptores de BROADCAST
+            java.util.Set<buseventos.IEventSuscriptor> suscriptores = busEventos.getSuscriptores("BROADCAST");
+            if (suscriptores != null) {
+                for (buseventos.IEventSuscriptor suscriptor : suscriptores) {
+                    try {
+                        suscriptor.recibirEvento(json);
+                    } catch (Exception e) {
+                        System.err.println("[Servidor] Error enviando a cliente: " + e.getMessage());
+                    }
+                }
+            }
         };
 
         HashMap<String, Consumer<Mensaje>> manejadores = new HashMap<>();
@@ -77,7 +81,6 @@ public class MainServidor {
         busEventos.suscribirse("ADD_NAVE", suscriptorServidor);
         busEventos.suscribirse("UNIRSE_PARTIDA", suscriptorServidor);
         busEventos.suscribirse("ABANDONAR_PARTIDA", suscriptorServidor);
-        busEventos.suscribirse("BROADCAST", suscriptorServidor);
 
         ServidorSocket servidor = new ServidorSocket(ConfiguracionRed.SERVIDOR_PUERTO, busEventos);
 

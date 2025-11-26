@@ -1,5 +1,7 @@
 package buseventos;
 
+import java.util.Set;
+
 public interface IBusEventos {
 
     void publicar(String evento, Mensaje mensaje);
@@ -9,6 +11,8 @@ public interface IBusEventos {
     void removeSuscriptor(IEventSuscriptor suscriptor);
 
     IEventSuscriptor getSuscriptor(String id);
+
+    Set<IEventSuscriptor> getSuscriptores(String evento);
 
     int getCantidadSuscriptores(String evento);
 
