@@ -110,7 +110,11 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         System.out.println("[Servidor] Jugador unido: " + jugador.getNombre());
         System.out.println("[Servidor] Jugadores en partida: " + servidor.getJugadores().size());
 
-        enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
+        // Notificar a todos sobre cada jugador en la partida
+        for (Jugador j : servidor.getJugadores()) {
+            JugadorDTO dto = JugadorMapper.toDTO(j);
+            enviarMensaje("JUGADOR_UNIDO", dto);
+        }
     }
 
     private void manejarAbandonarPartidaSv(Mensaje mensaje) {

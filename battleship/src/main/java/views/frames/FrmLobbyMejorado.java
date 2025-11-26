@@ -25,6 +25,8 @@ public class FrmLobbyMejorado extends JFrame implements ISuscriptor {
     private JButton btnRegresar;
     private JLabel lblEsperando;
     private Timer timerAnimacion;
+    private boolean jugador1Conectado = false;
+    private boolean jugador2Conectado = false;
 
     public FrmLobbyMejorado(Jugador jugador) {
         this.jugadorLocal = jugador;
@@ -82,7 +84,6 @@ public class FrmLobbyMejorado extends JFrame implements ISuscriptor {
         panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
 
         setContentPane(panelPrincipal);
-        actualizarJugador1(jugadorLocal.getNombre());
     }
 
     private JPanel crearPanelJugador(String titulo, boolean esJugador1) {
@@ -235,9 +236,15 @@ public class FrmLobbyMejorado extends JFrame implements ISuscriptor {
     public void notificar(String contexto, Object datos) {
         if ("JUGADOR_UNIDO".equals(contexto) && datos instanceof JugadorDTO) {
             JugadorDTO jugadorDTO = (JugadorDTO) datos;
-            if (!jugadorDTO.getNombre().equals(jugadorLocal.getNombre())) {
-                SwingUtilities.invokeLater(() -> actualizarJugador2(jugadorDTO.getNombre()));
-            }
+            SwingUtilities.invokeLater(() -> {
+                if (!jugador1Conectado) {
+                    actualizarJugador1(jugadorDTO.getNombre());
+                    jugador1Conectado = true;
+                } else if (!jugador2Conectado && !lblNombreJ1.getText().equals(jugadorDTO.getNombre())) {
+                    actualizarJugador2(jugadorDTO.getNombre());
+                    jugador2Conectado = true;
+                }
+            });
         }
     }
 
