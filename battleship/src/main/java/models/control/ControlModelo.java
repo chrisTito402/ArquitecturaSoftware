@@ -24,6 +24,9 @@ public class ControlModelo implements IModeloCliente {
     private boolean turno;
     private List<ISuscriptor> suscriptores;
 
+    public ControlModelo() {
+    }
+
     public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores) {
         this.jugador = jugador;
         this.tablero = tablero;
@@ -50,7 +53,7 @@ public class ControlModelo implements IModeloCliente {
         DisparoDTO disparo = new DisparoDTO(jugador, coordenadas, null, null, Instant.now().toEpochMilli());
         return disparo;
     }
-    
+
     @Override
     public void manejarResultadoDisparo(DisparoDTO disparo) {
         if (disparo.getResultadoDisparo() == ResultadoDisparo.DISPARO_FUERA_TIEMPO) {
@@ -61,13 +64,13 @@ public class ControlModelo implements IModeloCliente {
             System.out.println(disparo.getResultadoDisparo());
             return;
         }
-        
+
         notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
     }
 
     @Override
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
-        
+
         return null;
     }
 
@@ -106,7 +109,7 @@ public class ControlModelo implements IModeloCliente {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
     }
-    
+
     @Override
     public List<Jugador> getJugadores() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

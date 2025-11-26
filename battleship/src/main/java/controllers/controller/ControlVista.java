@@ -52,7 +52,6 @@ public class ControlVista implements ISuscriptor {
         return controlVista;
     }
 
-    
     public IControlador getControl() {
         return this.control;
     }
@@ -164,24 +163,24 @@ public class ControlVista implements ISuscriptor {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
-            
+
             if (d.getPuntaje() != null) {
                 String mensaje = String.format(
-                    "¡Partida terminada!\n\n" +
-                    "Ganador: %s\n" +
-                    "Puntaje final: %d puntos\n" +
-                    "Aciertos: %d\n" +
-                    "Fallos: %d\n" +
-                    "Naves hundidas: %d\n" +
-                    "Precisión: %.2f%%",
-                    d.getJugador().getNombre(),
-                    d.getPuntaje().getPuntosTotales(),
-                    d.getPuntaje().getDisparosAcertados(),
-                    d.getPuntaje().getDisparosFallados(),
-                    d.getPuntaje().getNavesHundidas(),
-                    d.getPuntaje().getPrecision()
+                        "¡Partida terminada!\n\n"
+                        + "Ganador: %s\n"
+                        + "Puntaje final: %d puntos\n"
+                        + "Aciertos: %d\n"
+                        + "Fallos: %d\n"
+                        + "Naves hundidas: %d\n"
+                        + "Precisión: %.2f%%",
+                        d.getJugador().getNombre(),
+                        d.getPuntaje().getPuntosTotales(),
+                        d.getPuntaje().getDisparosAcertados(),
+                        d.getPuntaje().getDisparosFallados(),
+                        d.getPuntaje().getNavesHundidas(),
+                        d.getPuntaje().getPrecision()
                 );
-                
+
                 JOptionPane.showMessageDialog(null, mensaje, "Fin de Partida", JOptionPane.INFORMATION_MESSAGE);
             }
         }

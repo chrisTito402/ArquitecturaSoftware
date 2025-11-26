@@ -2,8 +2,10 @@ package controllers.controller;
 
 import buseventos.Mensaje;
 import buseventos.TipoAccion;
+import clientesocket.ClienteSocket;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
+import java.util.HashMap;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
@@ -12,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
+import models.control.ControlModelo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
+import servidor.modelo.ServidorManager;
 import views.DTOs.JugadorDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
@@ -24,6 +26,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private IModeloCliente partida;
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadorEventos;
+
+    private ControlModelo modelo;
+    private ControlVista vista;
+    private ClienteSocket clienteS;
 
     public Controlador() {
     }
@@ -36,7 +42,29 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
+        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
+    }
 
+    public Controlador(ControlModelo modelo, ControlVista vista) {
+        this.modelo = modelo;
+        this.vista = vista;
+
+        ServidorManager.iniciar();
+
+        this.cliente = new ClienteSocket("localhost", 5000, this);
+        clienteS.execute();
+
+        this.manejadorEventos = new HashMap<>();
+        registrarEventos();
+    }
+
+    private void registrarEventos() {
+        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
+        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
+        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
+        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
     }
 
     // Metodo para enviar mensaje por la red.
@@ -72,6 +100,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
 
     }
+
     //Manda mensaje al servidor
     @Override
     public void abandonarLobby(Jugador jugador) {
@@ -150,5 +179,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
+    }
+
+    private void manejarUnirsePartida(Mensaje mensaje) {
+        JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
+        partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
+    }
+
+    private void manejarIniciarPartida(Mensaje mensaje) {
+        partida.empezarPartida();
+        partida.notificarAllSuscriptores("INICIAR_PARTIDA", null);
     }
 }

@@ -1,11 +1,7 @@
 package views.frames;
 
-import buseventos.buseventos.BusEventos;
-import buseventos.servidorsocket.ServidorSocket;
-import clientesocket.ClienteSocket;
 import controllers.controller.ControlVista;
 import controllers.controller.Controlador;
-import java.util.HashMap;
 import models.control.ControlModelo;
 
 /**
@@ -14,31 +10,21 @@ import models.control.ControlModelo;
  */
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
-    private static boolean iniciado = false;
-
-    ControlVista cv = ControlVista.getInstancia();
-    ControlModelo cm;
-    Controlador c;
-
-    ClienteSocket cliente;
-
+    private Controlador controlador;
+    
     /**
      * Creates new form FrmMenuPrincipal
      */
     public FrmMenuPrincipal() {
         initComponents();
     }
-
-//    private void server() {
-//        if (!iniciado) {
-//            BusEventos bus = new BusEventos(new HashMap());
-//            ServidorSocket server = new ServidorSocket(5000, bus);
-//            server.start();
-//            iniciado = true;
-//        } else {
-//            System.out.println("Servidor ya estaba escuchando en el puerto");
-//        }
-//    }
+    
+    private void iniciarPartida() {
+        // Crear Modelo y Vista
+        ControlModelo modelo = new ControlModelo();
+        ControlVista vista = ControlVista.getInstancia();
+        controlador = new Controlador(modelo, vista);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -140,6 +126,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
+        this.iniciarPartida();
         FrmRegistrarJugador r = new FrmRegistrarJugador();
         r.setLocationRelativeTo(this);
         r.setVisible(true);
