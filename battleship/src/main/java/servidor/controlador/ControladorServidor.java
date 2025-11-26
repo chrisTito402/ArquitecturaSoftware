@@ -19,11 +19,11 @@ import models.entidades.Puntaje;
 import models.entidades.Submarino;
 import models.enums.ResultadoAddNave;
 import servidor.modelo.IModeloServidor;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
-import views.DTOs.PuntajeDTO;
+import dtos.AddNaveDTO;
+import dtos.DisparoDTO;
+import dtos.JugadorDTO;
+import dtos.NaveDTO;
+import dtos.PuntajeDTO;
 
 /**
  *
@@ -61,8 +61,12 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
 
-        manejadoresEventos.get(mensaje.getEvento()).accept(mensaje);
-
+        Consumer<Mensaje> handler = manejadoresEventos.get(mensaje.getEvento());
+        if (handler != null) {
+            handler.accept(mensaje);
+        } else {
+            System.err.println("Evento no registrado en servidor: " + mensaje.getEvento());
+        }
     }
 
     private void addNave(Mensaje mensaje) {
@@ -70,33 +74,37 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         AddNaveDTO dto = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
 
         List<Coordenadas> coordenadas = dto.getCoordenadases();
-        JugadorDTO jugadorDTO = dto.getJugador();
-        Jugador jugador = new Jugador(
-                jugadorDTO.getNombre(),
-                jugadorDTO.getColor(),
-                jugadorDTO.getEstado()
-        );
-        NaveDTO naveDTO = dto.getNave();
-        Nave nave = null;
 
-        if (null != naveDTO.getTipo()) {
-            switch (naveDTO.getTipo()) {
-                case BARCO ->
-                    nave = new Barco(naveDTO.getOrientacion());
-                case SUBMARINO ->
-                    nave = new Submarino(naveDTO.getOrientacion());
-                case CRUCERO ->
-                    nave = new Crucero(naveDTO.getOrientacion());
-                case PORTAAVIONES ->
-                    nave = new PortaAviones(naveDTO.getOrientacion());
-                default -> {
-                }
-            }
-        }
+        // Usar JugadorMapper para convertir DTO a entidad
+        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(dto.getJugador());
+
+        // Crear nave según el tipo especificado
+        NaveDTO naveDTO = dto.getNave();
+        Nave nave = crearNave(naveDTO);
 
         ResultadoAddNave resultado = servidor.addNave(jugador, nave, coordenadas);
 
         enviarMensaje("RESULTADO_ADD_NAVE", resultado);
+    }
+
+    /**
+     * Factory method para crear una Nave según su tipo.
+     * Aplica el patrón Factory para eliminar el switch repetitivo.
+     *
+     * @param naveDTO El DTO con la información de la nave
+     * @return Una instancia de la Nave correspondiente, o null si el tipo es inválido
+     */
+    private Nave crearNave(NaveDTO naveDTO) {
+        if (naveDTO == null || naveDTO.getTipo() == null) {
+            return null;
+        }
+
+        return switch (naveDTO.getTipo()) {
+            case BARCO -> new Barco(naveDTO.getOrientacion());
+            case SUBMARINO -> new Submarino(naveDTO.getOrientacion());
+            case CRUCERO -> new Crucero(naveDTO.getOrientacion());
+            case PORTAAVIONES -> new PortaAviones(naveDTO.getOrientacion());
+        };
     }
 
     private void realizarDisparo(Mensaje mensaje) {
@@ -104,15 +112,14 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         DisparoDTO disparoDTO = gson.fromJson(mensaje.getData(), DisparoDTO.class);
 
         Coordenadas coordenadas = disparoDTO.getCoordenadas();
-        JugadorDTO jugadorDTO = disparoDTO.getJugador();
-        Jugador jugador = new Jugador(
-                jugadorDTO.getNombre(),
-                jugadorDTO.getColor(),
-                jugadorDTO.getEstado()
-        );
 
+        // Usar JugadorMapper para convertir DTO a entidad
+        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(disparoDTO.getJugador());
+
+        // Realizar el disparo en el servidor
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
 
+        // Obtener el puntaje actualizado del jugador usando el Mapper
         PuntajeDTO puntajeDTO = null;
         Jugador jugadorConPuntaje = servidor.getJugadores().stream()
                 .filter(j -> j.getNombre().equals(jugador.getNombre()))
@@ -120,21 +127,13 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
                 .orElse(null);
 
         if (jugadorConPuntaje != null && jugadorConPuntaje.getPuntaje() != null) {
-            Puntaje p = jugadorConPuntaje.getPuntaje();
-            puntajeDTO = new PuntajeDTO(
-                    p.getPuntosTotales(),
-                    p.getDisparosAcertados(),
-                    p.getDisparosFallados(),
-                    p.getNavesHundidas(),
-                    p.getPrecision()
-            );
+            // Usar PuntajeMapper para convertir entidad a DTO
+            puntajeDTO = dtos.mappers.PuntajeMapper.toDTO(jugadorConPuntaje.getPuntaje());
         }
-        
+
+        // Construir el DisparoDTO de respuesta usando Mappers
         DisparoDTO resultado = new DisparoDTO(
-                new JugadorDTO(
-                        disparo.getJugador().getNombre(),
-                        disparo.getJugador().getColor(),
-                        disparo.getJugador().getEstado()),
+                dtos.mappers.JugadorMapper.toDTO(disparo.getJugador()),
                 disparo.getCoordenadas(),
                 disparo.getResultadoDisparo(),
                 disparo.getEstadoPartida()
@@ -159,12 +158,8 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
 
-        // Convertir DTO a entidad real
-        Jugador jugador = new Jugador(
-                jugadorDTO.getNombre(),
-                jugadorDTO.getColor(),
-                jugadorDTO.getEstado()
-        );
+        // Usar JugadorMapper para convertir DTO a entidad
+        Jugador jugador = dtos.mappers.JugadorMapper.toEntity(jugadorDTO);
 
         // 1. Lógica REAL del servidor
         servidor.abandonarPartida(jugador);

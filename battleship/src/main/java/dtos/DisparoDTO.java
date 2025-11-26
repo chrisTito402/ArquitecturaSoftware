@@ -1,16 +1,17 @@
-package views.DTOs;
+package dtos;
 
-import java.time.Instant;
 import models.entidades.Coordenadas;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 
 /**
+ * Data Transfer Object para Disparo.
+ * Incluye información del puntaje obtenido en el disparo.
  *
  * @author daniel
  */
 public class DisparoDTO {
-    
+
     private JugadorDTO jugador;
     private Coordenadas coordenadas;
     private ResultadoDisparo resultadoDisparo;
@@ -29,7 +30,7 @@ public class DisparoDTO {
         this.tiempo = tiempo;
         this.puntaje = puntaje;
     }
-    
+
     public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
@@ -37,7 +38,7 @@ public class DisparoDTO {
         this.estadoPartida = estadoPartida;
         this.tiempo = tiempo;
     }
-    
+
     public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
@@ -52,7 +53,7 @@ public class DisparoDTO {
     public void setPuntaje(PuntajeDTO puntaje) {
         this.puntaje = puntaje;
     }
-    
+
     public JugadorDTO getJugador() {
         return jugador;
     }
@@ -95,13 +96,13 @@ public class DisparoDTO {
 
     @Override
     public String toString() {
-        return "DisparoDTO{" + 
-                "jugador=" + jugador + 
-                ", coordenadas=" + coordenadas + 
-                ", resultadoDisparo=" + resultadoDisparo + 
-                ", estadoPartida=" + estadoPartida + 
-                ", tiempo=" + tiempo + 
-                ", puntaje=" + puntaje + 
+        return "DisparoDTO{" +
+                "jugador=" + jugador +
+                ", coordenadas=" + coordenadas +
+                ", resultadoDisparo=" + resultadoDisparo +
+                ", estadoPartida=" + estadoPartida +
+                ", tiempo=" + tiempo +
+                ", puntaje=" + puntaje +
                 '}';
     }
 }

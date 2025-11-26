@@ -13,11 +13,13 @@ import models.enums.EstadoPartida;
 import models.control.IModeloCliente;
 
 /**
+ * Director del patrón Builder.
+ * Orquesta la construcción de objetos complejos.
  *
  * @author daniel
  */
 public class Director {
-    
+
     public IModeloCliente makePartida(IPartidaBuilder builder) {
         builder.setCantBarcos(0);
         builder.setCantSubmarinos(0);
@@ -27,7 +29,7 @@ public class Director {
         builder.setEstado(EstadoPartida.EN_CURSO);
         builder.setJugadores(new ArrayList<>());
         builder.setSuscriptores(new ArrayList<>());
-        
+
         return builder.getResult();
     }
     

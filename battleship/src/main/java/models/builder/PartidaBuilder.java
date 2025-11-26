@@ -9,11 +9,13 @@ import java.util.List;
 import models.control.IModeloCliente;
 
 /**
+ * Builder para construir objetos Partida.
+ * Implementa el patrón Builder para construcción flexible de Partidas.
  *
  * @author daniel
  */
 public class PartidaBuilder implements IPartidaBuilder {
-    
+
     private Jugador turno;
     private List<Jugador> jugadores;
     private int cantBarcos;
@@ -77,8 +79,8 @@ public class PartidaBuilder implements IPartidaBuilder {
 
     @Override
     public IModeloCliente getResult() {
-        //return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
-        return null;
+        // Usa el constructor sin cronómetro (apropiado para el modelo del cliente)
+        return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
     }
-    
+
 }

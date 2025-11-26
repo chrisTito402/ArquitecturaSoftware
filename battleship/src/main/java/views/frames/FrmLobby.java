@@ -3,43 +3,48 @@ package views.frames;
 import controllers.controller.ControlVista;
 import java.awt.Color;
 import java.util.List;
-import models.entidades.Jugador;
-import models.entidades.Partida;
+import dtos.JugadorDTO;
 
 /**
  *
  * @author Knocmare
  */
 public class FrmLobby extends javax.swing.JFrame {
-    
-    Partida p;
-    List<Jugador> jugadores;
-    
+
     /**
      * Creates new form FrmLobby
      */
-    public FrmLobby(Partida p) {
-        this.p = p;
+    public FrmLobby() {
         initComponents();
-        cargarLobby();
     }
-    
-    private void cargarLobby() {
-        jugadores = p.getJugadores();
-        
+
+    /**
+     * Actualiza la vista del lobby con la lista de jugadores
+     * @param jugadores Lista de jugadores en formato DTO
+     */
+    public void actualizarLobby(List<JugadorDTO> jugadores) {
+        if (jugadores == null || jugadores.isEmpty()) {
+            lblJugadorUno.setText("(Esperando)");
+            pnlEstadoUno.setBackground(Color.RED);
+            lblJugadorDos.setText("(Esperando)");
+            pnlEstadoDos.setBackground(Color.RED);
+            return;
+        }
+
         if (jugadores.size() > 1) {
             // Jugador 1
-            lblJugadorUno.setText(jugadores.getFirst().getNombre());
-            pnlEstadoUno.setBackground(Color.green);
+            lblJugadorUno.setText(jugadores.get(0).getNombre());
+            pnlEstadoUno.setBackground(Color.GREEN);
             // Jugador 2
-            lblJugadorDos.setText(jugadores.getLast().getNombre());
-            pnlEstadoDos.setBackground(Color.green);
+            lblJugadorDos.setText(jugadores.get(1).getNombre());
+            pnlEstadoDos.setBackground(Color.GREEN);
         } else {
             // Jugador 1
-            lblJugadorUno.setText(jugadores.getFirst().getNombre());
-            pnlEstadoUno.setBackground(Color.green);
+            lblJugadorUno.setText(jugadores.get(0).getNombre());
+            pnlEstadoUno.setBackground(Color.GREEN);
             // Jugador 2
             lblJugadorDos.setText("(Buscando)");
+            pnlEstadoDos.setBackground(Color.RED);
         }
     }
     

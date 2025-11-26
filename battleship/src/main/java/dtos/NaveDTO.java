@@ -1,14 +1,15 @@
-package views.DTOs;
+package dtos;
 
 import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
 
 /**
+ * Data Transfer Object para Nave.
  *
  * @author daniel
  */
 public class NaveDTO {
-    
+
     private EstadoNave estado;
     private OrientacionNave orientacion;
     private TipoNaveDTO tipo;
@@ -60,5 +61,5 @@ public class NaveDTO {
     public String toString() {
         return "NaveDTO{" + "estado=" + estado + ", orientacion=" + orientacion + ", tipo=" + tipo + ", tamanio=" + tamanio + '}';
     }
-    
+
 }

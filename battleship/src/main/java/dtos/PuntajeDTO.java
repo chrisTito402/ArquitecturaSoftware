@@ -1,14 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package views.DTOs;
+package dtos;
 
 /**
+ * Data Transfer Object para el puntaje de un jugador.
+ * Transporta información de puntaje entre capas sin exponer la entidad de dominio.
+ *
+ * Arquitectura en Capas: Este DTO pertenece a la capa de transferencia de datos,
+ * actuando como intermediario entre la capa de negocio y la capa de presentación.
+ *
  * @author Fred
  */
 public class PuntajeDTO {
-    
+
     private int puntosTotales;
     private int disparosAcertados;
     private int disparosFallados;
@@ -69,12 +71,12 @@ public class PuntajeDTO {
 
     @Override
     public String toString() {
-        return "PuntajeDTO{" + 
-                "puntosTotales=" + puntosTotales + 
-                ", disparosAcertados=" + disparosAcertados + 
-                ", disparosFallados=" + disparosFallados + 
-                ", navesHundidas=" + navesHundidas + 
-                ", precision=" + precision + 
+        return "PuntajeDTO{" +
+                "puntosTotales=" + puntosTotales +
+                ", disparosAcertados=" + disparosAcertados +
+                ", disparosFallados=" + disparosFallados +
+                ", navesHundidas=" + navesHundidas +
+                ", precision=" + precision +
                 '}';
     }
 }

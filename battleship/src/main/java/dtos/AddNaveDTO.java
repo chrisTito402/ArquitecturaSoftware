@@ -1,15 +1,16 @@
-package views.DTOs;
+package dtos;
 
 import java.util.List;
 import models.entidades.Coordenadas;
 import models.enums.ResultadoAddNave;
 
 /**
+ * Data Transfer Object para agregar una nave al tablero.
  *
  * @author daniel
  */
 public class AddNaveDTO {
-    
+
     private JugadorDTO jugador;
     private NaveDTO nave;
     private List<Coordenadas> coordenadases;
@@ -24,7 +25,7 @@ public class AddNaveDTO {
         this.coordenadases = coordenadases;
         this.resultado = resultado;
     }
-    
+
     public JugadorDTO getJugador() {
         return jugador;
     }
@@ -61,5 +62,5 @@ public class AddNaveDTO {
     public String toString() {
         return "AddNaveDTO{" + "jugador=" + jugador + ", nave=" + nave + ", coordenadases=" + coordenadases + ", resultado=" + resultado + '}';
     }
-    
+
 }

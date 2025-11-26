@@ -22,35 +22,38 @@ public class Tablero {
     }
     
     public ResultadoDisparo realizarDisparo(Coordenadas c) {
+        // Validar que las coordenadas estén dentro del rango
         if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
             System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
             return null;
         }
 
         Casilla casilla = casillas[c.getX()][c.getY()];
-        Nave nave = casilla.getNave();
-        EstadoCasilla eC = casilla.getEstado();
+        EstadoCasilla estadoCasilla = casilla.getEstado();
 
-        if (eC == EstadoCasilla.YA_DISPARADO) {
+        // Verificar si la casilla ya fue disparada
+        if (estadoCasilla == EstadoCasilla.YA_DISPARADO) {
             return ResultadoDisparo.YA_DISPARADO;
         }
 
+        // Marcar la casilla como disparada ANTES de procesar el resultado
+        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
+
+        Nave nave = casilla.getNave();
+
+        // Si hay una nave en la casilla, registrar el disparo
         if (nave != null) {
             EstadoNave estadoNave = nave.addDisparo();
 
-            if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
-                return ResultadoDisparo.IMPACTO;
-            } else if (estadoNave == EstadoNave.HUNDIDO) {
+            if (estadoNave == EstadoNave.HUNDIDO) {
                 return ResultadoDisparo.HUNDIMIENTO;
+            } else {
+                // AVERIADO o cualquier otro estado
+                return ResultadoDisparo.IMPACTO;
             }
         }
 
-        if (eC == EstadoCasilla.AGUA) {
-            return ResultadoDisparo.AGUA;
-        }
-
-        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
-        
+        // Si no hay nave, el disparo cayó en agua
         return ResultadoDisparo.AGUA;
     }
     

@@ -6,7 +6,7 @@ import models.entidades.Nave;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.entidades.Coordenadas;
-import views.DTOs.JugadorDTO;
+import dtos.JugadorDTO;
 
 /**
  *

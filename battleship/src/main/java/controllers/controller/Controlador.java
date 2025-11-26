@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
 import models.observador.ISuscriptor;
-import views.DTOs.DisparoDTO;
+import dtos.DisparoDTO;
 import models.control.IModeloCliente;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
-import views.DTOs.JugadorDTO;
+import dtos.JugadorDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
@@ -54,7 +54,12 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
 
-        manejadorEventos.get(mensaje.getEvento()).accept(mensaje);
+        Consumer<Mensaje> handler = manejadorEventos.get(mensaje.getEvento());
+        if (handler != null) {
+            handler.accept(mensaje);
+        } else {
+            System.err.println("Evento no registrado: " + mensaje.getEvento());
+        }
     }
 
     private void manejarResultadoDisparo(Mensaje mensaje) {
@@ -110,6 +115,29 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+        if (jugador == null || nave == null || coordenadas == null || coordenadas.isEmpty()) {
+            System.err.println("Error: Datos insuficientes para agregar nave");
+            return false;
+        }
+
+        // Usar NaveMapper para convertir Nave a NaveDTO
+        dtos.NaveDTO naveDTO = dtos.mappers.NaveMapper.toDTO(nave);
+
+        // Usar JugadorMapper para convertir Jugador a JugadorDTO
+        JugadorDTO jugadorDTO = dtos.mappers.JugadorMapper.toDTO(jugador);
+
+        // Crear DTO de AddNave (sin resultado aún, lo asigna el servidor)
+        dtos.AddNaveDTO addNaveDTO = new dtos.AddNaveDTO(
+            jugadorDTO,
+            naveDTO,
+            coordenadas,
+            null  // El resultado será asignado por el servidor
+        );
+
+        // Enviar mensaje al servidor
+        enviarMensaje("ADD_NAVE", addNaveDTO);
+
+        System.out.println("Solicitud de agregar nave enviada al servidor");
         return true;
     }
 

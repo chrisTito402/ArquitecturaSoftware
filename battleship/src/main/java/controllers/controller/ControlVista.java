@@ -1,6 +1,6 @@
 package controllers.controller;
 
-import views.DTOs.CoordenadasDTO;
+import dtos.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
+import dtos.DisparoDTO;
+import dtos.JugadorDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -117,9 +117,16 @@ public class ControlVista implements ISuscriptor {
         if (datos == null) {
             System.out.println("Los datos estan vacios.");
             return;
-        } else {
-            manejadoresNoti.get(contexto).accept(datos);
         }
+
+        // BUGFIX: Validar que el manejador existe antes de usarlo
+        Consumer<Object> manejador = manejadoresNoti.get(contexto);
+        if (manejador == null) {
+            System.err.println("ControlVista: No hay manejador registrado para el contexto: " + contexto);
+            return;
+        }
+
+        manejador.accept(datos);
     }
 
     private void manejarDisparo(Object datos) {

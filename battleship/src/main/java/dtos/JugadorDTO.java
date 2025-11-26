@@ -1,14 +1,15 @@
-package views.DTOs;
+package dtos;
 
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 
 /**
+ * Data Transfer Object para Jugador.
  *
  * @author daniel
  */
 public class JugadorDTO {
-    
+
     private String nombre;
     private ColorJugador color;
     private EstadoJugador estado;
@@ -50,5 +51,5 @@ public class JugadorDTO {
     public String toString() {
         return "JugadorDTO{" + "nombre=" + nombre + ", color=" + color + ", estado=" + estado + '}';
     }
-    
+
 }

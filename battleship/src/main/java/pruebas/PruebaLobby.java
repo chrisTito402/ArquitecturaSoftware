@@ -14,8 +14,8 @@ import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
 import servidor.controlador.ControladorServidor;
 import servidor.cronometro.Cronometro;
-import views.DTOs.JugadorDTO;
-import views.DTOs.TableroDTO;
+import dtos.JugadorDTO;
+import dtos.TableroDTO;
 import views.frames.FrmLobby;
 
 /**
@@ -66,8 +66,15 @@ public class PruebaLobby {
         cliente.execute();
         
         p.unirsePartida(j2);
-        
-        FrmLobby lobby = new FrmLobby(p);
+
+        // Crear DTOs de jugadores para la vista
+        List<JugadorDTO> jugadoresDTO = new ArrayList<>();
+        for (Jugador j : p.getJugadores()) {
+            jugadoresDTO.add(new JugadorDTO(j.getNombre(), j.getColor(), j.getEstado()));
+        }
+
+        FrmLobby lobby = new FrmLobby();
+        lobby.actualizarLobby(jugadoresDTO);
         lobby.setVisible(true);
     }
     

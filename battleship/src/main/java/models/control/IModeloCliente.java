@@ -4,10 +4,10 @@ import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import java.util.List;
 import models.observador.ISuscriptor;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
+import dtos.AddNaveDTO;
+import dtos.DisparoDTO;
+import dtos.JugadorDTO;
+import dtos.NaveDTO;
 
 /**
  *

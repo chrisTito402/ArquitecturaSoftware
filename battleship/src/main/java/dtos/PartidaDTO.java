@@ -1,13 +1,14 @@
-package views.DTOs;
+package dtos;
 
 import models.enums.EstadoPartida;
 
 /**
+ * Data Transfer Object para Partida.
  *
  * @author daniel
  */
 public class PartidaDTO {
-    
+
     private int cantBarcos;
     private int cantSubmarinos;
     private int cantCruceros;
@@ -76,5 +77,5 @@ public class PartidaDTO {
     public String toString() {
         return "PartidaDTO{" + "cantBarcos=" + cantBarcos + ", cantSubmarinos=" + cantSubmarinos + ", cantCruceros=" + cantCruceros + ", cantPortaAviones=" + cantPortaAviones + ", totalNaves=" + totalNaves + ", estado=" + estado + '}';
     }
-    
+
 }

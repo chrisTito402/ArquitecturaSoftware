@@ -1,6 +1,7 @@
-package views.DTOs;
+package dtos;
 
 /**
+ * Enum que representa los tipos de nave en el formato DTO.
  *
  * @author daniel
  */
