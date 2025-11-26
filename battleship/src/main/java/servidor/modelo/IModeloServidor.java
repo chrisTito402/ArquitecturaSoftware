@@ -15,8 +15,7 @@ public interface IModeloServidor {
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
     public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
     public void addJugador(Jugador j);
-    
-    // Caso de Uso: Unirse Partida
+    public List<Jugador> getJugadores(); 
     public void unirsePartida(Jugador jugador);
     public void empezarPartida();
     public void abandonarPartida(Jugador jugadorQueSeVa);

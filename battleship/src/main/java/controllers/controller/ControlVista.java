@@ -21,6 +21,7 @@ import views.DTOs.JugadorDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
+import views.frames.PuntajePanel;
 import views.frames.TimerPanel;
 
 /**
@@ -35,6 +36,7 @@ public class ControlVista implements ISuscriptor {
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
     private TimerPanel timer;
+    private PuntajePanel puntajePanel;
     private Map<String, Consumer<Object>> manejadoresNoti;
 
     private ControlVista() {
@@ -73,6 +75,19 @@ public class ControlVista implements ISuscriptor {
 
     public void setTimer(TimerPanel timer) {
         this.timer = timer;
+    }
+
+    public PuntajePanel getPuntajePanel() {
+        return puntajePanel;
+    }
+
+    public void setPuntajePanel(javax.swing.JPanel panel) {  //Para que acepte JPanel Generico
+        if (panel instanceof PuntajePanel) {
+            this.puntajePanel = (PuntajePanel) panel;
+            System.out.println("PuntajePanel registrado correctamente");
+        } else {
+            System.err.println("ERROR: El panel no es de tipo PuntajePanel");
+        }
     }
 
     public void realizarDisparo(Coordenadas c) {
@@ -124,6 +139,10 @@ public class ControlVista implements ISuscriptor {
         Component componente;
         if (d.getJugador().getNombre().equals(jugador.getNombre())) {
             componente = getCasillaEnemiga(d.getCoordenadas());
+            if (puntajePanel != null && d.getPuntaje() != null) {
+                puntajePanel.actualizarPuntaje(d.getPuntaje());
+                System.out.println("Puntaje actualizado en UI: " + d.getPuntaje().getPuntosTotales());
+            }
         } else {
             componente = getCasillaPropia(d.getCoordenadas());
         }
@@ -139,13 +158,32 @@ public class ControlVista implements ISuscriptor {
         }
 
         System.out.println(c.getX() + " " + c.getY());
-
         System.out.println(d.getResultadoDisparo().toString());
 
         if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
+            
+            if (d.getPuntaje() != null) {
+                String mensaje = String.format(
+                    "¡Partida terminada!\n\n" +
+                    "Ganador: %s\n" +
+                    "Puntaje final: %d puntos\n" +
+                    "Aciertos: %d\n" +
+                    "Fallos: %d\n" +
+                    "Naves hundidas: %d\n" +
+                    "Precisión: %.2f%%",
+                    d.getJugador().getNombre(),
+                    d.getPuntaje().getPuntosTotales(),
+                    d.getPuntaje().getDisparosAcertados(),
+                    d.getPuntaje().getDisparosFallados(),
+                    d.getPuntaje().getNavesHundidas(),
+                    d.getPuntaje().getPrecision()
+                );
+                
+                JOptionPane.showMessageDialog(null, mensaje, "Fin de Partida", JOptionPane.INFORMATION_MESSAGE);
+            }
         }
     }
 
@@ -154,13 +192,10 @@ public class ControlVista implements ISuscriptor {
         JOptionPane.showMessageDialog(null,
                 "El jugador " + dto.getNombre() + " abandonó la partida.");
 
-        // Deshabilitar tablero enemigo
         casillasEnemigas.forEach(c -> c.setEnabled(false));
 
-        // Detener cronómetro
         timer.stopTimer();
 
-        // Aquí puedes regresar al menú o cerrar ventana
     }
 
     public void initTableroPropio() {

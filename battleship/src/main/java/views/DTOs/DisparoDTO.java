@@ -16,10 +16,20 @@ public class DisparoDTO {
     private ResultadoDisparo resultadoDisparo;
     private EstadoPartida estadoPartida;
     private long tiempo;
+    private PuntajeDTO puntaje;
 
     public DisparoDTO() {
     }
 
+    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo, PuntajeDTO puntaje) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+        this.tiempo = tiempo;
+        this.puntaje = puntaje;
+    }
+    
     public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, long tiempo) {
         this.jugador = jugador;
         this.coordenadas = coordenadas;
@@ -35,6 +45,14 @@ public class DisparoDTO {
         this.estadoPartida = estadoPartida;
     }
 
+    public PuntajeDTO getPuntaje() {
+        return puntaje;
+    }
+
+    public void setPuntaje(PuntajeDTO puntaje) {
+        this.puntaje = puntaje;
+    }
+    
     public JugadorDTO getJugador() {
         return jugador;
     }
@@ -77,7 +95,13 @@ public class DisparoDTO {
 
     @Override
     public String toString() {
-        return "DisparoDTO{" + "jugador=" + jugador + ", coordenadas=" + coordenadas + ", resultadoDisparo=" + resultadoDisparo + ", estadoPartida=" + estadoPartida + ", tiempo=" + tiempo + '}';
+        return "DisparoDTO{" + 
+                "jugador=" + jugador + 
+                ", coordenadas=" + coordenadas + 
+                ", resultadoDisparo=" + resultadoDisparo + 
+                ", estadoPartida=" + estadoPartida + 
+                ", tiempo=" + tiempo + 
+                ", puntaje=" + puntaje + 
+                '}';
     }
-    
 }
