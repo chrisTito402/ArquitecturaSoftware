@@ -17,14 +17,15 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
      */
     public FrmMenuPrincipal() {
         initComponents();
+//        this.iniciarPartida();
     }
     
-    private void iniciarPartida() {
-        // Crear Modelo y Vista
-        ControlModelo modelo = new ControlModelo();
-        ControlVista vista = ControlVista.getInstancia();
-        controlador = new Controlador(modelo, vista);
-    }
+//    private void iniciarPartida() {
+//        // Crear Modelo y Vista
+//        ControlModelo modelo = new ControlModelo();
+//        ControlVista vista = ControlVista.getInstancia();
+//        controlador = new Controlador(modelo, vista);
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -126,7 +127,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
-        this.iniciarPartida();
+        
         FrmRegistrarJugador r = new FrmRegistrarJugador();
         r.setLocationRelativeTo(this);
         r.setVisible(true);

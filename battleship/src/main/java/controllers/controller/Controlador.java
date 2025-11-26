@@ -27,9 +27,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadorEventos;
 
-    private ControlModelo modelo;
-    private ControlVista vista;
-    private ClienteSocket clienteS;
+//    private ControlModelo modelo;
+//    private ControlVista vista;
+//    private ClienteSocket clienteS;
 
     public Controlador() {
     }
@@ -46,18 +46,16 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
     }
 
-    public Controlador(ControlModelo modelo, ControlVista vista) {
-        this.modelo = modelo;
-        this.vista = vista;
-
-        ServidorManager.iniciar();
-
-        this.cliente = new ClienteSocket("localhost", 5000, this);
-        clienteS.execute();
-
-        this.manejadorEventos = new HashMap<>();
-        registrarEventos();
-    }
+//    public Controlador(ControlModelo modelo, ControlVista vista) {
+//        this.modelo = modelo;
+//        this.vista = vista;
+//
+//        this.cliente = new ClienteSocket("localhost", 5000, this);
+//        clienteS.execute();
+//
+//        this.manejadorEventos = new HashMap<>();
+//        registrarEventos();
+//    }
 
     private void registrarEventos() {
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
