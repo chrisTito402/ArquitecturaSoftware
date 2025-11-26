@@ -1,9 +1,8 @@
 package controllers.controller;
 
 import buseventos.Mensaje;
-import buseventos.TipoAccion;
+import buseventos.util.MensajeriaHelper;
 import clientesocket.IClienteSocket;
-import com.google.gson.Gson;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
@@ -39,54 +38,35 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     }
 
-    // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
-        Gson gson = new Gson();
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), "1");
-        String json = gson.toJson(mensaje);
-
+        String json = MensajeriaHelper.crearMensajeJSON(evento, datos, "1");
         cliente.enviarMensaje(json);
     }
 
-    // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
-        Gson gson = new Gson();
-        Mensaje mensaje = gson.fromJson(json, Mensaje.class);
+        Mensaje mensaje = MensajeriaHelper.parsearMensaje(json);
 
         Consumer<Mensaje> handler = manejadorEventos.get(mensaje.getEvento());
         if (handler != null) {
             handler.accept(mensaje);
-        } else {
-            System.err.println("Evento no registrado: " + mensaje.getEvento());
         }
     }
 
     private void manejarResultadoDisparo(Mensaje mensaje) {
-        Gson gson = new Gson();
-        DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
-
+        DisparoDTO d = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
         partida.manejarResultadoDisparo(d);
     }
 
-    //Recibe el mensaje del servidor
     public void manejarAbandonarPartida(Mensaje mensaje) {
-        Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono la partida.");
+        JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
         partida.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
-
     }
-    //Manda mensaje al servidor
     @Override
     public void abandonarLobby(Jugador jugador) {
         partida.abandonarLobby(jugador);
-
-        //Mandar mensaje al servidor para avisar al ribal
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-
         enviarMensaje("ABANDONAR_PARTIDA", dto);
-
     }
 
     @Override
@@ -106,38 +86,27 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     private void manejarJugadorUnido(Mensaje mensaje) {
-        System.out.println("Cliente: Recibido 'JUGADOR_UNIDO'.");
-        Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-
+        JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
         partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
 
     @Override
     public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         if (jugador == null || nave == null || coordenadas == null || coordenadas.isEmpty()) {
-            System.err.println("Error: Datos insuficientes para agregar nave");
             return false;
         }
 
-        // Usar NaveMapper para convertir Nave a NaveDTO
         dtos.NaveDTO naveDTO = dtos.mappers.NaveMapper.toDTO(nave);
-
-        // Usar JugadorMapper para convertir Jugador a JugadorDTO
         JugadorDTO jugadorDTO = dtos.mappers.JugadorMapper.toDTO(jugador);
 
-        // Crear DTO de AddNave (sin resultado aún, lo asigna el servidor)
         dtos.AddNaveDTO addNaveDTO = new dtos.AddNaveDTO(
             jugadorDTO,
             naveDTO,
             coordenadas,
-            null  // El resultado será asignado por el servidor
+            null
         );
 
-        // Enviar mensaje al servidor
         enviarMensaje("ADD_NAVE", addNaveDTO);
-
-        System.out.println("Solicitud de agregar nave enviada al servidor");
         return true;
     }
 

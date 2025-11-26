@@ -1,5 +1,6 @@
 package buseventos.servidorsocket;
 
+import buseventos.IEventSuscriptor;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,11 +10,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 
-/**
- *
- * @author daniel
- */
-public class UserServerThread extends Thread {
+public class UserServerThread extends Thread implements IEventSuscriptor {
     
     private Socket socket;
     private ServidorSocket server;
@@ -38,6 +35,11 @@ public class UserServerThread extends Thread {
             while (true) {
                 try {
                     clientMessage = reader.readLine();
+                    if (clientMessage == null) {
+                        System.out.println("Cliente desconectado");
+                        server.removeUser(this);
+                        break;
+                    }
                     server.sendToBus(clientMessage, this);
                 } catch (SocketException ex) {
                     server.removeUser(this);
@@ -54,6 +56,14 @@ public class UserServerThread extends Thread {
     public void sendMessage(String message) {
         writer.println(message);
     }
-    
-    
+
+    @Override
+    public void recibirEvento(String eventoJSON) {
+        sendMessage(eventoJSON);
+    }
+
+    @Override
+    public String getSuscriptorId() {
+        return "UserThread-" + Thread.currentThread().getId() + "-" + this.hashCode();
+    }
 }

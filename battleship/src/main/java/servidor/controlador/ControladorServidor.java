@@ -1,23 +1,18 @@
 package servidor.controlador;
 
 import buseventos.Mensaje;
-import buseventos.TipoAccion;
+import buseventos.util.MensajeriaHelper;
 import clientesocket.IClienteSocket;
-import com.google.gson.Gson;
 import controllers.controller.ManejadorRespuestaCliente;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import models.entidades.Barco;
 import models.entidades.Coordenadas;
-import models.entidades.Crucero;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
-import models.entidades.PortaAviones;
-import models.entidades.Puntaje;
-import models.entidades.Submarino;
 import models.enums.ResultadoAddNave;
+import models.factories.NaveFactory;
 import servidor.modelo.IModeloServidor;
 import dtos.AddNaveDTO;
 import dtos.DisparoDTO;
@@ -48,30 +43,22 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
-        Gson gson = new Gson();
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), null);
-        String json = gson.toJson(mensaje);
-
+        String json = MensajeriaHelper.crearMensajeJSON(evento, datos);
         cliente.enviarMensaje(json);
     }
 
-    // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
-        Gson gson = new Gson();
-        Mensaje mensaje = gson.fromJson(json, Mensaje.class);
+        Mensaje mensaje = MensajeriaHelper.parsearMensaje(json);
 
         Consumer<Mensaje> handler = manejadoresEventos.get(mensaje.getEvento());
         if (handler != null) {
             handler.accept(mensaje);
-        } else {
-            System.err.println("Evento no registrado en servidor: " + mensaje.getEvento());
         }
     }
 
     private void addNave(Mensaje mensaje) {
-        Gson gson = new Gson();
-        AddNaveDTO dto = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
+        AddNaveDTO dto = MensajeriaHelper.extraerDatos(mensaje, AddNaveDTO.class);
 
         List<Coordenadas> coordenadas = dto.getCoordenadases();
 
@@ -87,29 +74,18 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         enviarMensaje("RESULTADO_ADD_NAVE", resultado);
     }
 
-    /**
-     * Factory method para crear una Nave según su tipo.
-     * Aplica el patrón Factory para eliminar el switch repetitivo.
-     *
-     * @param naveDTO El DTO con la información de la nave
-     * @return Una instancia de la Nave correspondiente, o null si el tipo es inválido
-     */
     private Nave crearNave(NaveDTO naveDTO) {
         if (naveDTO == null || naveDTO.getTipo() == null) {
             return null;
         }
 
-        return switch (naveDTO.getTipo()) {
-            case BARCO -> new Barco(naveDTO.getOrientacion());
-            case SUBMARINO -> new Submarino(naveDTO.getOrientacion());
-            case CRUCERO -> new Crucero(naveDTO.getOrientacion());
-            case PORTAAVIONES -> new PortaAviones(naveDTO.getOrientacion());
-        };
+        // Convertir TipoNaveDTO a TipoNave
+        models.enums.TipoNave tipoNave = models.enums.TipoNave.valueOf(naveDTO.getTipo().name());
+        return NaveFactory.crear(tipoNave, naveDTO.getOrientacion());
     }
 
     private void realizarDisparo(Mensaje mensaje) {
-        Gson gson = new Gson();
-        DisparoDTO disparoDTO = gson.fromJson(mensaje.getData(), DisparoDTO.class);
+        DisparoDTO disparoDTO = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
 
         Coordenadas coordenadas = disparoDTO.getCoordenadas();
 
@@ -145,18 +121,12 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     }
 
     private void manejarUnirsePartida(Mensaje mensaje) {
-        //unicamente para pruebas este print v
-        System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");
-
-        Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
     }
 
-    //Recibe el mensaje enviado por el cliente
     private void manejarAbandonarPartidaSv(Mensaje mensaje) {
-        Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
 
         // Usar JugadorMapper para convertir DTO a entidad
         Jugador jugador = dtos.mappers.JugadorMapper.toEntity(jugadorDTO);

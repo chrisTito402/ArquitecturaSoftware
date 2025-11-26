@@ -11,23 +11,9 @@ import dtos.PuntajeDTO;
 import java.util.List;
 import java.util.Comparator;
 
-/**
- * Servicio de negocio para gestionar operaciones relacionadas con puntajes.
- *
- * Este servicio forma parte de la Arquitectura en Capas (Capa de Negocio)
- * y proporciona funcionalidades de alto nivel para el Caso de Uso: Gestionar Puntaje.
- *
- * @author Fred
- */
-public class PuntajeService {
+public class PuntajeService implements IPuntajeService {
 
-    /**
-     * Registra un disparo y actualiza el puntaje correspondiente.
-     *
-     * @param puntaje El puntaje a actualizar
-     * @param resultado El resultado del disparo
-     * @return Los puntos obtenidos en este disparo
-     */
+    @Override
     public int registrarDisparo(Puntaje puntaje, ResultadoDisparo resultado) {
         if (puntaje == null) {
             throw new IllegalArgumentException("El puntaje no puede ser null");
@@ -36,11 +22,7 @@ public class PuntajeService {
         return puntaje.calcularPuntos(resultado);
     }
 
-    /**
-     * Registra una victoria y suma el bonus correspondiente.
-     *
-     * @param puntaje El puntaje del ganador
-     */
+    @Override
     public void registrarVictoria(Puntaje puntaje) {
         if (puntaje == null) {
             throw new IllegalArgumentException("El puntaje no puede ser null");
@@ -49,11 +31,7 @@ public class PuntajeService {
         puntaje.sumarVictoria();
     }
 
-    /**
-     * Reinicia el puntaje a cero.
-     *
-     * @param puntaje El puntaje a reiniciar
-     */
+    @Override
     public void reiniciarPuntaje(Puntaje puntaje) {
         if (puntaje == null) {
             throw new IllegalArgumentException("El puntaje no puede ser null");
@@ -62,27 +40,13 @@ public class PuntajeService {
         puntaje.resetear();
     }
 
-    /**
-     * Convierte una entidad Puntaje a un DTO para la capa de presentación.
-     *
-     * Aplicación de Arquitectura en Capas: convierte entidad del dominio
-     * a DTO para la vista, manteniendo separación de responsabilidades.
-     *
-     * @param puntaje La entidad Puntaje
-     * @return El DTO correspondiente
-     */
+    @Override
     public PuntajeDTO convertirADTO(Puntaje puntaje) {
         // Delegar al PuntajeMapper para mantener la conversión centralizada
         return dtos.mappers.PuntajeMapper.toDTO(puntaje);
     }
 
-    /**
-     * Compara dos puntajes y determina cuál es mayor.
-     *
-     * @param puntaje1 Primer puntaje
-     * @param puntaje2 Segundo puntaje
-     * @return Número positivo si puntaje1 > puntaje2, negativo si puntaje1 < puntaje2, 0 si son iguales
-     */
+    @Override
     public int compararPuntajes(Puntaje puntaje1, Puntaje puntaje2) {
         if (puntaje1 == null || puntaje2 == null) {
             throw new IllegalArgumentException("Los puntajes no pueden ser null");
@@ -91,12 +55,7 @@ public class PuntajeService {
         return Integer.compare(puntaje1.getPuntosTotales(), puntaje2.getPuntosTotales());
     }
 
-    /**
-     * Determina el jugador con mayor puntaje de una lista.
-     *
-     * @param jugadores Lista de jugadores
-     * @return El jugador con mayor puntaje, o null si la lista está vacía
-     */
+    @Override
     public Jugador obtenerJugadorConMayorPuntaje(List<Jugador> jugadores) {
         if (jugadores == null || jugadores.isEmpty()) {
             return null;
@@ -108,12 +67,7 @@ public class PuntajeService {
                 .orElse(null);
     }
 
-    /**
-     * Genera un reporte comparativo de puntajes entre jugadores.
-     *
-     * @param jugadores Lista de jugadores
-     * @return String con el reporte comparativo
-     */
+    @Override
     public String generarReporteComparativo(List<Jugador> jugadores) {
         if (jugadores == null || jugadores.isEmpty()) {
             return "No hay jugadores para comparar";
@@ -151,12 +105,7 @@ public class PuntajeService {
         return reporte.toString();
     }
 
-    /**
-     * Calcula el promedio de precisión de una lista de jugadores.
-     *
-     * @param jugadores Lista de jugadores
-     * @return El promedio de precisión, o 0.0 si no hay jugadores
-     */
+    @Override
     public double calcularPrecisionPromedio(List<Jugador> jugadores) {
         if (jugadores == null || jugadores.isEmpty()) {
             return 0.0;
@@ -169,12 +118,7 @@ public class PuntajeService {
                 .orElse(0.0);
     }
 
-    /**
-     * Verifica si un jugador tiene un puntaje válido y con datos.
-     *
-     * @param jugador El jugador a verificar
-     * @return true si tiene puntaje válido con datos, false en caso contrario
-     */
+    @Override
     public boolean tienePuntajeValido(Jugador jugador) {
         return jugador != null &&
                jugador.getPuntaje() != null &&

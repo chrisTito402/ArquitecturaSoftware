@@ -35,6 +35,11 @@ public class UserReadClientThread extends Thread {
             while (true) {
                 try {
                     String response = reader.readLine();
+                    if (response == null) {
+                        System.out.println("Conexión cerrada por el servidor");
+                        socket.close();
+                        break;
+                    }
                     client.manejarMensaje(response);
                 } catch (SocketException ex) {
                     socket.close();

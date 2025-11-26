@@ -81,12 +81,9 @@ public class ControlVista implements ISuscriptor {
         return puntajePanel;
     }
 
-    public void setPuntajePanel(javax.swing.JPanel panel) {  //Para que acepte JPanel Generico
+    public void setPuntajePanel(javax.swing.JPanel panel) {
         if (panel instanceof PuntajePanel) {
             this.puntajePanel = (PuntajePanel) panel;
-            System.out.println("PuntajePanel registrado correctamente");
-        } else {
-            System.err.println("ERROR: El panel no es de tipo PuntajePanel");
         }
     }
 
@@ -115,14 +112,11 @@ public class ControlVista implements ISuscriptor {
     @Override
     public void notificar(String contexto, Object datos) {
         if (datos == null) {
-            System.out.println("Los datos estan vacios.");
             return;
         }
 
-        // BUGFIX: Validar que el manejador existe antes de usarlo
         Consumer<Object> manejador = manejadoresNoti.get(contexto);
         if (manejador == null) {
-            System.err.println("ControlVista: No hay manejador registrado para el contexto: " + contexto);
             return;
         }
 
@@ -131,7 +125,6 @@ public class ControlVista implements ISuscriptor {
 
     private void manejarDisparo(Object datos) {
         if (!(datos instanceof DisparoDTO)) {
-            System.out.println("Los datos no son un objeto DisparoDTO");
             return;
         }
 
@@ -139,48 +132,42 @@ public class ControlVista implements ISuscriptor {
         timer.initTimer();
 
         DisparoDTO d = (DisparoDTO) datos;
-        Coordenadas c = d.getCoordenadas();
-
         JugadorDTO jugador = control.getJugador();
 
         Component componente;
         if (d.getJugador().getNombre().equals(jugador.getNombre())) {
             componente = getCasillaEnemiga(d.getCoordenadas());
+            // Gestionar Puntaje: Actualizar panel de puntaje en la UI
             if (puntajePanel != null && d.getPuntaje() != null) {
                 puntajePanel.actualizarPuntaje(d.getPuntaje());
-                System.out.println("Puntaje actualizado en UI: " + d.getPuntaje().getPuntosTotales());
             }
         } else {
             componente = getCasillaPropia(d.getCoordenadas());
         }
 
+        // Actualizar color de casilla según resultado
         if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
             componente.setBackground(Color.YELLOW);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
+        } else if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
             componente.setBackground(Color.RED);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
+        } else if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
             componente.setBackground(Color.BLUE);
         }
 
-        System.out.println(c.getX() + " " + c.getY());
-        System.out.println(d.getResultadoDisparo().toString());
-
+        // Gestionar Puntaje: Mostrar resumen al finalizar partida
         if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stopTimer();
-            System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
-            
+
             if (d.getPuntaje() != null) {
                 String mensaje = String.format(
-                    "¡Partida terminada!\n\n" +
+                    "Partida terminada!\n\n" +
                     "Ganador: %s\n" +
                     "Puntaje final: %d puntos\n" +
                     "Aciertos: %d\n" +
                     "Fallos: %d\n" +
                     "Naves hundidas: %d\n" +
-                    "Precisión: %.2f%%",
+                    "Precision: %.2f%%",
                     d.getJugador().getNombre(),
                     d.getPuntaje().getPuntosTotales(),
                     d.getPuntaje().getDisparosAcertados(),
@@ -188,7 +175,7 @@ public class ControlVista implements ISuscriptor {
                     d.getPuntaje().getNavesHundidas(),
                     d.getPuntaje().getPrecision()
                 );
-                
+
                 JOptionPane.showMessageDialog(null, mensaje, "Fin de Partida", JOptionPane.INFORMATION_MESSAGE);
             }
         }
@@ -244,10 +231,7 @@ public class ControlVista implements ISuscriptor {
     }
 
     public void addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        boolean resultado = control.addNave(jugador, nave, coordenadas);
-        if (!resultado) {
-            System.out.println("No se pudo agregar la Nave.");
-        }
+        control.addNave(jugador, nave, coordenadas);
     }
 
     public void addJugador(Jugador j) {

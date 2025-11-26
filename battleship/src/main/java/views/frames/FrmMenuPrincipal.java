@@ -10,52 +10,30 @@ import javax.swing.border.*;
  */
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
-    private static final Color COLOR_FONDO = new Color(13, 27, 42);
-    private static final Color COLOR_PRIMARIO = new Color(27, 38, 59);
-    private static final Color COLOR_ACENTO = new Color(65, 90, 119);
-    private static final Color COLOR_TEXTO = new Color(238, 238, 238);
-    private static final Color COLOR_HOVER = new Color(119, 141, 169);
-
     public FrmMenuPrincipal() {
         initComponents();
         customizeComponents();
     }
 
     private void customizeComponents() {
-        getContentPane().setBackground(COLOR_FONDO);
-        pnlCambiante.setBackground(COLOR_FONDO);
+        UIHelper.aplicarTemaOscuro(this);
+        UIHelper.aplicarTemaOscuro(pnlCambiante);
 
-        lblTitulo.setForeground(COLOR_TEXTO);
+        lblTitulo.setFont(UIConstants.FONT_TITULO_GRANDE);
+        lblTitulo.setForeground(UIConstants.COLOR_ACENTO_DORADO);
 
-        customizeButton(btnJugar, new Color(46, 125, 50));
-        customizeButton(btnJugador, COLOR_ACENTO);
-        customizeButton(btnPuntaje, COLOR_ACENTO);
-        customizeButton(btnSalir, new Color(198, 40, 40));
-    }
+        lblSubtitulo.setFont(UIConstants.FONT_TITULO_PEQUENO);
+        lblSubtitulo.setForeground(UIConstants.COLOR_TEXTO_SECUNDARIO);
 
-    private void customizeButton(JButton btn, Color bgColor) {
-        btn.setBackground(bgColor);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(bgColor.darker(), 2, true),
-            BorderFactory.createEmptyBorder(15, 40, 15, 40)
-        ));
+        UIHelper.personalizarBoton(btnJugar, UIConstants.COLOR_ACIERTO);
+        UIHelper.personalizarBoton(btnJugador, UIConstants.COLOR_ACENTO_AZUL);
+        UIHelper.personalizarBoton(btnPuntaje, UIConstants.COLOR_ACENTO_DORADO);
+        UIHelper.personalizarBoton(btnSalir, UIConstants.COLOR_FALLO);
 
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            Color originalColor = bgColor;
-
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(bgColor.brighter());
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(originalColor);
-            }
-        });
+        btnJugar.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        btnJugador.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        btnPuntaje.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        btnSalir.setFont(new Font("Segoe UI", Font.BOLD, 20));
     }
 
     @SuppressWarnings("unchecked")
@@ -204,13 +182,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnPuntajeActionPerformed
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
-        int opcion = JOptionPane.showConfirmDialog(this,
-            "¿Estás seguro de que deseas salir?",
-            "Confirmar Salida",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE);
-
-        if (opcion == JOptionPane.YES_OPTION) {
+        if (UIHelper.mostrarConfirmacion(this, "¿Estás seguro de que deseas salir?")) {
             System.exit(0);
         }
     }//GEN-LAST:event_btnSalirActionPerformed

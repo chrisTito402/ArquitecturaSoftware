@@ -92,7 +92,6 @@ public class Puntaje {
      */
     public void sumarVictoria() {
         puntosTotales += PUNTOS_VICTORIA;
-        System.out.println("Victoria! +" + PUNTOS_VICTORIA + " puntos de bonus");
     }
 
     /**
