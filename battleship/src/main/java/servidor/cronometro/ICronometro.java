@@ -1,12 +1,16 @@
 package servidor.cronometro;
 
-/**
- *
- * @author daniel
- */
 public interface ICronometro {
-    public void initCronometro();
-    public boolean isInTime(long tiempo);
-    public void setProcesandoDisparo(boolean estado);
-    public void stop();
+
+    void initCronometro();
+
+    boolean isInTime(long tiempo);
+
+    void setProcesandoDisparo(boolean estado);
+
+    void stop();
+
+    long getTiempoRestante();
+
+    void setOnTiempoAgotado(Runnable callback);
 }

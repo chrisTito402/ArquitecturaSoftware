@@ -19,7 +19,7 @@ public class NaveArrastrable extends JPanel {
         this.tipo = tipo;
         this.tamanio = obtenerTamanio(tipo);
         this.orientacion = OrientacionNave.HORIZONTAL;
-        this.colorNave = colorNave;
+        this.colorNave = new Color(80, 80, 80);
         this.colocada = false;
 
         configurarComponente();
@@ -100,11 +100,11 @@ public class NaveArrastrable extends JPanel {
             g2d.setColor(colorNave);
             g2d.fillRoundRect(x + 2, y + 2, tamCasilla - 4, tamCasilla - 4, 8, 8);
 
-            g2d.setColor(colorNave.darker());
+            g2d.setColor(Color.BLACK);
             g2d.setStroke(new BasicStroke(2));
             g2d.drawRoundRect(x + 2, y + 2, tamCasilla - 4, tamCasilla - 4, 8, 8);
 
-            g2d.setColor(new Color(255, 255, 255, 80));
+            g2d.setColor(new Color(255, 255, 255, 100));
             g2d.fillRoundRect(x + 4, y + 4, tamCasilla - 12, (tamCasilla - 4) / 3, 4, 4);
         }
 

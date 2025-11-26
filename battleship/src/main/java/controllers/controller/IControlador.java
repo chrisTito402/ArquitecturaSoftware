@@ -30,4 +30,6 @@ public interface IControlador {
     void abandonarLobby(Jugador jugador);
 
     List<Jugador> getJugadores();
+
+    boolean esMiTurno();
 }

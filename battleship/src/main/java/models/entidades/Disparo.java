@@ -54,6 +54,10 @@ public class Disparo {
         return resultadoDisparo;
     }
 
+    public ResultadoDisparo getResultado() {
+        return resultadoDisparo;
+    }
+
     public void setResultadoDisparo(ResultadoDisparo resultadoDisparo) {
         this.resultadoDisparo = resultadoDisparo;
     }

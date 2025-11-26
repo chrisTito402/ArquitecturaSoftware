@@ -12,6 +12,8 @@ import models.builder.Director;
 import models.builder.TableroBuilder;
 import models.entidades.*;
 import models.enums.*;
+import models.services.DisparoService;
+import models.services.IDisparoService;
 import models.services.IPuntajeService;
 import models.services.PuntajeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +26,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de integracion para el Caso de Uso: Gestionar Puntaje.
- * Verifica que todos los componentes funcionen correctamente juntos.
- */
 @DisplayName("Pruebas de Integracion - Gestionar Puntaje")
 class GestionarPuntajeIntegracionTest {
 
@@ -35,18 +33,18 @@ class GestionarPuntajeIntegracionTest {
     private Jugador jugador1;
     private Jugador jugador2;
     private IPuntajeService puntajeService;
+    private IDisparoService disparoService;
     private Director director;
 
     @BeforeEach
     void setUp() {
         director = new Director();
         puntajeService = new PuntajeService();
+        disparoService = new DisparoService();
 
-        // Crear jugadores directamente
         jugador1 = new Jugador("Jugador1", ColorJugador.ROJO, EstadoJugador.JUGANDO);
         jugador2 = new Jugador("Jugador2", ColorJugador.AZUL, EstadoJugador.JUGANDO);
 
-        // Crear tableros usando el Builder
         TableroBuilder tableroBuilder1 = new TableroBuilder();
         director.makeTablero(tableroBuilder1);
         jugador1.setTablero(tableroBuilder1.getResult());
@@ -57,7 +55,6 @@ class GestionarPuntajeIntegracionTest {
         jugador2.setTablero(tableroBuilder2.getResult());
         jugador2.setNaves(new ArrayList<>());
 
-        // Crear partida
         List<Jugador> jugadores = new ArrayList<>();
         jugadores.add(jugador1);
         jugadores.add(jugador2);
@@ -77,8 +74,6 @@ class GestionarPuntajeIntegracionTest {
 
         @BeforeEach
         void colocarNavesParaPrueba() {
-            // Colocar una nave del jugador 2 para que jugador 1 pueda dispararle
-            // Barco tiene tamanio 1, asi que usamos Crucero (tamanio 4) para tener mas casillas
             Nave crucero = new Crucero(OrientacionNave.HORIZONTAL);
             List<Coordenadas> coordsCrucero = List.of(
                     new Coordenadas(0, 0),
@@ -94,13 +89,12 @@ class GestionarPuntajeIntegracionTest {
         @Test
         @DisplayName("Disparo exitoso actualiza puntaje del jugador")
         void disparoExitosoActualizaPuntaje() {
-            // El jugador1 tiene el turno
-            Coordenadas coordDisparo = new Coordenadas(0, 0);  // Donde esta la nave
+            Coordenadas coordDisparo = new Coordenadas(0, 0);
 
-            Disparo disparo = partida.realizarDisparo(coordDisparo, jugador1, System.currentTimeMillis());
+            Disparo disparo = disparoService.realizarDisparo(partida, jugador1, coordDisparo, System.currentTimeMillis());
 
             assertNotNull(disparo);
-            assertEquals(ResultadoDisparo.IMPACTO, disparo.getResultadoDisparo());
+            assertEquals(ResultadoDisparo.IMPACTO, disparo.getResultado());
             assertEquals(10, jugador1.getPuntaje().getPuntosTotales());
             assertEquals(1, jugador1.getPuntaje().getDisparosAcertados());
         }
@@ -108,12 +102,12 @@ class GestionarPuntajeIntegracionTest {
         @Test
         @DisplayName("Disparo al agua no suma puntos")
         void disparoAguaNoSumaPuntos() {
-            Coordenadas coordDisparo = new Coordenadas(5, 5);  // Casilla vacia
+            Coordenadas coordDisparo = new Coordenadas(5, 5);
 
-            Disparo disparo = partida.realizarDisparo(coordDisparo, jugador1, System.currentTimeMillis());
+            Disparo disparo = disparoService.realizarDisparo(partida, jugador1, coordDisparo, System.currentTimeMillis());
 
             assertNotNull(disparo);
-            assertEquals(ResultadoDisparo.AGUA, disparo.getResultadoDisparo());
+            assertEquals(ResultadoDisparo.AGUA, disparo.getResultado());
             assertEquals(0, jugador1.getPuntaje().getPuntosTotales());
             assertEquals(1, jugador1.getPuntaje().getDisparosFallados());
         }
@@ -121,7 +115,6 @@ class GestionarPuntajeIntegracionTest {
         @Test
         @DisplayName("Puntaje se convierte correctamente a DTO")
         void puntajeSeConvierteADTO() {
-            // Simular un disparo con impacto directo en el puntaje
             jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.IMPACTO);
 
             PuntajeDTO dto = PuntajeMapper.toDTO(jugador1.getPuntaje());
@@ -138,7 +131,6 @@ class GestionarPuntajeIntegracionTest {
 
         @BeforeEach
         void colocarNaveUnica() {
-            // Colocar un barco (tamanio 1) para hundirlo facilmente con un disparo
             Nave barco = new Barco(OrientacionNave.HORIZONTAL);
             List<Coordenadas> coordsBarco = List.of(
                     new Coordenadas(0, 0)
@@ -149,18 +141,12 @@ class GestionarPuntajeIntegracionTest {
         }
 
         @Test
-        @DisplayName("Hundir todas las naves suma bonus de victoria")
-        void hundirTodasNavesGanaPartida() {
-            // Disparar a ambas casillas de la nave para hundirla
-            partida.realizarDisparo(new Coordenadas(0, 0), jugador1, System.currentTimeMillis());
+        @DisplayName("Hundir nave con un disparo")
+        void hundirNaveConUnDisparo() {
+            Disparo disparo = disparoService.realizarDisparo(partida, jugador1, new Coordenadas(0, 0), System.currentTimeMillis());
 
-            // Cambiar turno manualmente para el test (ya que cambio automaticamente)
-            // Simular que es el turno de jugador1 otra vez
-            Disparo disparo = partida.realizarDisparo(new Coordenadas(0, 1), jugador1, System.currentTimeMillis());
-
-            // Verificar el resultado (puede ser TURNO_INCORRECTO si cambio el turno)
-            // En un flujo real, el segundo disparo seria del jugador2
             assertNotNull(disparo);
+            assertEquals(ResultadoDisparo.HUNDIMIENTO, disparo.getResultado());
         }
     }
 
@@ -218,8 +204,8 @@ class GestionarPuntajeIntegracionTest {
         @Test
         @DisplayName("Service obtiene jugador con mayor puntaje")
         void serviceObtieneJugadorMayorPuntaje() {
-            jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.IMPACTO);      // 10
-            jugador2.getPuntaje().calcularPuntos(ResultadoDisparo.HUNDIMIENTO);  // 50
+            jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.IMPACTO);
+            jugador2.getPuntaje().calcularPuntos(ResultadoDisparo.HUNDIMIENTO);
 
             List<Jugador> jugadores = List.of(jugador1, jugador2);
 
@@ -240,7 +226,7 @@ class GestionarPuntajeIntegracionTest {
 
             assertTrue(reporte.contains("Jugador1"));
             assertTrue(reporte.contains("Jugador2"));
-            assertTrue(reporte.contains("10"));  // Puntos de jugador1
+            assertTrue(reporte.contains("10"));
         }
     }
 
@@ -251,15 +237,13 @@ class GestionarPuntajeIntegracionTest {
         @Test
         @DisplayName("Precision se calcula correctamente tras multiples disparos")
         void precisionMultiplesDisparos() {
-            // Simular varios disparos
             jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.IMPACTO);
             jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.IMPACTO);
             jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.AGUA);
             jugador1.getPuntaje().calcularPuntos(ResultadoDisparo.HUNDIMIENTO);
 
-            // 3 aciertos de 4 disparos = 75%
             assertEquals(75.0, jugador1.getPuntaje().getPrecision());
-            assertEquals(70, jugador1.getPuntaje().getPuntosTotales());  // 10+10+0+50
+            assertEquals(70, jugador1.getPuntaje().getPuntosTotales());
         }
 
         @Test

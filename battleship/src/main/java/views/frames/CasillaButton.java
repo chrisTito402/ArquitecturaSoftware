@@ -9,12 +9,12 @@ import java.awt.event.MouseEvent;
 
 public class CasillaButton extends JButton {
 
-    private static final Color COLOR_NO_DISPARADO = new Color(70, 130, 180);
-    private static final Color COLOR_AGUA = new Color(100, 149, 237);
-    private static final Color COLOR_IMPACTO = new Color(255, 140, 0);
-    private static final Color COLOR_HUNDIDO = new Color(220, 20, 60);
-    private static final Color COLOR_HOVER = new Color(30, 144, 255);
-    private static final Color COLOR_BORDE = new Color(25, 25, 112);
+    private static final Color COLOR_NO_DISPARADO = new Color(230, 230, 230);
+    private static final Color COLOR_AGUA = new Color(180, 180, 180);
+    private static final Color COLOR_IMPACTO = new Color(100, 100, 100);
+    private static final Color COLOR_HUNDIDO = Color.BLACK;
+    private static final Color COLOR_HOVER = new Color(200, 200, 200);
+    private static final Color COLOR_BORDE = Color.BLACK;
 
     private CoordenadasDTO coordenadas;
     private EstadoCasilla estado;
@@ -62,8 +62,8 @@ public class CasillaButton extends JButton {
         switch (estado) {
             case NO_DISPARADO:
                 setBackground(COLOR_NO_DISPARADO);
-                setText("~");
-                setForeground(new Color(224, 255, 255));
+                setText("");
+                setForeground(Color.BLACK);
                 setEnabled(true);
                 break;
 
@@ -84,6 +84,7 @@ public class CasillaButton extends JButton {
             case HUNDIDO:
                 setBackground(COLOR_HUNDIDO);
                 setText("!");
+                setForeground(Color.WHITE);
                 setEnabled(false);
                 break;
         }
@@ -122,7 +123,7 @@ public class CasillaButton extends JButton {
 
         timer.addActionListener(e -> {
             if (contador[0] % 2 == 0) {
-                setBackground(Color.YELLOW);
+                setBackground(Color.WHITE);
             } else {
                 setBackground(COLOR_IMPACTO);
             }
@@ -142,7 +143,7 @@ public class CasillaButton extends JButton {
 
         timer.addActionListener(e -> {
             if (contador[0] % 2 == 0) {
-                setBackground(Color.RED);
+                setBackground(Color.WHITE);
             } else {
                 setBackground(COLOR_HUNDIDO);
             }

@@ -1,6 +1,6 @@
+import buseventos.EventoJuego;
 import buseventos.IEventSuscriptor;
 import buseventos.Mensaje;
-import buseventos.TipoAccion;
 import buseventos.buseventos.BusEventos;
 import buseventos.servidorsocket.ServidorSocket;
 import config.ConfiguracionRed;
@@ -9,6 +9,7 @@ import models.enums.EstadoPartida;
 import servidor.controlador.ControladorServidor;
 import servidor.controlador.IOutputChannel;
 import servidor.cronometro.Cronometro;
+import servidor.modelo.ModeloServidor;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -38,19 +39,19 @@ public class MainServidor {
         busEventos = new BusEventos();
 
         Cronometro cronometro = new Cronometro(30000);
+
         Partida partida = new Partida(
                 null,
                 new ArrayList<>(),
                 3, 4, 2, 2, 11,
                 EstadoPartida.POR_EMPEZAR,
-                new ArrayList<>(),
-                cronometro
+                new ArrayList<>()
         );
-        cronometro.setPartida(partida);
+
+        ModeloServidor modeloServidor = new ModeloServidor(partida, cronometro);
 
         IOutputChannel outputChannel = json -> {
-            // Enviar directamente el JSON a todos los suscriptores de BROADCAST
-            java.util.Set<buseventos.IEventSuscriptor> suscriptores = busEventos.getSuscriptores("BROADCAST");
+            java.util.Set<buseventos.IEventSuscriptor> suscriptores = busEventos.getSuscriptores(EventoJuego.BROADCAST.getValor());
             if (suscriptores != null) {
                 for (buseventos.IEventSuscriptor suscriptor : suscriptores) {
                     try {
@@ -63,7 +64,11 @@ public class MainServidor {
         };
 
         HashMap<String, Consumer<Mensaje>> manejadores = new HashMap<>();
-        ControladorServidor controladorServidor = new ControladorServidor(partida, outputChannel, manejadores);
+        ControladorServidor controladorServidor = new ControladorServidor(modeloServidor, outputChannel, manejadores);
+
+        cronometro.setOnTiempoAgotado(() -> {
+            controladorServidor.onTiempoAgotado();
+        });
 
         IEventSuscriptor suscriptorServidor = new IEventSuscriptor() {
             @Override
@@ -77,10 +82,10 @@ public class MainServidor {
             }
         };
 
-        busEventos.suscribirse("DISPARO", suscriptorServidor);
-        busEventos.suscribirse("ADD_NAVE", suscriptorServidor);
-        busEventos.suscribirse("UNIRSE_PARTIDA", suscriptorServidor);
-        busEventos.suscribirse("ABANDONAR_PARTIDA", suscriptorServidor);
+        busEventos.suscribirse(EventoJuego.DISPARO.getValor(), suscriptorServidor);
+        busEventos.suscribirse(EventoJuego.ADD_NAVE.getValor(), suscriptorServidor);
+        busEventos.suscribirse(EventoJuego.UNIRSE_PARTIDA.getValor(), suscriptorServidor);
+        busEventos.suscribirse(EventoJuego.ABANDONAR_PARTIDA.getValor(), suscriptorServidor);
 
         ServidorSocket servidor = new ServidorSocket(ConfiguracionRed.SERVIDOR_PUERTO, busEventos);
 

@@ -10,11 +10,12 @@ import models.observador.ISuscriptor;
 
 public class ControlModelo implements IModeloCliente {
 
-    private Jugador jugadorLocal;
-    private Tablero tablero;
-    private boolean esMiTurno;
-    private GestorSuscriptores gestorSuscriptores;
-    private List<Jugador> jugadores;
+    private volatile Jugador jugadorLocal;
+    private volatile Tablero tablero;
+    private volatile boolean esMiTurno;
+    private final GestorSuscriptores gestorSuscriptores;
+    private final List<Jugador> jugadores;
+    private final Object lock = new Object();
 
     public ControlModelo(List<ISuscriptor> suscriptores) {
         this.gestorSuscriptores = new GestorSuscriptores(suscriptores);
@@ -53,9 +54,11 @@ public class ControlModelo implements IModeloCliente {
             return;
         }
 
-        this.jugadorLocal = j;
-        if (!jugadores.contains(j)) {
-            jugadores.add(j);
+        synchronized (lock) {
+            this.jugadorLocal = j;
+            if (!jugadores.contains(j)) {
+                jugadores.add(j);
+            }
         }
     }
 
@@ -80,9 +83,11 @@ public class ControlModelo implements IModeloCliente {
             return;
         }
 
-        this.jugadorLocal = jugador;
-        if (!jugadores.contains(jugador)) {
-            jugadores.add(jugador);
+        synchronized (lock) {
+            this.jugadorLocal = jugador;
+            if (!jugadores.contains(jugador)) {
+                jugadores.add(jugador);
+            }
         }
         notificarAllSuscriptores("JUGADOR_UNIDO_LOCAL", jugador);
     }

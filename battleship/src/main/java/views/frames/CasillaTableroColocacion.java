@@ -12,11 +12,11 @@ public class CasillaTableroColocacion extends JPanel {
     private boolean valida;
     private NaveArrastrable naveAsociada;
 
-    private static final Color COLOR_VACIA = new Color(70, 130, 180);
-    private static final Color COLOR_OCUPADA = new Color(76, 175, 80);
-    private static final Color COLOR_RESALTADA_VALIDA = new Color(100, 200, 100, 150);
-    private static final Color COLOR_RESALTADA_INVALIDA = new Color(244, 67, 54, 150);
-    private static final Color COLOR_BORDE = new Color(25, 25, 112);
+    private static final Color COLOR_VACIA = new Color(230, 230, 230);
+    private static final Color COLOR_OCUPADA = new Color(60, 60, 60);
+    private static final Color COLOR_RESALTADA_VALIDA = new Color(180, 180, 180);
+    private static final Color COLOR_RESALTADA_INVALIDA = new Color(120, 120, 120);
+    private static final Color COLOR_BORDE = Color.BLACK;
 
     public CasillaTableroColocacion(CoordenadasDTO coordenadas) {
         this.coordenadas = coordenadas;
@@ -51,7 +51,7 @@ public class CasillaTableroColocacion extends JPanel {
             g2d.setColor(naveAsociada.getColorNave());
             g2d.fillRoundRect(3, 3, getWidth() - 6, getHeight() - 6, 6, 6);
 
-            g2d.setColor(naveAsociada.getColorNave().darker());
+            g2d.setColor(Color.BLACK);
             g2d.setStroke(new BasicStroke(2));
             g2d.drawRoundRect(3, 3, getWidth() - 6, getHeight() - 6, 6, 6);
 

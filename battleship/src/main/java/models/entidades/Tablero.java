@@ -60,8 +60,20 @@ public class Tablero {
     }
     
     public boolean addNave(Nave nave, List<Coordenadas> coordenadas) {
+        if (nave == null || coordenadas == null || coordenadas.isEmpty()) {
+            return false;
+        }
+
+        for (Coordenadas c : coordenadas) {
+            if (c.getX() < 0 || c.getX() >= limiteX || c.getY() < 0 || c.getY() >= limiteY) {
+                return false;
+            }
+            if (casillas[c.getX()][c.getY()].getNave() != null) {
+                return false;
+            }
+        }
+
         coordenadas.forEach(c -> casillas[c.getX()][c.getY()].setNave(nave));
-        
         return true;
     }
 

@@ -12,12 +12,15 @@ import models.enums.ResultadoAddNave;
  * @author daniel
  */
 public interface IModeloServidor {
-    public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
-    public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
-    public void addJugador(Jugador j);
-    public List<Jugador> getJugadores();
-    public void unirsePartida(Jugador jugador);
-    public void crearTableros();
-    public void empezarPartida();
-    public void abandonarPartida(Jugador jugadorQueSeVa);
+    Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
+    ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+    void addJugador(Jugador j);
+    List<Jugador> getJugadores();
+    void unirsePartida(Jugador jugador);
+    void crearTableros();
+    void empezarPartida();
+    void abandonarPartida(Jugador jugadorQueSeVa);
+    long getTiempoRestante();
+    Jugador getTurnoActual();
+    void cambiarTurno();
 }

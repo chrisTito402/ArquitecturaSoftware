@@ -28,11 +28,15 @@ public class Director {
     }
 
     public void makeTablero(ITableroBuilder builder) {
-        builder.setLimiteX(10);
-        builder.setLimiteY(10);
-        Casilla[][] casillas = new Casilla[10][10];
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        makeTablero(builder, 10, 10);
+    }
+
+    public void makeTablero(ITableroBuilder builder, int filas, int columnas) {
+        builder.setLimiteX(filas);
+        builder.setLimiteY(columnas);
+        Casilla[][] casillas = new Casilla[filas][columnas];
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
                 Coordenadas c = new Coordenadas(i, j);
                 casillas[i][j] = new Casilla(EstadoCasilla.NO_DISPARADO, c);
             }

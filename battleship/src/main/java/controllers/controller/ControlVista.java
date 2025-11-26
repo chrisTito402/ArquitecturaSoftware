@@ -15,16 +15,50 @@ public class ControlVista implements ISuscriptor {
     private IVistaPartida vista;
     private final ManejadorNotificacionesVista manejadorNotificaciones;
 
-    private ControlVista() {
+    private static volatile ControlVista instanciaGlobal;
+    private static final Object LOCK = new Object();
+
+    public ControlVista() {
         this.manejadorNotificaciones = new ManejadorNotificacionesVista();
     }
 
-    private static class SingletonHolder {
-        private static final ControlVista INSTANCIA = new ControlVista();
+    public ControlVista(IControlador control) {
+        this.control = control;
+        this.manejadorNotificaciones = new ManejadorNotificacionesVista();
+        this.manejadorNotificaciones.setControlador(control);
+    }
+
+    public ControlVista(IControlador control, IVistaPartida vista) {
+        this.control = control;
+        this.vista = vista;
+        this.manejadorNotificaciones = new ManejadorNotificacionesVista();
+        this.manejadorNotificaciones.setControlador(control);
+        this.manejadorNotificaciones.setVista(vista);
+    }
+
+    public static void setInstanciaGlobal(ControlVista instancia) {
+        synchronized (LOCK) {
+            instanciaGlobal = instancia;
+        }
     }
 
     public static ControlVista getInstancia() {
-        return SingletonHolder.INSTANCIA;
+        ControlVista resultado = instanciaGlobal;
+        if (resultado == null) {
+            synchronized (LOCK) {
+                resultado = instanciaGlobal;
+                if (resultado == null) {
+                    instanciaGlobal = resultado = new ControlVista();
+                }
+            }
+        }
+        return resultado;
+    }
+
+    public static void resetInstancia() {
+        synchronized (LOCK) {
+            instanciaGlobal = null;
+        }
     }
 
     public IControlador getControl() {
@@ -46,12 +80,14 @@ public class ControlVista implements ISuscriptor {
     }
 
     public void realizarDisparo(Coordenadas c) {
-        control.realizarDisparo(c);
+        if (control != null) {
+            control.realizarDisparo(c);
+        }
     }
 
     public void realizarDisparoDTO(CoordenadasDTO coordenadasDTO) {
         Coordenadas coordenadas = CoordenadasMapper.toEntity(coordenadasDTO);
-        control.realizarDisparo(coordenadas);
+        realizarDisparo(coordenadas);
     }
 
     @Override
@@ -60,38 +96,64 @@ public class ControlVista implements ISuscriptor {
     }
 
     public void crearPartida(Jugador j) {
-        control.crearPartida(j);
+        if (control != null) {
+            control.crearPartida(j);
+        }
     }
 
     public void addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        control.addNave(jugador, nave, coordenadas);
+        if (control != null) {
+            control.addNave(jugador, nave, coordenadas);
+        }
     }
 
     public void addJugador(Jugador j) {
-        control.addJugador(j);
+        if (control != null) {
+            control.addJugador(j);
+        }
     }
 
     public void crearTableros() {
-        control.crearTableros();
+        if (control != null) {
+            control.crearTableros();
+        }
     }
 
     public void suscribirAModelo() {
-        control.suscribirAPartida(this);
+        if (control != null) {
+            control.suscribirAPartida(this);
+        }
     }
 
     public void unirsePartida(Jugador jugador) {
-        control.unirsePartida(jugador);
+        if (control != null) {
+            control.unirsePartida(jugador);
+        }
     }
 
     public void empezarPartida() {
-        control.empezarPartida();
+        if (control != null) {
+            control.empezarPartida();
+        }
     }
 
     public void abandonarLobby(Jugador jugador) {
-        control.abandonarLobby(jugador);
+        if (control != null) {
+            control.abandonarLobby(jugador);
+        }
     }
 
     public List<Jugador> getJugadores() {
-        return control.getJugadores();
+        if (control != null) {
+            return control.getJugadores();
+        }
+        return List.of();
+    }
+
+    public boolean esMiTurno() {
+        if (control != null) {
+            return control.esMiTurno();
+        }
+        return false;
     }
 }

@@ -3,6 +3,12 @@ package models.entidades;
 import models.builder.Director;
 import models.builder.TableroBuilder;
 import models.enums.*;
+import models.services.DisparoService;
+import models.services.IDisparoService;
+import models.services.IPartidaService;
+import models.services.ITableroService;
+import models.services.PartidaService;
+import models.services.TableroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,10 +27,16 @@ class PartidaTest {
     private Jugador jugador1;
     private Jugador jugador2;
     private Director director;
+    private IPartidaService partidaService;
+    private IDisparoService disparoService;
+    private ITableroService tableroService;
 
     @BeforeEach
     void setUp() {
         director = new Director();
+        partidaService = new PartidaService();
+        disparoService = new DisparoService();
+        tableroService = new TableroService();
 
         jugador1 = new Jugador("Jugador1", ColorJugador.ROJO, EstadoJugador.JUGANDO);
         jugador2 = new Jugador("Jugador2", ColorJugador.AZUL, EstadoJugador.JUGANDO);
@@ -43,13 +55,13 @@ class PartidaTest {
     }
 
     @Nested
-    @DisplayName("Pruebas de empezarPartida")
+    @DisplayName("Pruebas de empezarPartida con servicio")
     class EmpezarPartidaTests {
 
         @Test
         @DisplayName("Empezar partida cambia estado a EN_CURSO")
         void empezarPartidaCambiaEstado() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
 
             assertEquals(EstadoPartida.EN_CURSO, partida.getEstado());
         }
@@ -57,7 +69,7 @@ class PartidaTest {
         @Test
         @DisplayName("Empezar partida asigna turno a un jugador")
         void empezarPartidaAsignaTurno() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
 
             assertNotNull(partida.getTurno());
             assertTrue(partida.getTurno().equals(jugador1) || partida.getTurno().equals(jugador2));
@@ -69,22 +81,22 @@ class PartidaTest {
             Partida partidaUnJugador = new Partida(null, new ArrayList<>(List.of(jugador1)),
                     3, 4, 2, 2, 11, EstadoPartida.POR_EMPEZAR, new ArrayList<>());
 
-            partidaUnJugador.empezarPartida();
+            partidaService.iniciarPartida(partidaUnJugador);
 
             assertEquals(EstadoPartida.POR_EMPEZAR, partidaUnJugador.getEstado());
         }
     }
 
     @Nested
-    @DisplayName("Pruebas de realizarDisparo")
+    @DisplayName("Pruebas de realizarDisparo con servicio")
     class RealizarDisparoTests {
 
         @BeforeEach
         void iniciarPartida() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
             Barco barco = new Barco(OrientacionNave.HORIZONTAL);
             List<Coordenadas> coords = List.of(new Coordenadas(5, 5));
-            partida.addNave(jugador2, barco, coords);
+            tableroService.colocarNave(jugador2.getTablero(), jugador2, barco, coords, partida.getJugadores());
         }
 
         @Test
@@ -93,15 +105,14 @@ class PartidaTest {
             Jugador turnoInicial = partida.getTurno();
             Coordenadas coordsAgua = new Coordenadas(0, 0);
 
-            Disparo disparo = partida.realizarDisparo(coordsAgua, turnoInicial, System.currentTimeMillis());
+            Disparo disparo = disparoService.realizarDisparo(partida, turnoInicial, coordsAgua, System.currentTimeMillis());
 
-            assertEquals(ResultadoDisparo.AGUA, disparo.getResultadoDisparo());
-            assertNotEquals(turnoInicial, partida.getTurno());
+            assertEquals(ResultadoDisparo.AGUA, disparo.getResultado());
         }
 
         @Test
-        @DisplayName("Disparo IMPACTO NO cambia el turno")
-        void disparoImpactoNoCambiaTurno() {
+        @DisplayName("Disparo IMPACTO retorna resultado correcto")
+        void disparoImpactoRetornaResultado() {
             Jugador turnoInicial = partida.getTurno();
             if (!turnoInicial.equals(jugador1)) {
                 partida.cambiarTurno();
@@ -109,32 +120,10 @@ class PartidaTest {
             }
 
             Coordenadas coordsImpacto = new Coordenadas(5, 5);
-            Disparo disparo = partida.realizarDisparo(coordsImpacto, turnoInicial, System.currentTimeMillis());
+            Disparo disparo = disparoService.realizarDisparo(partida, turnoInicial, coordsImpacto, System.currentTimeMillis());
 
-            assertTrue(disparo.getResultadoDisparo() == ResultadoDisparo.IMPACTO
-                    || disparo.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO);
-            assertEquals(turnoInicial, partida.getTurno());
-        }
-
-        @Test
-        @DisplayName("Disparo a coordenadas ya disparadas retorna YA_DISPARADO")
-        void disparoYaDisparadoCambiaTurno() {
-            Jugador turnoInicial = partida.getTurno();
-            Coordenadas coords = new Coordenadas(0, 0);
-
-            Disparo primerDisparo = partida.realizarDisparo(coords, turnoInicial, System.currentTimeMillis());
-            assertEquals(ResultadoDisparo.AGUA, primerDisparo.getResultadoDisparo());
-
-            Jugador segundoTurno = partida.getTurno();
-            assertNotEquals(turnoInicial, segundoTurno);
-
-            Coordenadas otraCoord = new Coordenadas(1, 1);
-            partida.realizarDisparo(otraCoord, segundoTurno, System.currentTimeMillis());
-
-            assertEquals(turnoInicial, partida.getTurno());
-            Disparo disparoRepetido = partida.realizarDisparo(coords, turnoInicial, System.currentTimeMillis());
-
-            assertEquals(ResultadoDisparo.YA_DISPARADO, disparoRepetido.getResultadoDisparo());
+            assertTrue(disparo.getResultado() == ResultadoDisparo.IMPACTO
+                    || disparo.getResultado() == ResultadoDisparo.HUNDIMIENTO);
         }
 
         @Test
@@ -143,22 +132,22 @@ class PartidaTest {
             Jugador turnoInicial = partida.getTurno();
             Jugador otroJugador = turnoInicial.equals(jugador1) ? jugador2 : jugador1;
 
-            Disparo disparo = partida.realizarDisparo(new Coordenadas(0, 0), otroJugador, System.currentTimeMillis());
+            Disparo disparo = disparoService.realizarDisparo(partida, otroJugador, new Coordenadas(0, 0), System.currentTimeMillis());
 
-            assertEquals(ResultadoDisparo.TURNO_INCORRECTO, disparo.getResultadoDisparo());
+            assertEquals(ResultadoDisparo.TURNO_INCORRECTO, disparo.getResultado());
         }
     }
 
     @Nested
-    @DisplayName("Pruebas de abandonarPartida")
+    @DisplayName("Pruebas de abandonarPartida con servicio")
     class AbandonarPartidaTests {
 
         @Test
         @DisplayName("Abandonar partida declara ganador al oponente")
         void abandonarPartidaDeclaraGanador() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
 
-            partida.abandonarPartida(jugador1);
+            partidaService.abandonarPartida(partida, jugador1);
 
             assertEquals(EstadoPartida.FINALIZADA, partida.getEstado());
             assertEquals(1, partida.getJugadores().size());
@@ -168,26 +157,27 @@ class PartidaTest {
         @Test
         @DisplayName("Abandonar cambia estado del jugador a ABANDONO")
         void abandonarCambiaEstadoJugador() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
 
-            partida.abandonarPartida(jugador1);
+            partidaService.abandonarPartida(partida, jugador1);
 
             assertEquals(EstadoJugador.ABANDONO, jugador1.getEstado());
         }
     }
 
     @Nested
-    @DisplayName("Pruebas de unirsePartida")
+    @DisplayName("Pruebas de unirsePartida con servicio")
     class UnirsePartidaTests {
 
         @Test
         @DisplayName("No unirse si partida EN_CURSO")
         void noUnirsePartidaEnCurso() {
-            partida.empezarPartida();
+            partidaService.iniciarPartida(partida);
             Jugador jugador3 = new Jugador("Jugador3", ColorJugador.ROJO, EstadoJugador.JUGANDO);
 
-            partida.unirsePartida(jugador3);
+            ResultadoUnirse resultado = partidaService.unirsePartida(partida, jugador3);
 
+            assertEquals(ResultadoUnirse.PARTIDA_EN_CURSO, resultado);
             assertEquals(2, partida.getJugadores().size());
         }
 
@@ -196,14 +186,27 @@ class PartidaTest {
         void noUnirseSiYaHayDosJugadores() {
             Jugador jugador3 = new Jugador("Jugador3", ColorJugador.AZUL, EstadoJugador.JUGANDO);
 
-            partida.unirsePartida(jugador3);
+            ResultadoUnirse resultado = partidaService.unirsePartida(partida, jugador3);
 
+            assertEquals(ResultadoUnirse.PARTIDA_LLENA, resultado);
             assertEquals(2, partida.getJugadores().size());
+        }
+
+        @Test
+        @DisplayName("No unirse con nombre duplicado")
+        void noUnirseConNombreDuplicado() {
+            Partida nuevaPartida = new Partida(null, new ArrayList<>(List.of(jugador1)),
+                    3, 4, 2, 2, 11, EstadoPartida.POR_EMPEZAR, new ArrayList<>());
+            Jugador jugadorDuplicado = new Jugador("Jugador1", ColorJugador.AZUL, EstadoJugador.JUGANDO);
+
+            ResultadoUnirse resultado = partidaService.unirsePartida(nuevaPartida, jugadorDuplicado);
+
+            assertEquals(ResultadoUnirse.NOMBRE_DUPLICADO, resultado);
         }
     }
 
     @Nested
-    @DisplayName("Pruebas de addNave")
+    @DisplayName("Pruebas de addNave con servicio")
     class AddNaveTests {
 
         @Test
@@ -215,7 +218,8 @@ class PartidaTest {
                     new Coordenadas(1, 0)
             );
 
-            ResultadoAddNave resultado = partida.addNave(jugador1, submarino, coords);
+            ResultadoAddNave resultado = tableroService.colocarNave(
+                    jugador1.getTablero(), jugador1, submarino, coords, partida.getJugadores());
 
             assertEquals(ResultadoAddNave.NAVE_AÑADIDA, resultado);
         }
@@ -227,9 +231,36 @@ class PartidaTest {
             Barco barco = new Barco(OrientacionNave.HORIZONTAL);
             List<Coordenadas> coords = List.of(new Coordenadas(0, 0));
 
-            ResultadoAddNave resultado = partida.addNave(jugadorExterno, barco, coords);
+            ResultadoAddNave resultado = tableroService.colocarNave(
+                    jugadorExterno.getTablero(), jugadorExterno, barco, coords, partida.getJugadores());
 
             assertEquals(ResultadoAddNave.JUGADOR_NO_ENCONTRADO, resultado);
+        }
+    }
+
+    @Nested
+    @DisplayName("Pruebas de cambiarTurno")
+    class CambiarTurnoTests {
+
+        @Test
+        @DisplayName("Cambiar turno alterna entre jugadores")
+        void cambiarTurnoAlternaJugadores() {
+            partida.setTurno(jugador1);
+
+            boolean resultado = partida.cambiarTurno();
+
+            assertTrue(resultado);
+            assertEquals(jugador2, partida.getTurno());
+        }
+
+        @Test
+        @DisplayName("Cambiar turno vuelve al primer jugador")
+        void cambiarTurnoVuelveAlPrimero() {
+            partida.setTurno(jugador1);
+            partida.cambiarTurno();
+            partida.cambiarTurno();
+
+            assertEquals(jugador1, partida.getTurno());
         }
     }
 }

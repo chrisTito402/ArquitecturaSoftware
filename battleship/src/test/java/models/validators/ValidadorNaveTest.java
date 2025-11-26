@@ -287,7 +287,7 @@ class ValidadorNaveTest {
 
             ResultadoAddNave resultado = validador.validarOrientacion(nave, coords);
 
-            assertEquals(ResultadoAddNave.NO_ORDENADA_VERTICLMENTE, resultado);
+            assertEquals(ResultadoAddNave.NO_ORDENADA_VERTICALMENTE, resultado);
         }
 
         @Test

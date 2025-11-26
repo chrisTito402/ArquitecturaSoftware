@@ -12,9 +12,9 @@ public class MarcadorNavesPanel extends JPanel {
     private Map<String, int[]> contadoresNaves;
     private Map<String, JLabel[]> labelsNaves;
 
-    private static final Color COLOR_SIN_DANIOS = new Color(76, 175, 80);
-    private static final Color COLOR_AVERIADO = new Color(255, 193, 7);
-    private static final Color COLOR_HUNDIDO = new Color(244, 67, 54);
+    private static final Color COLOR_SIN_DANIOS = new Color(60, 60, 60);
+    private static final Color COLOR_AVERIADO = new Color(120, 120, 120);
+    private static final Color COLOR_HUNDIDO = Color.BLACK;
 
     private static final String[] TIPOS_NAVES = {"Portaaviones", "Cruceros", "Submarinos", "Barcos"};
     private static final int[] CANTIDADES_INICIALES = {2, 2, 4, 3};
@@ -23,10 +23,10 @@ public class MarcadorNavesPanel extends JPanel {
         contadoresNaves = new HashMap<>();
         labelsNaves = new HashMap<>();
 
-        setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        setBackground(Color.WHITE);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(UIConstants.COLOR_ACENTO_AZUL, 2),
+                BorderFactory.createLineBorder(Color.BLACK, 1),
                 new EmptyBorder(10, 15, 10, 15)
         ));
 
@@ -41,18 +41,18 @@ public class MarcadorNavesPanel extends JPanel {
     }
 
     private void crearComponentes() {
-        JLabel lblTitulo = new JLabel("⚓ ESTADO DE FLOTA");
+        JLabel lblTitulo = new JLabel("ESTADO DE FLOTA");
         lblTitulo.setFont(UIConstants.FONT_TITULO_PEQUENO);
-        lblTitulo.setForeground(UIConstants.COLOR_ACENTO_DORADO);
+        lblTitulo.setForeground(Color.BLACK);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(lblTitulo);
         add(Box.createVerticalStrut(10));
 
         JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        panelLeyenda.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
-        panelLeyenda.add(crearIndicadorLeyenda("●", COLOR_SIN_DANIOS, "OK"));
-        panelLeyenda.add(crearIndicadorLeyenda("●", COLOR_AVERIADO, "Avg"));
-        panelLeyenda.add(crearIndicadorLeyenda("●", COLOR_HUNDIDO, "Hnd"));
+        panelLeyenda.setBackground(Color.WHITE);
+        panelLeyenda.add(crearIndicadorLeyenda("o", COLOR_SIN_DANIOS, "OK"));
+        panelLeyenda.add(crearIndicadorLeyenda("o", COLOR_AVERIADO, "Avg"));
+        panelLeyenda.add(crearIndicadorLeyenda("o", COLOR_HUNDIDO, "Hnd"));
         add(panelLeyenda);
         add(Box.createVerticalStrut(10));
 
@@ -66,14 +66,14 @@ public class MarcadorNavesPanel extends JPanel {
 
     private JPanel crearIndicadorLeyenda(String simbolo, Color color, String texto) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-        panel.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        panel.setBackground(Color.WHITE);
 
         JLabel lblSimbolo = new JLabel(simbolo);
         lblSimbolo.setForeground(color);
         lblSimbolo.setFont(new Font("Segoe UI", Font.BOLD, 10));
 
         JLabel lblTexto = new JLabel(texto);
-        lblTexto.setForeground(UIConstants.COLOR_TEXTO_SECUNDARIO);
+        lblTexto.setForeground(Color.DARK_GRAY);
         lblTexto.setFont(new Font("Segoe UI", Font.PLAIN, 9));
 
         panel.add(lblSimbolo);
@@ -83,16 +83,16 @@ public class MarcadorNavesPanel extends JPanel {
 
     private JPanel crearFilaNave(String tipoNave, int cantidad) {
         JPanel panel = new JPanel(new BorderLayout(5, 0));
-        panel.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        panel.setBackground(Color.WHITE);
         panel.setMaximumSize(new Dimension(200, 25));
 
         JLabel lblNombre = new JLabel(tipoNave);
-        lblNombre.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        lblNombre.setForeground(Color.BLACK);
         lblNombre.setFont(UIConstants.FONT_TEXTO_PEQUENO);
         panel.add(lblNombre, BorderLayout.WEST);
 
         JPanel panelContadores = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-        panelContadores.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        panelContadores.setBackground(Color.WHITE);
 
         JLabel lblSinDanios = crearLabelContador(String.valueOf(cantidad), COLOR_SIN_DANIOS);
         JLabel lblAveriados = crearLabelContador("0", COLOR_AVERIADO);

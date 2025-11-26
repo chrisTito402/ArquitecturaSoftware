@@ -1,5 +1,6 @@
 package controllers.controller;
 
+import buseventos.EventoJuego;
 import buseventos.Mensaje;
 import buseventos.util.MensajeriaHelper;
 import clientesocket.IClienteSocket;
@@ -8,6 +9,7 @@ import dtos.CoordenadasDTO;
 import dtos.DisparoDTO;
 import dtos.JugadorDTO;
 import dtos.NaveDTO;
+import dtos.TiempoDTO;
 import dtos.mappers.CoordenadasMapper;
 import dtos.mappers.JugadorMapper;
 import dtos.mappers.NaveMapper;
@@ -36,9 +38,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         this.cliente = cliente;
         this.manejadorEventos = mapa;
 
-        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
-        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
-        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
+        registrarManejadores();
+    }
+
+    private void registrarManejadores() {
+        manejadorEventos.put(EventoJuego.RESULTADO_DISPARO.getValor(), this::manejarResultadoDisparo);
+        manejadorEventos.put(EventoJuego.JUGADOR_UNIDO.getValor(), this::manejarJugadorUnido);
+        manejadorEventos.put(EventoJuego.JUGADOR_ABANDONO.getValor(), this::manejarAbandonarPartida);
+        manejadorEventos.put(EventoJuego.TIEMPO_ACTUALIZADO.getValor(), this::manejarTiempoActualizado);
+        manejadorEventos.put(EventoJuego.CAMBIO_TURNO.getValor(), this::manejarCambioTurno);
     }
 
     private void enviarMensaje(String evento, Object datos) {
@@ -48,6 +56,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         String idJugador = obtenerIdJugadorLocal();
         String json = MensajeriaHelper.crearMensajeJSON(evento, datos, idJugador);
         cliente.enviarMensaje(json);
+    }
+
+    private void enviarMensaje(EventoJuego evento, Object datos) {
+        enviarMensaje(evento.getValor(), datos);
     }
 
     private String obtenerIdJugadorLocal() {
@@ -76,14 +88,28 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private void manejarResultadoDisparo(Mensaje mensaje) {
         DisparoDTO disparoDTO = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
         if (disparoDTO != null) {
-            modelo.notificarAllSuscriptores("RESULTADO_DISPARO", disparoDTO);
+            modelo.notificarAllSuscriptores(EventoJuego.RESULTADO_DISPARO.getValor(), disparoDTO);
         }
     }
 
     public void manejarAbandonarPartida(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
         if (jugadorDTO != null) {
-            modelo.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
+            modelo.notificarAllSuscriptores(EventoJuego.ABANDONAR_PARTIDA.getValor(), jugadorDTO);
+        }
+    }
+
+    private void manejarTiempoActualizado(Mensaje mensaje) {
+        TiempoDTO tiempoDTO = MensajeriaHelper.extraerDatos(mensaje, TiempoDTO.class);
+        if (tiempoDTO != null) {
+            modelo.notificarAllSuscriptores(EventoJuego.TIEMPO_ACTUALIZADO.getValor(), tiempoDTO);
+        }
+    }
+
+    private void manejarCambioTurno(Mensaje mensaje) {
+        DisparoDTO disparoDTO = MensajeriaHelper.extraerDatos(mensaje, DisparoDTO.class);
+        if (disparoDTO != null) {
+            modelo.notificarAllSuscriptores(EventoJuego.CAMBIO_TURNO.getValor(), disparoDTO);
         }
     }
 
@@ -91,7 +117,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void abandonarLobby(Jugador jugador) {
         modelo.abandonarLobby(jugador);
         JugadorDTO dto = JugadorMapper.toDTO(jugador);
-        enviarMensaje("ABANDONAR_PARTIDA", dto);
+        enviarMensaje(EventoJuego.ABANDONAR_PARTIDA, dto);
     }
 
     @Override
@@ -120,13 +146,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
                 System.currentTimeMillis()
         );
 
-        enviarMensaje("DISPARO", disparoDTO);
+        enviarMensaje(EventoJuego.DISPARO, disparoDTO);
     }
 
     private void manejarJugadorUnido(Mensaje mensaje) {
         JugadorDTO jugadorDTO = MensajeriaHelper.extraerDatos(mensaje, JugadorDTO.class);
         if (jugadorDTO != null) {
-            modelo.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
+            modelo.notificarAllSuscriptores(EventoJuego.JUGADOR_UNIDO.getValor(), jugadorDTO);
         }
     }
 
@@ -147,7 +173,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
                 null
         );
 
-        enviarMensaje("ADD_NAVE", addNaveDTO);
+        enviarMensaje(EventoJuego.ADD_NAVE, addNaveDTO);
         return true;
     }
 
@@ -170,7 +196,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void unirsePartida(Jugador jugador) {
         modelo.unirsePartida(jugador);
         JugadorDTO jugadorDTO = JugadorMapper.toDTO(jugador);
-        enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
+        enviarMensaje(EventoJuego.UNIRSE_PARTIDA, jugadorDTO);
     }
 
     @Override
@@ -190,5 +216,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
             return JugadorMapper.toDTO(turno);
         }
         return null;
+    }
+
+    @Override
+    public boolean esMiTurno() {
+        return modelo != null && modelo.getTurno() != null;
     }
 }

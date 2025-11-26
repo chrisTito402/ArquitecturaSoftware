@@ -72,7 +72,7 @@ public class ValidadorNave {
             int y = coordenadas.getFirst().getY();
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getY() != y) {
-                    return ResultadoAddNave.NO_ORDENADA_VERTICLMENTE;
+                    return ResultadoAddNave.NO_ORDENADA_VERTICALMENTE;
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {

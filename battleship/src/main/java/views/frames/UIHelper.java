@@ -11,104 +11,105 @@ public class UIHelper {
     public static JButton crearBotonPrimario(String texto) {
         JButton btn = new JButton(texto);
         btn.setFont(UIConstants.FONT_BOTON);
-        btn.setBackground(UIConstants.COLOR_ACENTO_AZUL);
-        btn.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(UIConstants.COLOR_ACENTO_AZUL.darker(), 2, true),
-            BorderFactory.createEmptyBorder(12, 30, 12, 30)
+            new LineBorder(Color.BLACK, 2),
+            BorderFactory.createEmptyBorder(10, 25, 10, 25)
         ));
 
-        agregarEfectoHover(btn, UIConstants.COLOR_ACENTO_AZUL);
+        agregarEfectoHover(btn);
         return btn;
     }
 
     public static JButton crearBotonExito(String texto) {
         JButton btn = new JButton(texto);
         btn.setFont(UIConstants.FONT_BOTON);
-        btn.setBackground(UIConstants.COLOR_ACIERTO);
+        btn.setBackground(Color.BLACK);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(UIConstants.COLOR_ACIERTO.darker(), 2, true),
-            BorderFactory.createEmptyBorder(12, 30, 12, 30)
+            new LineBorder(Color.BLACK, 2),
+            BorderFactory.createEmptyBorder(10, 25, 10, 25)
         ));
 
-        agregarEfectoHover(btn, UIConstants.COLOR_ACIERTO);
+        agregarEfectoHoverInvertido(btn);
         return btn;
     }
 
     public static JButton crearBotonPeligro(String texto) {
         JButton btn = new JButton(texto);
         btn.setFont(UIConstants.FONT_BOTON);
-        btn.setBackground(UIConstants.COLOR_FALLO);
-        btn.setForeground(Color.WHITE);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(UIConstants.COLOR_FALLO.darker(), 2, true),
-            BorderFactory.createEmptyBorder(12, 30, 12, 30)
+            new LineBorder(Color.BLACK, 2),
+            BorderFactory.createEmptyBorder(10, 25, 10, 25)
         ));
 
-        agregarEfectoHover(btn, UIConstants.COLOR_FALLO);
+        agregarEfectoHover(btn);
         return btn;
     }
 
     public static JButton crearBotonSecundario(String texto) {
         JButton btn = new JButton(texto);
         btn.setFont(UIConstants.FONT_BOTON);
-        btn.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
-        btn.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        btn.setBackground(new Color(240, 240, 240));
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(UIConstants.COLOR_FONDO_SECUNDARIO.brighter(), 2, true),
-            BorderFactory.createEmptyBorder(12, 30, 12, 30)
+            new LineBorder(Color.GRAY, 1),
+            BorderFactory.createEmptyBorder(10, 25, 10, 25)
         ));
 
-        agregarEfectoHover(btn, UIConstants.COLOR_FONDO_SECUNDARIO);
+        agregarEfectoHover(btn);
         return btn;
     }
 
     public static void personalizarBoton(JButton btn, Color colorFondo) {
         btn.setFont(UIConstants.FONT_BOTON);
-        btn.setBackground(colorFondo);
-        btn.setForeground(Color.WHITE);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(colorFondo.darker(), 2, true),
-            BorderFactory.createEmptyBorder(12, 30, 12, 30)
+            new LineBorder(Color.BLACK, 2),
+            BorderFactory.createEmptyBorder(10, 25, 10, 25)
         ));
 
-        agregarEfectoHover(btn, colorFondo);
+        agregarEfectoHover(btn);
     }
 
-    private static void agregarEfectoHover(JButton btn, Color colorOriginal) {
+    private static void agregarEfectoHover(JButton btn) {
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btn.setBackground(colorOriginal.brighter());
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    new LineBorder(colorOriginal.brighter(), 2, true),
-                    BorderFactory.createEmptyBorder(12, 30, 12, 30)
-                ));
+                btn.setBackground(new Color(230, 230, 230));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setBackground(colorOriginal);
-                btn.setBorder(BorderFactory.createCompoundBorder(
-                    new LineBorder(colorOriginal.darker(), 2, true),
-                    BorderFactory.createEmptyBorder(12, 30, 12, 30)
-                ));
+                btn.setBackground(Color.WHITE);
+            }
+        });
+    }
+
+    private static void agregarEfectoHoverInvertido(JButton btn) {
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(new Color(60, 60, 60));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(Color.BLACK);
             }
         });
     }
@@ -116,32 +117,32 @@ public class UIHelper {
     public static JLabel crearTitulo(String texto) {
         JLabel label = new JLabel(texto, SwingConstants.CENTER);
         label.setFont(UIConstants.FONT_TITULO_GRANDE);
-        label.setForeground(UIConstants.COLOR_ACENTO_DORADO);
+        label.setForeground(Color.BLACK);
         return label;
     }
 
     public static JLabel crearSubtitulo(String texto) {
         JLabel label = new JLabel(texto, SwingConstants.CENTER);
         label.setFont(UIConstants.FONT_TITULO_MEDIO);
-        label.setForeground(UIConstants.COLOR_TEXTO_SECUNDARIO);
+        label.setForeground(Color.DARK_GRAY);
         return label;
     }
 
     public static JLabel crearLabel(String texto) {
         JLabel label = new JLabel(texto);
         label.setFont(UIConstants.FONT_TEXTO_NORMAL);
-        label.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        label.setForeground(Color.BLACK);
         return label;
     }
 
     public static JTextField crearTextField() {
         JTextField textField = new JTextField();
         textField.setFont(UIConstants.FONT_TEXTO_NORMAL);
-        textField.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
-        textField.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
-        textField.setCaretColor(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        textField.setBackground(Color.WHITE);
+        textField.setForeground(Color.BLACK);
+        textField.setCaretColor(Color.BLACK);
         textField.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(UIConstants.COLOR_ACENTO_AZUL, 2, true),
+            new LineBorder(Color.BLACK, 1),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
         return textField;
@@ -149,67 +150,61 @@ public class UIHelper {
 
     public static JPanel crearPanelConBorde(String titulo) {
         JPanel panel = new JPanel();
-        panel.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(UIConstants.COLOR_ACENTO_AZUL, 2),
+            BorderFactory.createLineBorder(Color.BLACK, 1),
             titulo,
             TitledBorder.LEFT,
             TitledBorder.TOP,
             UIConstants.FONT_TITULO_PEQUENO,
-            UIConstants.COLOR_TEXTO_PRINCIPAL
+            Color.BLACK
         ));
         return panel;
     }
 
     public static JPanel crearPanelFondo() {
         JPanel panel = new JPanel();
-        panel.setBackground(UIConstants.COLOR_FONDO_PRINCIPAL);
+        panel.setBackground(Color.WHITE);
         return panel;
     }
 
     public static JSeparator crearSeparador() {
         JSeparator separator = new JSeparator();
-        separator.setForeground(UIConstants.COLOR_FONDO_SECUNDARIO);
-        separator.setBackground(UIConstants.COLOR_FONDO_SECUNDARIO);
+        separator.setForeground(Color.GRAY);
+        separator.setBackground(Color.GRAY);
         return separator;
     }
 
     public static void aplicarTemaOscuro(JFrame frame) {
-        frame.getContentPane().setBackground(UIConstants.COLOR_FONDO_PRINCIPAL);
+        frame.getContentPane().setBackground(Color.WHITE);
     }
 
     public static void aplicarTemaOscuro(JPanel panel) {
-        panel.setBackground(UIConstants.COLOR_FONDO_PRINCIPAL);
+        panel.setBackground(Color.WHITE);
     }
 
     public static JCheckBox crearCheckBox(String texto, Color colorFondo) {
         JCheckBox checkBox = new JCheckBox(texto);
         checkBox.setFont(UIConstants.FONT_TEXTO_NORMAL);
-        checkBox.setBackground(UIConstants.COLOR_FONDO_PRINCIPAL);
-        checkBox.setForeground(UIConstants.COLOR_TEXTO_PRINCIPAL);
+        checkBox.setBackground(Color.WHITE);
+        checkBox.setForeground(Color.BLACK);
         checkBox.setFocusPainted(false);
         checkBox.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(colorFondo, 3, true),
+            new LineBorder(Color.BLACK, 2),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
-
-        JPanel panelColor = new JPanel();
-        panelColor.setBackground(colorFondo);
-        panelColor.setPreferredSize(new Dimension(30, 30));
-        panelColor.setBorder(new LineBorder(colorFondo.darker(), 2, true));
-
         return checkBox;
     }
 
     public static JPanel crearPanelIndicadorEstado(boolean conectado) {
         JPanel panel = new JPanel();
         panel.setPreferredSize(new Dimension(20, 20));
-        panel.setBorder(new LineBorder(Color.BLACK, 2, true));
+        panel.setBorder(new LineBorder(Color.BLACK, 2));
 
         if (conectado) {
-            panel.setBackground(UIConstants.COLOR_ACIERTO);
+            panel.setBackground(Color.BLACK);
         } else {
-            panel.setBackground(UIConstants.COLOR_FALLO);
+            panel.setBackground(Color.WHITE);
         }
 
         return panel;
@@ -223,7 +218,7 @@ public class UIHelper {
         JOptionPane.showMessageDialog(
             parent,
             mensaje,
-            "Éxito",
+            "Exito",
             JOptionPane.INFORMATION_MESSAGE
         );
     }
@@ -241,7 +236,7 @@ public class UIHelper {
         int resultado = JOptionPane.showConfirmDialog(
             parent,
             mensaje,
-            "Confirmación",
+            "Confirmacion",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE
         );
