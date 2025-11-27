@@ -4,9 +4,7 @@ import buseventos.buseventos.BusEventos;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,11 +39,11 @@ public class ServidorSocket {
     }
     
     void sendMessage(String message, UserServerThread user) {
-//        for (UserServerThread userThread : threads) {
-//            if (userThread == user) {
-//                userThread.sendMessage(message);
-//            }
-//        }
+        for (UserServerThread userThread : threads) {
+            if (userThread == user) {
+                userThread.sendMessage(message);
+            }
+        }
     }
     
     void sendToBus(String message, UserServerThread user) {
@@ -53,7 +51,7 @@ public class ServidorSocket {
     }
     
     void removeUser(UserServerThread user) {
-//        threads.remove(user);
+        threads.remove(user);
         bus.removeSuscriptor(user);
     }
     
