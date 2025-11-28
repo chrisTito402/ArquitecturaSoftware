@@ -62,6 +62,7 @@ public class Partida implements IModeloServidor {
         return true;
     }
 
+    @Override
     public List<Jugador> getJugadores() {
         return jugadores;
     }

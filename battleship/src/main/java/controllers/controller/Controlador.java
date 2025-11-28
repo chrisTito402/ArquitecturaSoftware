@@ -43,7 +43,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
         manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
+        manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
     }
 
 //    public Controlador(ControlModelo modelo, ControlVista vista) {
@@ -57,13 +58,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 //        registrarEventos();
 //    }
 
-    private void registrarEventos() {
-        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
-        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
-        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
-    }
+//    private void registrarEventos() {
+//        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
+//        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
+//        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
+//        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+//        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
+//    }
 
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
@@ -99,17 +100,14 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     }
 
-    //Manda mensaje al servidor
-    @Override
-    public void abandonarLobby(Jugador jugador) {
-        partida.abandonarLobby(jugador);
-
-        //Mandar mensaje al servidor para avisar al ribal
-        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-
-        enviarMensaje("ABANDONAR_PARTIDA", dto);
-
-    }
+    //Manda mensaje* al servidor
+//    @Override
+//    public void abandonarLobby(Jugador jugador) {
+//        partida.abandonarLobby(jugador);
+//        //Mandar mensaje al servidor para avisar al ribal
+//        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+//        enviarMensaje("ABANDONAR_PARTIDA", dto);
+//    }
 
     @Override
     public String crearPartida(Jugador j) {
@@ -154,38 +152,54 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void suscribirAPartida(ISuscriptor suscriptor) {
         partida.suscribirAPartida(suscriptor);
     }
-
-    // Caso de Uso: Unirse Partida
-    @Override
-    public void unirsePartida(Jugador jugador) {
-        partida.unirsePartida(jugador);
-
-        JugadorDTO jugadorDTO = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-        enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
-    }
-
-    @Override
-    public void empezarPartida() {
-        partida.empezarPartida();
-    }
-
-    @Override
-    public List<Jugador> getJugadores() {
-        return partida.getJugadores();
-    }
-
+    
     @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
     }
 
+    // Caso de Uso: Unirse Partida
+    @Override
+    public void unirsePartida(Jugador jugador) {
+        partida.unirsePartida(jugador);
+        JugadorDTO jugadorDTO = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
+    }
+    
     private void manejarUnirsePartida(Mensaje mensaje) {
         JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("El jugador " + dto.getNombre() + " se unio a la partida.");
         partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
     }
 
-    private void manejarIniciarPartida(Mensaje mensaje) {
+    @Override
+    public void empezarPartida() {
         partida.empezarPartida();
-        partida.notificarAllSuscriptores("INICIAR_PARTIDA", null);
+        enviarMensaje("EMPEZAR_PARTIDA", null);
+    }
+    
+    private void manejarEmpezarPartida(Mensaje mensaje) {
+        JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("La partida esta comenzando.");
+        partida.notificarAllSuscriptores("EMPEZAR_PARTIDA", jugadorDTO);
+    }
+    
+    @Override
+    public void abandonarLobby(Jugador jugador) {
+        partida.abandonarLobby(jugador);
+        //Mandar mensaje al servidor para avisar al ribal
+        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        enviarMensaje("ABANDONAR_LOBBY", dto);
+    }
+    
+    private void manejarAbandonarLobby(Mensaje mensaje) {
+        JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono el lobby.");
+        partida.notificarAllSuscriptores("ABANDONAR_LOBBY", jugadorDTO);
+    }
+
+    @Override
+    public List<Jugador> getJugadores() {
+        return partida.getJugadores();
     }
 }
