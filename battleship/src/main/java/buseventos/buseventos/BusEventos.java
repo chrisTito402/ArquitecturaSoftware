@@ -31,7 +31,9 @@ public class BusEventos {
     private void suscribirse(String evento, UserServerThread suscriptor) {
         System.out.println("SUSCRIBIR");
         if (eventos.containsKey(evento)) {
-            eventos.get(evento).add(suscriptor);
+            if (!eventos.get(evento).contains(suscriptor)) {
+                eventos.get(evento).add(suscriptor);
+            }
         } else {
             eventos.put(evento, new HashSet<>());
             eventos.get(evento).add(suscriptor);
@@ -57,4 +59,10 @@ public class BusEventos {
         }
     }
     
+    public void addNewClient(String event, UserServerThread client) {
+        if (!eventos.containsKey(event)) {
+            eventos.put(event, new HashSet<>());
+            eventos.get(event).add(client);
+        }
+    }
 }

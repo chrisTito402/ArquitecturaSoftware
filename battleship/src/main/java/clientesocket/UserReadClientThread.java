@@ -32,6 +32,12 @@ public class UserReadClientThread extends Thread {
     @Override
     public void run() {
         try {
+            try {
+                String id = reader.readLine();
+                client.setId(id);
+            } catch (SocketException ex) {
+                socket.close();
+            }
             while (true) {
                 try {
                     String response = reader.readLine();

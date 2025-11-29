@@ -18,6 +18,7 @@ public class ClienteSocket implements IClienteSocket {
     private PrintWriter writer;
     private Socket socket;
     private ManejadorRespuestaCliente control;
+    private String id;
 
     public ClienteSocket(String hostname, int port, ManejadorRespuestaCliente control) {
         this.hostname = hostname;
@@ -51,5 +52,14 @@ public class ClienteSocket implements IClienteSocket {
     
     public void manejarMensaje(String json) {
         control.manejarMensaje(json);
+    }
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    @Override
+    public String getId() {
+        return this.id;
     }
 }

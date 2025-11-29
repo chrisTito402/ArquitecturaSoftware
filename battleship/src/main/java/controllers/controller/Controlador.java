@@ -69,7 +69,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), "1");
+        
+        String id = cliente.getId();
+        if (id == null) {
+            System.out.println("Error, id vacio.");
+            return;
+        }
+        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), id);
         String json = gson.toJson(mensaje);
 
         cliente.enviarMensaje(json);
