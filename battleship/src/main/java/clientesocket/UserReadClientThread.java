@@ -34,6 +34,7 @@ public class UserReadClientThread extends Thread {
         try {
             try {
                 String id = reader.readLine();
+                System.out.println("CLIENTE, ID QUE LLEGO: " + id);
                 client.setId(id);
             } catch (SocketException ex) {
                 socket.close();

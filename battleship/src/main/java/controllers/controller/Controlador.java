@@ -45,6 +45,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
+        manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
     }
 
 //    public Controlador(ControlModelo modelo, ControlVista vista) {
@@ -90,6 +91,20 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.get(mensaje.getEvento()).accept(mensaje);
     }
 
+    // Metodo para asignar un metodo al Map cuando se asigne un id al Cliente.
+    @Override
+    public void onIdSet(String id) {
+        manejadorEventos.put("MENSAJE_CLIENTE_" + id, this::manejarEventoPrivado);
+    }
+    
+    private void manejarEventoPrivado(Mensaje mensaje) {
+        manejadorEventos.get(mensaje.getSubEvento()).accept(mensaje);
+    }
+    
+    private void manejarResultadoAddNave(Mensaje mensaje) {
+        
+    }
+    
     private void manejarResultadoDisparo(Mensaje mensaje) {
         Gson gson = new Gson();
         DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);

@@ -6,4 +6,5 @@ package controllers.controller;
  */
 public interface ManejadorRespuestaCliente {
     public void manejarMensaje(String json);
+    public void onIdSet(String id);
 }

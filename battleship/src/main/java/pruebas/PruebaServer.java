@@ -97,7 +97,7 @@ public class PruebaServer {
         cliente.setControl(control);
         cliente.execute();
         
-        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null, "1");
+        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "DISPARO", null);
         Gson gson = new Gson();
         String json = gson.toJson(m);
         cliente.enviarMensaje(json);

@@ -49,7 +49,14 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), null);
+        
+        String id = cliente.getId();
+        if (id == null) {
+            System.out.println("Error, id vacio.");
+            return;
+        }
+        
+        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, evento, gson.toJsonTree(datos), id);
         String json = gson.toJson(mensaje);
 
         cliente.enviarMensaje(json);
@@ -63,6 +70,16 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         manejadoresEventos.get(mensaje.getEvento()).accept(mensaje);
 
+    }
+    
+    // Metodo para asignar un metodo al Map cuando se asigne un id al Cliente.
+    @Override
+    public void onIdSet(String id) {
+        manejadoresEventos.put("MENSAJE_CLIENTE_" + id, this::manejarEventoPrivado);
+    }
+    
+    private void manejarEventoPrivado(Mensaje mensaje) {
+        
     }
 
     private void addNave(Mensaje mensaje) {
@@ -96,7 +113,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         ResultadoAddNave resultado = servidor.addNave(jugador, nave, coordenadas);
 
-        enviarMensaje("RESULTADO_ADD_NAVE", resultado);
+        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), resultado);
     }
 
     private void realizarDisparo(Mensaje mensaje) {

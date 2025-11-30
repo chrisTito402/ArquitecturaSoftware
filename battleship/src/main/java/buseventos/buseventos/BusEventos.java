@@ -43,6 +43,7 @@ public class BusEventos {
     public void manejarEvento(String json, UserServerThread cliente) {
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
+        System.out.println("ID DEL CLIENTE: " + mensaje.getIdPublicador());
         
         if (mensaje.getAccion() == TipoAccion.SUSCRIBIR) {
             suscribirse(mensaje.getEvento(), cliente);
@@ -60,9 +61,11 @@ public class BusEventos {
     }
     
     public void addNewClient(String event, UserServerThread client) {
+        System.out.println(event);
         if (!eventos.containsKey(event)) {
             eventos.put(event, new HashSet<>());
             eventos.get(event).add(client);
+            System.out.println("ID ASIGNADO");
         }
     }
 }

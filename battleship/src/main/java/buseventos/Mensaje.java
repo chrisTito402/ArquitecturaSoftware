@@ -12,6 +12,7 @@ public class Mensaje {
     private String evento;
     private JsonElement data;
     private String idPublicador;
+    private String subEvento;
 
     public Mensaje() {
     }
@@ -21,6 +22,20 @@ public class Mensaje {
         this.evento = evento;
         this.data = data;
         this.idPublicador = idPublicador;
+    }
+
+    public Mensaje(TipoAccion accion, String evento, JsonElement data) {
+        this.accion = accion;
+        this.evento = evento;
+        this.data = data;
+    }
+
+    public Mensaje(TipoAccion accion, String evento, JsonElement data, String idPublicador, String subEvento) {
+        this.accion = accion;
+        this.evento = evento;
+        this.data = data;
+        this.idPublicador = idPublicador;
+        this.subEvento = subEvento;
     }
 
     public TipoAccion getAccion() {
@@ -55,9 +70,17 @@ public class Mensaje {
         this.idPublicador = idPublicador;
     }
 
+    public String getSubEvento() {
+        return subEvento;
+    }
+
+    public void setSubEvento(String subEvento) {
+        this.subEvento = subEvento;
+    }
+
     @Override
     public String toString() {
-        return "Mensaje{" + "accion=" + accion + ", evento=" + evento + ", data=" + data + ", idPublicador=" + idPublicador + '}';
+        return "Mensaje{" + "accion=" + accion + ", evento=" + evento + ", data=" + data + ", idPublicador=" + idPublicador + ", subEvento=" + subEvento + '}';
     }
-    
+
 }

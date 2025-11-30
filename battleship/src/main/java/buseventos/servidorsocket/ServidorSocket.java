@@ -6,6 +6,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,11 +34,17 @@ public class ServidorSocket {
                 UserServerThread newUser = new UserServerThread(socket, this);
                 newUser.start();
                 
+                try {
+                    newUser.waitUntilReady();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(ServidorSocket.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
                 id++;
                 String idCliente = String.valueOf(id);
                 newUser.sendMessage(idCliente);
                 
-                String evento = "MENSAJE_JUGADOR_" + String.valueOf(id);
+                String evento = "MENSAJE_CLIENTE_" + String.valueOf(id);
                 addNewClientToEvent(evento, newUser);
             }
         } catch (IOException ex) {

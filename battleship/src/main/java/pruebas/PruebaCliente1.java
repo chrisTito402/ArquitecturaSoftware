@@ -43,7 +43,7 @@ public class PruebaCliente1 {
         
         cS.execute();
         
-        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_DISPARO", null, "1");
+        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_DISPARO", null);
         Gson gson = new Gson();
         String json = gson.toJson(m);
         cS.enviarMensaje(json);

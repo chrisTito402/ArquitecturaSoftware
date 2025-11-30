@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.CountDownLatch;
 
 /**
  *
@@ -19,6 +20,7 @@ public class UserServerThread extends Thread {
     private ServidorSocket server;
     private PrintWriter writer;
     private BufferedReader reader;
+    private final CountDownLatch readyLatch = new CountDownLatch(1);
 
     public UserServerThread(Socket socket, ServidorSocket server) {
         this.socket = socket;
@@ -33,6 +35,8 @@ public class UserServerThread extends Thread {
 
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
+            
+            readyLatch.countDown();
             
             String clientMessage;
             while (true) {
@@ -55,5 +59,8 @@ public class UserServerThread extends Thread {
         writer.println(message);
     }
     
+    public void waitUntilReady() throws InterruptedException {
+        readyLatch.await();
+    }
     
 }
