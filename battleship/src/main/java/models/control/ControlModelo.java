@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
+import models.enums.ResultadoAddNave;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import views.DTOs.AddNaveDTO;
@@ -70,10 +71,20 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
-
-        return null;
+        AddNaveDTO naveDTO = new AddNaveDTO(
+                jugador, 
+                nave, 
+                coordenadas
+        );
+        
+        return naveDTO;
     }
 
+    @Override
+    public void manejarResultadoAddNave(ResultadoAddNave resultado) { 
+        System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
+    }
+    
     @Override
     public void addJugador(Jugador j) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

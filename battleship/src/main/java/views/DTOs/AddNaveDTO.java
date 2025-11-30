@@ -24,6 +24,12 @@ public class AddNaveDTO {
         this.coordenadases = coordenadases;
         this.resultado = resultado;
     }
+
+    public AddNaveDTO(JugadorDTO jugador, NaveDTO nave, List<Coordenadas> coordenadases) {
+        this.jugador = jugador;
+        this.nave = nave;
+        this.coordenadases = coordenadases;
+    }
     
     public JugadorDTO getJugador() {
         return jugador;

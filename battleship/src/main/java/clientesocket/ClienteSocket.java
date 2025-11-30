@@ -54,8 +54,9 @@ public class ClienteSocket implements IClienteSocket {
         control.manejarMensaje(json);
     }
     
-    public void setId(String id) {
+    void setId(String id) {
         this.id = id;
+        control.onIdSet(id);
     }
     
     @Override

@@ -24,8 +24,11 @@ public class BusEventos {
         System.out.println("PUBLICAR");
         Gson gson = new Gson();
         String jsonMensaje = gson.toJson(mensaje);
+        System.out.println(evento);
+        if (!eventos.containsKey(evento)) {
+            eventos.put(evento, new HashSet<>());
+        }
         eventos.get(evento).forEach(s -> s.sendMessage(jsonMensaje));
-        //System.out.println(eventos);
     }
     
     private void suscribirse(String evento, UserServerThread suscriptor) {

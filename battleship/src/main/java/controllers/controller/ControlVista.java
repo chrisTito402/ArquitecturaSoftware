@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -235,11 +236,8 @@ public class ControlVista implements ISuscriptor {
         control.crearPartida(j);
     }
 
-    public void addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        boolean resultado = control.addNave(jugador, nave, coordenadas);
-        if (!resultado) {
-            System.out.println("No se pudo agregar la Nave.");
-        }
+    public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
+        control.addNave(nave, coordenadas);
     }
 
     public void addJugador(Jugador j) {

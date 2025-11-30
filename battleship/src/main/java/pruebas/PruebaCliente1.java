@@ -8,12 +8,20 @@ import controllers.controller.ControlVista;
 import controllers.controller.Controlador;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.Timer;
 import models.control.ControlModelo;
+import models.entidades.Coordenadas;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
+import models.enums.EstadoNave;
+import models.enums.OrientacionNave;
+import models.enums.ResultadoAddNave;
+import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 import views.DTOs.TableroDTO;
+import views.DTOs.TipoNaveDTO;
 import views.frames.TimerPanel;
 
 /**
@@ -47,6 +55,11 @@ public class PruebaCliente1 {
         Gson gson = new Gson();
         String json = gson.toJson(m);
         cS.enviarMensaje(json);
+        
+        NaveDTO nave = new NaveDTO(EstadoNave.SIN_DAÑOS, OrientacionNave.HORIZONTAL, TipoNaveDTO.BARCO, 1);
+        List<Coordenadas> coordenadas = new ArrayList<>();
+        coordenadas.add(new Coordenadas(2, 2));
+        cV.addNave(nave, coordenadas);
     }
     
 }

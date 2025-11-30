@@ -18,8 +18,11 @@ import models.control.ControlModelo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
+import models.enums.ResultadoAddNave;
 import servidor.modelo.ServidorManager;
+import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
@@ -102,7 +105,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
     
     private void manejarResultadoAddNave(Mensaje mensaje) {
+        Gson gson = new Gson();
+        ResultadoAddNave resultado = gson.fromJson(mensaje.getData(), ResultadoAddNave.class);
         
+        partida.manejarResultadoAddNave(resultado);
     }
     
     private void manejarResultadoDisparo(Mensaje mensaje) {
@@ -155,8 +161,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
-    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        return true;
+    public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
+        AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
+        if (addDTO != null) {
+            enviarMensaje("ADD_NAVE", addDTO);
+        }
     }
 
     @Override
