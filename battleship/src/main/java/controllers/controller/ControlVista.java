@@ -44,6 +44,9 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
+        manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
     }
 
     public static ControlVista getInstancia() {
