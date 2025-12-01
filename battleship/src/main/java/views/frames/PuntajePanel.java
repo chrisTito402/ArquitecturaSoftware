@@ -12,7 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import views.DTOs.PuntajeDTO;
+import shared.dto.PuntajeDTO;
 
 /**
  * @author I-Fred

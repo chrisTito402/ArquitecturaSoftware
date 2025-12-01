@@ -1,19 +1,17 @@
 package models.control;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
-import views.DTOs.TableroDTO;
+import shared.dto.AddNaveDTO;
+import shared.dto.DisparoDTO;
+import shared.dto.JugadorDTO;
+import shared.dto.NaveDTO;
+import shared.dto.TableroDTO;
 
 /**
  *
@@ -74,85 +72,56 @@ public class ControlModelo implements IModeloCliente {
         notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
     }
 
+    /**
+     * Valida y prepara una nave para ser agregada.
+     * NOTA: Este metodo solo realiza validaciones BASICAS de UI.
+     * La validacion COMPLETA (colisiones, adyacencias, etc.) se hace en el SERVIDOR.
+     * Esto evita duplicacion de codigo y asegura consistencia.
+     *
+     * @param nave nave a agregar
+     * @param coordenadas coordenadas donde colocar la nave
+     * @return DTO para enviar al servidor, o null si falla la validacion basica
+     */
     @Override
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
-        // Verificar que la nave no sea nula.
+        // === VALIDACIONES BASICAS DE UI ===
+        // Estas validaciones dan feedback rapido al usuario sin necesidad de ir al servidor
+
+        // Verificar que la nave no sea nula
         if (nave == null) {
-            System.out.println("Error, nave vacia.");
+            System.out.println("Error: Nave no seleccionada.");
             return null;
         }
-        // Verificar que las coordenadas no esten vacias.
+
+        // Verificar que las coordenadas no esten vacias
         if (coordenadas == null || coordenadas.isEmpty()) {
-            System.out.println("Error, coordenadas vascias.");
+            System.out.println("Error: No se seleccionaron coordenadas.");
             return null;
         }
 
-        // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
+        // Verificar numero de coordenadas
         if (coordenadas.size() != nave.getTamanio()) {
-            System.out.println("Error, coordenadas extra o insuficientes para la Nave.");
+            System.out.println("Error: Numero de coordenadas incorrecto para la nave.");
             return null;
         }
 
-        // Verificar que las coordenadas no se salen del limite del tablero.
-        for (Coordenadas coordenada : coordenadas) {
-            if (coordenada.getY() < 0 || coordenada.getY() > tablero.getLimiteY()
-                    || coordenada.getX() < 0 || coordenada.getX() > tablero.getLimiteX()) {
-                System.out.println("Error: La nave se sale de los limites del tablero.");
-                return null;
-            }
-        }
-
-        // Verificar que todas las coordenas esten con la misma orientacion.
-        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
-            int y = coordenadas.getFirst().getY();
-            for (Coordenadas coordenada : coordenadas) {
-                if (coordenada.getY() != y) {
-                    System.out.println("Error: La nave no esta ordenada Verticalmente");
-                    return null;
-                }
-            }
-        } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
-            int x = coordenadas.getFirst().getX();
-            for (Coordenadas coordenada : coordenadas) {
-                if (coordenada.getX() != x) {
-                    System.out.println("Error: La nave no esta ordenada Horizontalmente.");
+        // Verificar limites del tablero (feedback rapido)
+        if (tablero != null) {
+            for (Coordenadas c : coordenadas) {
+                if (c.getX() < 0 || c.getX() > tablero.getLimiteX()
+                        || c.getY() < 0 || c.getY() > tablero.getLimiteY()) {
+                    System.out.println("Error: Coordenadas fuera del tablero.");
                     return null;
                 }
             }
         }
 
-        // Ordenar lista por "X" y "Y".
-        coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
-                .thenComparingInt(Coordenadas::getY));
+        // === FIN VALIDACIONES BASICAS ===
+        // La validacion de orientacion, consecutividad, colisiones y adyacencias
+        // se realiza en el SERVIDOR (Partida.addNave via ValidadorNave)
 
-        // Verificar que cada Coordenada este consecutiva de la otra.
-        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getX() != coordenadas.get(i).getX() - 1) {
-                    System.out.println("Error: Coordenas no consecutivas en 'X'");
-                    return null;
-                }
-            }
-        } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getY() != coordenadas.get(i).getY() - 1) {
-                    System.out.println("Error: Coordenas no consecutivas en 'Y'");
-                    return null;
-                }
-            }
-        }
-
-        AddNaveDTO naveDTO = new AddNaveDTO(
-                jugador,
-                nave,
-                coordenadas
-        );
+        // Preparar DTO para enviar al servidor
+        AddNaveDTO naveDTO = new AddNaveDTO(jugador, nave, coordenadas);
 
         return naveDTO;
     }

@@ -1,6 +1,6 @@
 package views.frames;
 
-import views.DTOs.CoordenadasDTO;
+import shared.dto.CoordenadasDTO;
 import javax.swing.JPanel;
 
 /**

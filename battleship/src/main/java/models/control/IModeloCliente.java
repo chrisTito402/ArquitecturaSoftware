@@ -5,10 +5,10 @@ import models.entidades.Jugador;
 import java.util.List;
 import models.enums.ResultadoAddNave;
 import models.observador.ISuscriptor;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
+import shared.dto.AddNaveDTO;
+import shared.dto.DisparoDTO;
+import shared.dto.JugadorDTO;
+import shared.dto.NaveDTO;
 
 /**
  *
