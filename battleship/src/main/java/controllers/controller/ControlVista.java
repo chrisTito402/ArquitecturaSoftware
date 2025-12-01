@@ -258,7 +258,7 @@ public class ControlVista implements ISuscriptor {
     }
 
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador) {
+    public void unirsePartida(JugadorDTO jugador) {
         control.unirsePartida(jugador);
     }
 
@@ -266,11 +266,11 @@ public class ControlVista implements ISuscriptor {
         control.empezarPartida();
     }
 
-    public void abandonarLobby(Jugador jugador) {
+    public void abandonarLobby(JugadorDTO jugador) {
         control.abandonarLobby(jugador);
     }
 
-    public List<Jugador> getJugadores() {
+    public List<JugadorDTO> getJugadores() {
         return control.getJugadores();
     }
 }

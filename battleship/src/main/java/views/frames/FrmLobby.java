@@ -3,29 +3,29 @@ package views.frames;
 import controllers.controller.ControlVista;
 import java.awt.Color;
 import java.util.List;
-import models.entidades.Jugador;
-import models.entidades.Partida;
+import views.DTOs.JugadorDTO;
 
 /**
  *
- * @author Knocmare
+ * @author Ángel Ruíz García - 248171
  */
 public class FrmLobby extends javax.swing.JFrame {
     
-    Partida p;
-    List<Jugador> jugadores;
+    private ControlVista cv;
+    private JugadorDTO jugador;
+    private List<JugadorDTO> jugadores;
     
     /**
      * Creates new form FrmLobby
      */
-    public FrmLobby(Partida p) {
-        this.p = p;
+    public FrmLobby() {
         initComponents();
+        this.cv = ControlVista.getInstancia();
         cargarLobby();
     }
     
     private void cargarLobby() {
-        jugadores = p.getJugadores();
+        jugadores = this.cv.getJugadores();
         
         if (jugadores.size() > 1) {
             // Jugador 1
@@ -208,11 +208,15 @@ public class FrmLobby extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEmpezarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmpezarActionPerformed
-        // TODO add your handling code here:
+        this.cv.empezarPartida();
     }//GEN-LAST:event_btnEmpezarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-        // TODO add your handling code here:
+        this.cv.abandonarLobby(jugador);
+        FrmMenuPrincipal menu = new FrmMenuPrincipal();
+        menu.setVisible(true);
+        menu.setLocationRelativeTo(this);
+        dispose();
     }//GEN-LAST:event_btnRegresarActionPerformed
     
     
