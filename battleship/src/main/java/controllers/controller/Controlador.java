@@ -5,6 +5,7 @@ import buseventos.TipoAccion;
 import clientesocket.ClienteSocket;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
+import java.util.ArrayList;
 import java.util.HashMap;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
@@ -33,7 +34,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 //    private ControlModelo modelo;
 //    private ControlVista vista;
 //    private ClienteSocket clienteS;
-
     public Controlador() {
     }
 
@@ -61,7 +61,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 //        this.manejadorEventos = new HashMap<>();
 //        registrarEventos();
 //    }
-
 //    private void registrarEventos() {
 //        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
 //        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
@@ -69,11 +68,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 //        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
 //        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
 //    }
-
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
-        
+
         String id = cliente.getId();
         if (id == null) {
             System.out.println("Error, id vacio.");
@@ -99,18 +97,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void onIdSet(String id) {
         manejadorEventos.put("MENSAJE_CLIENTE_" + id, this::manejarEventoPrivado);
     }
-    
+
     private void manejarEventoPrivado(Mensaje mensaje) {
         manejadorEventos.get(mensaje.getSubEvento()).accept(mensaje);
     }
-    
+
     private void manejarResultadoAddNave(Mensaje mensaje) {
         Gson gson = new Gson();
         ResultadoAddNave resultado = gson.fromJson(mensaje.getData(), ResultadoAddNave.class);
-        
+
         partida.manejarResultadoAddNave(resultado);
     }
-    
+
     private void manejarResultadoDisparo(Mensaje mensaje) {
         Gson gson = new Gson();
         DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
@@ -128,14 +126,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     //Manda mensaje* al servidor
-//    @Override
-//    public void abandonarLobby(Jugador jugador) {
-//        partida.abandonarLobby(jugador);
-//        //Mandar mensaje al servidor para avisar al ribal
-//        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-//        enviarMensaje("ABANDONAR_PARTIDA", dto);
-//    }
-
+    @Override
+    public void abandonarPartida(Jugador jugador) {
+        partida.abandonarLobby(jugador);
+        //Mandar mensaje al servidor para avisar al ribal
+        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        enviarMensaje("ABANDONAR_PARTIDA", dto);
+    }
     @Override
     public String crearPartida(Jugador j) {
         Director d = new Director();
@@ -182,7 +179,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void suscribirAPartida(ISuscriptor suscriptor) {
         partida.suscribirAPartida(suscriptor);
     }
-    
+
     @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
@@ -190,12 +187,12 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     // Caso de Uso: Unirse Partida
     @Override
-    public void unirsePartida(Jugador jugador) {
+    public void unirsePartida(JugadorDTO jugadorDTO) {
+        Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
         partida.unirsePartida(jugador);
-        JugadorDTO jugadorDTO = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
-    
+
     private void manejarUnirsePartida(Mensaje mensaje) {
         JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + dto.getNombre() + " se unio a la partida.");
@@ -207,21 +204,21 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.empezarPartida();
         enviarMensaje("EMPEZAR_PARTIDA", null);
     }
-    
+
     private void manejarEmpezarPartida(Mensaje mensaje) {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("La partida esta comenzando.");
         partida.notificarAllSuscriptores("EMPEZAR_PARTIDA", jugadorDTO);
     }
-    
+
     @Override
-    public void abandonarLobby(Jugador jugador) {
+    public void abandonarLobby(JugadorDTO jugadorDTO) {
+        Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
         partida.abandonarLobby(jugador);
-        //Mandar mensaje al servidor para avisar al ribal
-        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-        enviarMensaje("ABANDONAR_LOBBY", dto);
+        //Mandar mensaje al servidor para avisar al rival
+        enviarMensaje("ABANDONAR_LOBBY", jugadorDTO);
     }
-    
+
     private void manejarAbandonarLobby(Mensaje mensaje) {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono el lobby.");
@@ -229,7 +226,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
-    public List<Jugador> getJugadores() {
-        return partida.getJugadores();
+    public List<JugadorDTO> getJugadores() {
+        return partida.getJugadores()
+                .stream()
+                .map(jugadorEntidad -> new JugadorDTO(jugadorEntidad.getNombre(), jugadorEntidad.getColor(), jugadorEntidad.getEstado()))
+                .toList();
     }
 }

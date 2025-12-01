@@ -19,11 +19,12 @@ public interface IControlador {
     public void realizarDisparo(Coordenadas c);
     public JugadorDTO getJugador();
     public void addNave(NaveDTO nave, List<Coordenadas> coordenadas);
+    public void abandonarPartida(Jugador jugador);
     
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
+    public void unirsePartida(JugadorDTO jugadorDTO);
     public void empezarPartida();
-    public void abandonarLobby(Jugador jugador);
-    public List<Jugador> getJugadores();
+    public void abandonarLobby(JugadorDTO jugadorDTO);
+    public List<JugadorDTO> getJugadores();
     
 }

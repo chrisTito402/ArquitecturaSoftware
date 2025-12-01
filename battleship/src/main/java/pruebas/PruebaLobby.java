@@ -67,7 +67,7 @@ public class PruebaLobby {
         
         p.unirsePartida(j2);
         
-        FrmLobby lobby = new FrmLobby(p);
+        FrmLobby lobby = new FrmLobby();
         lobby.setVisible(true);
     }
     

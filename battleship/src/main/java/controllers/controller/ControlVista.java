@@ -44,6 +44,9 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
+        manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
     }
 
     public static ControlVista getInstancia() {
@@ -258,7 +261,7 @@ public class ControlVista implements ISuscriptor {
     }
 
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador) {
+    public void unirsePartida(JugadorDTO jugador) {
         control.unirsePartida(jugador);
     }
 
@@ -266,11 +269,26 @@ public class ControlVista implements ISuscriptor {
         control.empezarPartida();
     }
 
-    public void abandonarLobby(Jugador jugador) {
+    public void abandonarLobby(JugadorDTO jugador) {
         control.abandonarLobby(jugador);
     }
 
-    public List<Jugador> getJugadores() {
+    public List<JugadorDTO> getJugadores() {
         return control.getJugadores();
+    }
+    
+    private void manejarUnirsePartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " se unio a la partida.");
+    }
+    
+    private void manejarEmpezarPartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+    }
+    
+    private void manejarAbandonarLobby(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
     }
 }
