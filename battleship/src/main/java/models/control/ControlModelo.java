@@ -26,8 +26,10 @@ public class ControlModelo implements IModeloCliente {
     private List<NaveDTO> naves;
     private boolean turno;
     private List<ISuscriptor> suscriptores;
+    private List<Jugador> jugadores;
 
     public ControlModelo() {
+        this.jugadores = new java.util.ArrayList<>();
     }
 
     public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores) {
@@ -36,6 +38,7 @@ public class ControlModelo implements IModeloCliente {
         this.naves = naves;
         this.turno = turno;
         this.suscriptores = suscriptores;
+        this.jugadores = new java.util.ArrayList<>();
     }
 
     @Override
@@ -161,12 +164,19 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void addJugador(Jugador j) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (j != null) {
+            jugadores.add(j);
+            System.out.println("Jugador agregado: " + j.getNombre());
+        }
     }
 
     @Override
     public void crearTableros() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // Los tableros se crean en el servidor, aquí solo inicializamos el DTO
+        if (tablero == null) {
+            tablero = new TableroDTO(10, 10);
+        }
+        System.out.println("Tableros inicializados.");
     }
 
     @Override
@@ -181,12 +191,28 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void unirsePartida(Jugador jugador) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (jugador == null) {
+            System.out.println("Error: Jugador nulo al unirse a partida.");
+            return;
+        }
+
+        // Guardar el jugador local
+        this.jugador = new JugadorDTO(
+                jugador.getNombre(),
+                jugador.getColor(),
+                jugador.getEstado()
+        );
+
+        // Agregar a la lista de jugadores
+        jugadores.add(jugador);
+
+        System.out.println("Jugador " + jugador.getNombre() + " se unio a la partida.");
     }
 
     @Override
     public void empezarPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println("Partida iniciada desde el cliente.");
+        // La lógica principal está en el servidor
     }
 
     @Override
@@ -197,7 +223,7 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public List<Jugador> getJugadores() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return jugadores;
     }
 
     @Override

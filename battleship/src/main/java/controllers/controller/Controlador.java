@@ -155,10 +155,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     private void manejarJugadorUnido(Mensaje mensaje) {
-        System.out.println("Cliente: Recibido 'JUGADOR_UNIDO'.");
+        System.out.println("=== RECIBIDO JUGADOR_UNIDO ===");
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("Jugador en mensaje: " + jugadorDTO.getNombre());
 
+        // Notificar a los suscriptores locales (esto actualiza el lobby)
+        System.out.println("Notificando a suscriptores del modelo...");
         partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
 
@@ -200,8 +203,27 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     private void manejarUnirsePartida(Mensaje mensaje) {
         JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("El jugador " + dto.getNombre() + " se unio a la partida.");
+        System.out.println("=== RECIBIDO UNIRSE_PARTIDA ===");
+        System.out.println("Jugador que se unio: " + dto.getNombre());
+
         partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
+
+        // Si soy el HOST, enviar mi info al nuevo jugador para que me vea
+        ControlVista cv = ControlVista.getInstancia();
+        System.out.println("Soy HOST? " + cv.isEsHost());
+
+        if (cv.isEsHost()) {
+            JugadorDTO miJugador = partida.getJugador();
+            System.out.println("Mi jugador: " + (miJugador != null ? miJugador.getNombre() : "NULL"));
+
+            // Solo enviar si tengo info y no soy yo mismo
+            if (miJugador != null && !miJugador.getNombre().equals(dto.getNombre())) {
+                System.out.println(">>> HOST: Enviando JUGADOR_UNIDO con mi info: " + miJugador.getNombre());
+                enviarMensaje("JUGADOR_UNIDO", miJugador);
+            } else {
+                System.out.println("No envio porque es el mismo jugador o miJugador es null");
+            }
+        }
     }
 
     @Override

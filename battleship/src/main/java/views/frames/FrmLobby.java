@@ -2,18 +2,21 @@ package views.frames;
 
 import controllers.controller.ControlVista;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
+import models.observador.ISuscriptor;
 import views.DTOs.JugadorDTO;
 
 /**
  *
  * @author Ángel Ruíz García - 248171
  */
-public class FrmLobby extends javax.swing.JFrame {
+public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
 
     private ControlVista cv;
     private JugadorDTO jugador;
     private List<JugadorDTO> jugadores;
+    private String codigoPartida;
 
     /**
      * Creates new form FrmLobby
@@ -21,25 +24,89 @@ public class FrmLobby extends javax.swing.JFrame {
     public FrmLobby() {
         initComponents();
         this.cv = ControlVista.getInstancia();
+        this.jugadores = new ArrayList<>();
+        this.codigoPartida = cv.getCodigoPartida();
+
+        // Suscribirse a las notificaciones
+        cv.suscribirLobby(this);
+
         cargarLobby();
     }
 
-    private void cargarLobby() {
-        jugadores = this.cv.getJugadores();
+    public void setCodigoPartida(String codigo) {
+        this.codigoPartida = codigo;
+        // Actualizar el titulo de la ventana con el codigo
+        setTitle("Battleship - Lobby [" + codigo + "]");
+    }
 
-        if (jugadores.size() > 1) {
-            // Jugador 1
-            lblJugadorUno.setText(jugadores.getFirst().getNombre());
+    private void cargarLobby() {
+        // Copiar la lista del controlador a nuestra lista local mutable
+        List<JugadorDTO> listaDelControlador = this.cv.getJugadores();
+        if (listaDelControlador != null) {
+            for (JugadorDTO j : listaDelControlador) {
+                boolean existe = jugadores.stream()
+                        .anyMatch(existing -> existing.getNombre().equals(j.getNombre()));
+                if (!existe) {
+                    jugadores.add(j);
+                }
+            }
+        }
+
+        actualizarUI();
+    }
+
+    private void actualizarUI() {
+        if (jugadores == null || jugadores.isEmpty()) {
+            lblJugadorUno.setText("(Buscando)");
+            lblJugadorDos.setText("(Buscando)");
+            pnlEstadoUno.setBackground(Color.red);
+            pnlEstadoDos.setBackground(Color.red);
+            return;
+        }
+
+        if (jugadores.size() >= 1) {
+            lblJugadorUno.setText(jugadores.get(0).getNombre());
             pnlEstadoUno.setBackground(Color.green);
-            // Jugador 2
-            lblJugadorDos.setText(jugadores.getLast().getNombre());
+        }
+
+        if (jugadores.size() >= 2) {
+            lblJugadorDos.setText(jugadores.get(1).getNombre());
             pnlEstadoDos.setBackground(Color.green);
         } else {
-            // Jugador 1
-            lblJugadorUno.setText(jugadores.getFirst().getNombre());
-            pnlEstadoUno.setBackground(Color.green);
-            // Jugador 2
             lblJugadorDos.setText("(Buscando)");
+            pnlEstadoDos.setBackground(Color.red);
+        }
+
+        // Refrescar la UI
+        pnlEstadoUno.repaint();
+        pnlEstadoDos.repaint();
+    }
+
+    @Override
+    public void notificar(String contexto, Object datos) {
+        System.out.println("=== FrmLobby.notificar() ===");
+        System.out.println("Contexto: " + contexto);
+        System.out.println("Datos: " + datos);
+
+        if ("JUGADOR_UNIDO".equals(contexto) && datos instanceof JugadorDTO) {
+            JugadorDTO nuevoJugador = (JugadorDTO) datos;
+            System.out.println("Procesando jugador: " + nuevoJugador.getNombre());
+
+            // Actualizar UI en el hilo de Swing
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                // Agregar a la lista local si no existe
+                boolean existe = jugadores.stream()
+                        .anyMatch(j -> j.getNombre().equals(nuevoJugador.getNombre()));
+                System.out.println("Jugador ya existe? " + existe);
+
+                if (!existe) {
+                    jugadores.add(nuevoJugador);
+                    System.out.println(">>> Lobby: Agregado jugador " + nuevoJugador.getNombre());
+                    System.out.println("Total jugadores en lobby: " + jugadores.size());
+                }
+                // Refrescar la pantalla
+                actualizarUI();
+            });
         }
     }
 
@@ -208,7 +275,19 @@ public class FrmLobby extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEmpezarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmpezarActionPerformed
-        this.cv.empezarPartida();
+        // Verificar que haya 2 jugadores
+        if (jugadores.size() < 2) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Esperando a que se una otro jugador...",
+                "Esperando jugador",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Ir a la pantalla de colocar naves
+        FrmColocarNaves frmNaves = new FrmColocarNaves();
+        frmNaves.setVisible(true);
+        dispose();
     }//GEN-LAST:event_btnEmpezarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
