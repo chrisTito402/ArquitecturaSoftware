@@ -1,6 +1,6 @@
 package controllers.controller;
 
-import views.DTOs.CoordenadasDTO;
+import shared.dto.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.entidades.Nave;
@@ -16,9 +16,9 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
+import shared.dto.DisparoDTO;
+import shared.dto.JugadorDTO;
+import shared.dto.NaveDTO;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -48,9 +48,13 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
         manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);  // El servidor envía con esta clave
+        manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
+        // Nuevos manejadores para crear/unirse partida con codigo
+        manejadoresNoti.put("RESULTADO_CREAR_PARTIDA", this::manejarResultadoCrearPartida);
+        manejadoresNoti.put("RESULTADO_VALIDAR_CODIGO", this::manejarResultadoValidarCodigo);
+        manejadoresNoti.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
         suscriptoresLobby = new ArrayList<>();
     }
 
@@ -353,5 +357,72 @@ public class ControlVista implements ISuscriptor {
     private void manejarAbandonarLobby(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
         JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
+    }
+
+    // ===== NUEVOS METODOS PARA CREAR/UNIRSE PARTIDA CON CODIGO =====
+
+    /**
+     * Crea una nueva partida en el servidor con el codigo especificado.
+     * @param jugador datos del jugador que crea la partida
+     * @param codigo codigo de la partida
+     */
+    public void crearPartidaConCodigo(JugadorDTO jugador, String codigo) {
+        this.codigoPartida = codigo;
+        this.esHost = true;
+        control.crearPartida(jugador, codigo);
+    }
+
+    /**
+     * Valida si un codigo de partida es valido antes de intentar unirse.
+     * @param codigo codigo a validar
+     */
+    public void validarCodigoPartida(String codigo) {
+        control.validarCodigoPartida(codigo);
+    }
+
+    /**
+     * Se une a una partida existente usando el codigo.
+     * @param jugador datos del jugador
+     * @param codigo codigo de la partida
+     */
+    public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo) {
+        this.codigoPartida = codigo;
+        this.esHost = false;
+        control.unirsePartida(jugador, codigo);
+    }
+
+    private void manejarResultadoCrearPartida(Object datos) {
+        shared.dto.CrearPartidaDTO resultado = (shared.dto.CrearPartidaDTO) datos;
+
+        if (resultado.isExito()) {
+            System.out.println("Partida creada: " + resultado.getCodigoPartida());
+            this.codigoPartida = resultado.getCodigoPartida();
+            notificarLobby("PARTIDA_CREADA", resultado);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                resultado.getMensaje(),
+                "Error al crear partida",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void manejarResultadoValidarCodigo(Object datos) {
+        shared.dto.UnirsePartidaDTO resultado = (shared.dto.UnirsePartidaDTO) datos;
+        notificarLobby("RESULTADO_VALIDAR_CODIGO", resultado);
+    }
+
+    private void manejarResultadoUnirsePartida(Object datos) {
+        shared.dto.UnirsePartidaDTO resultado = (shared.dto.UnirsePartidaDTO) datos;
+
+        if (resultado.isExito()) {
+            System.out.println("Te uniste a la partida: " + resultado.getCodigoPartida());
+            notificarLobby("UNIDO_A_PARTIDA", resultado);
+        } else {
+            JOptionPane.showMessageDialog(null,
+                resultado.getMensaje(),
+                "Error al unirse",
+                JOptionPane.ERROR_MESSAGE);
+            notificarLobby("ERROR_UNIRSE_PARTIDA", resultado);
+        }
     }
 }

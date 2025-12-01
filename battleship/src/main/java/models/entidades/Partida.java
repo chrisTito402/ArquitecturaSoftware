@@ -148,116 +148,41 @@ public class Partida implements IModeloServidor {
         return disparo;
     }
 
+    /**
+     * Agrega una nave al tablero de un jugador.
+     * Usa el ValidadorNave centralizado para evitar duplicacion de codigo.
+     *
+     * @param jugador jugador que agrega la nave
+     * @param nave nave a agregar
+     * @param coordenadas coordenadas donde colocar la nave
+     * @return resultado de la operacion
+     */
     @Override
     public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
-        if (jugador == null || jugador.getNombre() == null || jugador.getNombre().isBlank()) {
-            System.out.println("Error: Informacion insuficiente del Jugador.");
-            return ResultadoAddNave.JUGADOR_NULL;
+        // Usar el validador centralizado para todas las validaciones
+        ResultadoAddNave resultado = servidor.validacion.ValidadorNave.validarAddNave(
+            jugador, nave, coordenadas, jugadores);
+
+        // Si la validacion falla, retornar el resultado
+        if (resultado != ResultadoAddNave.NAVE_AÑADIDA) {
+            return resultado;
         }
 
-        if (nave == null) {
-            System.out.println("Error: Informacion insuficiente de la Nave");
-            return ResultadoAddNave.NAVE_NULL;
-        }
-
-        if (coordenadas == null || coordenadas.isEmpty()) {
-            System.out.println("Error: Informacion insuficiente de las Coordenadas");
-            return ResultadoAddNave.COORDENADAS_NULL;
-        }
-
-        // Verificar que el jugador existe.
+        // La validacion paso, ahora agregar la nave al tablero
         Jugador j = jugadores.stream()
                 .filter(e -> e.getNombre().equals(jugador.getNombre()))
                 .findFirst()
                 .orElse(null);
 
-        if (j == null) {
-            System.out.println("Error: No se encontro al Jugador.");
-            return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
+        if (j != null) {
+            // Ordenar coordenadas antes de agregar
+            coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
+                    .thenComparingInt(Coordenadas::getY));
+
+            Tablero t = j.getTablero();
+            t.addNave(nave, coordenadas);
+            j.getNaves().add(nave);
         }
-
-        // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
-        if (coordenadas.size() != nave.getTamanio()) {
-            System.out.println("Error: Coordenadas extra para la nave.");
-            return ResultadoAddNave.COORDENADAS_EXTRA;
-        }
-
-        // Verificar que las coordenadas no se salen del limite del tablero.
-        Tablero t = j.getTablero();
-        for (Coordenadas coordenada : coordenadas) {
-            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY()
-                    || coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
-                System.out.println("Error: La nave se sale de los limites del tablero.");
-                return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
-            }
-        }
-
-        // Verificar que todas las coordenas esten con la misma orientacion.
-        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
-            int y = coordenadas.getFirst().getY();
-            for (Coordenadas coordenada : coordenadas) {
-                if (coordenada.getY() != y) {
-                    System.out.println("Error: La nave no esta ordenada Verticalmente");
-                    return ResultadoAddNave.NO_ORDENADA_VERTICLMENTE;
-                }
-            }
-        } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
-            int x = coordenadas.getFirst().getX();
-            for (Coordenadas coordenada : coordenadas) {
-                if (coordenada.getX() != x) {
-                    System.out.println("Error: La nave no esta ordenada Horizontalmente.");
-                    return ResultadoAddNave.NO_ORDENADA_HORIZONTALMENTE;
-                }
-            }
-        }
-
-        // Ordenar lista por "X" y "Y".
-        coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
-                .thenComparingInt(Coordenadas::getY));
-
-        // Verificar que cada Coordenada este consecutiva de la otra.
-        if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getX() != coordenadas.get(i).getX() - 1) {
-                    System.out.println("Error: Coordenas no consecutivas en 'X'");
-                    return ResultadoAddNave.NO_CONSECUTIVO_X;
-                }
-            }
-        } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
-            for (int i = coordenadas.size() - 1; i >= 0; i--) {
-                if (i == 0) {
-                    break;
-                }
-                if (coordenadas.get(i - 1).getY() != coordenadas.get(i).getY() - 1) {
-                    System.out.println("Error: Coordenas no consecutivas en 'Y'");
-                    return ResultadoAddNave.NO_CONSECUTIVO_Y;
-                }
-            }
-        }
-
-        // Verificar que no haya una nave en las coordenadas seleccionadas o alrededor de estas.
-        Casilla[][] casillas = t.getCasillas();
-        for (Coordenadas c : coordenadas) {
-            for (int i = c.getX() - 1; i < c.getX() + 2; i++) {
-                for (int k = c.getY() - 1; k < c.getY() + 2; k++) {
-                    if (i >= 0 && k >= 0) {
-                        Nave n = casillas[i][k].getNave();
-                        if (n != null) {
-                            if (n != nave) {
-                                System.out.println("Error: Nave encima de otra.");
-                                return ResultadoAddNave.ESPACIO_YA_OCUPADO;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        t.addNave(nave, coordenadas);
-        j.getNaves().add(nave);
 
         return ResultadoAddNave.NAVE_AÑADIDA;
     }

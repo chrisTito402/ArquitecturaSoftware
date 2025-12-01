@@ -20,7 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
-import views.DTOs.JugadorDTO;
+import shared.dto.JugadorDTO;
 
 /**
  * Pantalla para crear una partida y generar codigo.
@@ -185,8 +185,22 @@ public class FrmCrearPartida extends JFrame {
 
     private void continuar() {
         String nombre = txtNombre.getText().trim();
+
+        // Validaciones de UI
         if (nombre.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor ingresa tu nombre.");
+            return;
+        }
+        if (nombre.length() < 2) {
+            JOptionPane.showMessageDialog(this, "El nombre debe tener al menos 2 caracteres.");
+            return;
+        }
+        if (nombre.length() > 20) {
+            JOptionPane.showMessageDialog(this, "El nombre no puede tener mas de 20 caracteres.");
+            return;
+        }
+        if (!nombre.matches("^[a-zA-Z0-9\\s]+$")) {
+            JOptionPane.showMessageDialog(this, "El nombre solo puede contener letras, numeros y espacios.");
             return;
         }
         if (colorSeleccionado == null) {
@@ -194,18 +208,20 @@ public class FrmCrearPartida extends JFrame {
             return;
         }
 
-        // Guardar el codigo de la partida en ControlVista
-        controlVista.setCodigoPartida(codigoPartida);
-        controlVista.setEsHost(true);
+        // Crear el jugador usando el Builder
+        models.builder.IJugadorBuilder builder = new models.builder.JugadorBuilder();
+        builder.setNombre(nombre);
+        builder.setColor(colorSeleccionado);
+        builder.setEstado(EstadoJugador.JUGANDO);
+
+        JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
 
         // IMPORTANTE: Crear el lobby PRIMERO para que se suscriba
-        // ANTES de enviar el mensaje de unirse
         FrmLobby lobby = new FrmLobby();
         lobby.setCodigoPartida(codigoPartida);
 
-        // Ahora sí enviar el mensaje de unirse (lobby ya está suscrito)
-        JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
-        controlVista.unirsePartida(jugador);
+        // Crear la partida en el servidor con el codigo generado
+        controlVista.crearPartidaConCodigo(jugador, codigoPartida);
 
         // Mostrar el lobby
         lobby.setVisible(true);

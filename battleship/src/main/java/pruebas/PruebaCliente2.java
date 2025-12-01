@@ -11,8 +11,8 @@ import java.util.HashMap;
 import models.control.ControlModelo;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
-import views.DTOs.JugadorDTO;
-import views.DTOs.TableroDTO;
+import shared.dto.JugadorDTO;
+import shared.dto.TableroDTO;
 import views.frames.TimerPanel;
 
 /**

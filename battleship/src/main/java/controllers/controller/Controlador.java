@@ -16,14 +16,17 @@ import java.util.Map;
 import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
 import models.control.ControlModelo;
+import models.enums.ResultadoUnirsePartida;
 import models.observador.ISuscriptor;
-import views.DTOs.DisparoDTO;
+import shared.dto.CrearPartidaDTO;
+import shared.dto.DisparoDTO;
 import models.control.IModeloCliente;
 import models.enums.ResultadoAddNave;
 import servidor.modelo.ServidorManager;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
+import shared.dto.AddNaveDTO;
+import shared.dto.JugadorDTO;
+import shared.dto.NaveDTO;
+import shared.dto.UnirsePartidaDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
@@ -31,9 +34,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadorEventos;
 
-//    private ControlModelo modelo;
-//    private ControlVista vista;
-//    private ClienteSocket clienteS;
     public Controlador() {
     }
 
@@ -42,32 +42,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         this.cliente = cliente;
         this.manejadorEventos = mapa;
 
+        // Registrar manejadores de eventos
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartidaLegacy);
         manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
+        manejadorEventos.put("RESULTADO_CREAR_PARTIDA", this::manejarResultadoCrearPartida);
+        manejadorEventos.put("RESULTADO_VALIDAR_CODIGO", this::manejarResultadoValidarCodigo);
+        manejadorEventos.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
     }
-
-//    public Controlador(ControlModelo modelo, ControlVista vista) {
-//        this.modelo = modelo;
-//        this.vista = vista;
-//
-//        this.cliente = new ClienteSocket("localhost", 5000, this);
-//        clienteS.execute();
-//
-//        this.manejadorEventos = new HashMap<>();
-//        registrarEventos();
-//    }
-//    private void registrarEventos() {
-//        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
-//        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
-//        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-//        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-//        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
-//    }
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
@@ -139,11 +125,103 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
+    @Deprecated
     public String crearPartida(Jugador j) {
         Director d = new Director();
         IModeloCliente modelo = d.makePartida(new PartidaBuilder());
         this.partida = modelo;
         return "Partida creada correctamente";
+    }
+
+    @Override
+    public void crearPartida(JugadorDTO jugadorDTO, String codigoPartida) {
+        // Crear modelo local
+        Director d = new Director();
+        IModeloCliente modelo = d.makePartida(new PartidaBuilder());
+        this.partida = modelo;
+
+        // Preparar DTO para enviar al servidor
+        CrearPartidaDTO crearDTO = new CrearPartidaDTO(codigoPartida, jugadorDTO);
+
+        // Enviar solicitud al servidor
+        enviarMensaje("CREAR_PARTIDA", crearDTO);
+    }
+
+    @Override
+    public void validarCodigoPartida(String codigo) {
+        UnirsePartidaDTO validarDTO = new UnirsePartidaDTO();
+        validarDTO.setCodigoPartida(codigo);
+        enviarMensaje("VALIDAR_CODIGO", validarDTO);
+    }
+
+    @Override
+    public void unirsePartida(JugadorDTO jugadorDTO, String codigoPartida) {
+        // Crear modelo local
+        Director d = new Director();
+        IModeloCliente modelo = d.makePartida(new PartidaBuilder());
+        this.partida = modelo;
+
+        // Preparar DTO para enviar al servidor
+        UnirsePartidaDTO unirseDTO = new UnirsePartidaDTO(codigoPartida, jugadorDTO);
+
+        // Enviar solicitud al servidor
+        enviarMensaje("UNIRSE_PARTIDA", unirseDTO);
+    }
+
+    private void manejarResultadoCrearPartida(Mensaje mensaje) {
+        Gson gson = new Gson();
+        CrearPartidaDTO resultado = gson.fromJson(mensaje.getData(), CrearPartidaDTO.class);
+
+        if (resultado.isExito()) {
+            System.out.println("Partida creada exitosamente: " + resultado.getCodigoPartida());
+            // Guardar datos del jugador en el modelo local
+            if (resultado.getJugador() != null) {
+                Jugador jugador = new Jugador(
+                    resultado.getJugador().getNombre(),
+                    resultado.getJugador().getColor(),
+                    resultado.getJugador().getEstado()
+                );
+                partida.addJugador(jugador);
+            }
+        } else {
+            System.out.println("Error al crear partida: " + resultado.getMensaje());
+        }
+
+        // Notificar a la vista
+        partida.notificarAllSuscriptores("RESULTADO_CREAR_PARTIDA", resultado);
+    }
+
+    private void manejarResultadoValidarCodigo(Mensaje mensaje) {
+        Gson gson = new Gson();
+        UnirsePartidaDTO resultado = gson.fromJson(mensaje.getData(), UnirsePartidaDTO.class);
+
+        System.out.println("Resultado validar codigo: " + resultado.getResultado());
+
+        // Notificar a la vista
+        partida.notificarAllSuscriptores("RESULTADO_VALIDAR_CODIGO", resultado);
+    }
+
+    private void manejarResultadoUnirsePartida(Mensaje mensaje) {
+        Gson gson = new Gson();
+        UnirsePartidaDTO resultado = gson.fromJson(mensaje.getData(), UnirsePartidaDTO.class);
+
+        if (resultado.isExito()) {
+            System.out.println("Te uniste exitosamente a la partida: " + resultado.getCodigoPartida());
+            // Guardar datos del jugador en el modelo local
+            if (resultado.getJugador() != null) {
+                Jugador jugador = new Jugador(
+                    resultado.getJugador().getNombre(),
+                    resultado.getJugador().getColor(),
+                    resultado.getJugador().getEstado()
+                );
+                partida.addJugador(jugador);
+            }
+        } else {
+            System.out.println("Error al unirse: " + resultado.getMensaje());
+        }
+
+        // Notificar a la vista
+        partida.notificarAllSuscriptores("RESULTADO_UNIRSE_PARTIDA", resultado);
     }
 
     @Override
@@ -201,9 +279,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
 
-    private void manejarUnirsePartida(Mensaje mensaje) {
+    // Metodo legacy para compatibilidad con el flujo anterior
+    private void manejarUnirsePartidaLegacy(Mensaje mensaje) {
         JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("=== RECIBIDO UNIRSE_PARTIDA ===");
+        System.out.println("=== RECIBIDO UNIRSE_PARTIDA (Legacy) ===");
         System.out.println("Jugador que se unio: " + dto.getNombre());
 
         partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
