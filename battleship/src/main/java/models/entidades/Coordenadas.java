@@ -5,7 +5,7 @@ package models.entidades;
  * @author daniel
  */
 public class Coordenadas {
-    
+
     private int x;
     private int y;
 
@@ -21,5 +21,5 @@ public class Coordenadas {
     public int getY() {
         return y;
     }
-    
+
 }

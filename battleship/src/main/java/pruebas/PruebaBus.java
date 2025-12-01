@@ -15,5 +15,5 @@ public class PruebaBus {
         ServidorSocket server = new ServidorSocket(5000, bus);
         server.start();
     }
-    
+
 }

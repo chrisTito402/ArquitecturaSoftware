@@ -7,8 +7,8 @@ import javax.swing.JPanel;
  *
  * @author daniel
  */
-public class CasillaPanel extends JPanel{
-    
+public class CasillaPanel extends JPanel {
+
     private CoordenadasDTO coordenadas;
 
     public CasillaPanel(CoordenadasDTO coordenadas) {
@@ -18,5 +18,5 @@ public class CasillaPanel extends JPanel{
     public CoordenadasDTO getCoordenadas() {
         return coordenadas;
     }
-    
+
 }

@@ -17,7 +17,7 @@ import models.control.IModeloCliente;
  * @author daniel
  */
 public class Director {
-    
+
     public IModeloCliente makePartida(IPartidaBuilder builder) {
         builder.setCantBarcos(0);
         builder.setCantSubmarinos(0);
@@ -27,20 +27,20 @@ public class Director {
         builder.setEstado(EstadoPartida.EN_CURSO);
         builder.setJugadores(new ArrayList<>());
         builder.setSuscriptores(new ArrayList<>());
-        
+
         return builder.getResult();
     }
-    
+
     public void makeJugador(IJugadorBuilder builder) {
         builder.setColor(ColorJugador.AZUL);
         builder.setEstado(EstadoJugador.JUGANDO);
         builder.setNombre("Jugador1");
     }
-    
+
     public void makeBot(IJugadorBuilder builder) {
-        
+
     }
-    
+
     public void makeTablero(ITableroBuilder builder) {
         builder.setLimiteX(10);
         builder.setLimiteY(10);

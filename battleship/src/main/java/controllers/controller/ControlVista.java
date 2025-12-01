@@ -297,4 +297,19 @@ public class ControlVista implements ISuscriptor {
 
         control.abandonarPartida(jugador);
     }
+
+    private void manejarUnirsePartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " se unio a la partida.");
+    }
+
+    private void manejarEmpezarPartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+    }
+
+    private void manejarAbandonarLobby(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
+    }
 }

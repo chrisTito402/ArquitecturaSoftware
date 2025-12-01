@@ -12,7 +12,7 @@ import java.net.UnknownHostException;
  * @author daniel
  */
 public class ClienteSocket implements IClienteSocket {
-    
+
     private String hostname;
     private int port;
     private PrintWriter writer;
@@ -29,13 +29,13 @@ public class ClienteSocket implements IClienteSocket {
     public void setControl(ManejadorRespuestaCliente control) {
         this.control = control;
     }
-    
+
     public void execute() {
         try {
             socket = new Socket(hostname, port);
             System.out.println("Conectado al Servidor.");
             new UserReadClientThread(socket, this).start();
-            
+
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
         } catch (UnknownHostException ex) {
@@ -44,21 +44,21 @@ public class ClienteSocket implements IClienteSocket {
             System.out.println("Error: " + ex.getMessage());
         }
     }
-    
+
     @Override
     public void enviarMensaje(String json) {
         writer.println(json);
     }
-    
+
     public void manejarMensaje(String json) {
         control.manejarMensaje(json);
     }
-    
+
     void setId(String id) {
         this.id = id;
         control.onIdSet(id);
     }
-    
+
     @Override
     public String getId() {
         return this.id;

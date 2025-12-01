@@ -28,47 +28,47 @@ public class PruebaLobby {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
+
         Jugador j1 = new Jugador(
-                "J1", 
-                ColorJugador.AZUL, 
-                new ArrayList<>(), 
-                null, 
+                "J1",
+                ColorJugador.AZUL,
+                new ArrayList<>(),
+                null,
                 EstadoJugador.JUGANDO);
-        
+
         Jugador j2 = new Jugador(
-                "J2", 
-                ColorJugador.ROJO, 
-                new ArrayList<>(), 
-                null, 
+                "J2",
+                ColorJugador.ROJO,
+                new ArrayList<>(),
+                null,
                 EstadoJugador.JUGANDO);
-        
+
         List<Jugador> jugadores = new ArrayList<>();
-        
+
         Cronometro cronometro = new Cronometro(5000);
         Partida p = new Partida(
-                j1, 
-                jugadores, 
-                1, 
-                0, 
-                0, 
-                0, 
-                0, 
-                EstadoPartida.POR_EMPEZAR, 
+                j1,
+                jugadores,
+                1,
+                0,
+                0,
+                0,
+                0,
+                EstadoPartida.POR_EMPEZAR,
                 new ArrayList<>(),
                 cronometro
         );
         cronometro.setPartida(p);
-        
+
         ClienteSocket cliente = new ClienteSocket("localhost", 5000, null);
         ControladorServidor control = new ControladorServidor(p, cliente, new HashMap<>());
         cliente.setControl(control);
         cliente.execute();
-        
+
         p.unirsePartida(j2);
-        
+
         FrmLobby lobby = new FrmLobby();
         lobby.setVisible(true);
     }
-    
+
 }

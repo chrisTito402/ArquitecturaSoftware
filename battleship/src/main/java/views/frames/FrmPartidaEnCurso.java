@@ -3,33 +3,30 @@ package views.frames;
 import controllers.controller.ControlVista;
 import java.awt.Component;
 
-
 /**
  *
  * @author daniel
  */
 public class FrmPartidaEnCurso extends javax.swing.JFrame {
-    
+
     /**
      * Creates new form FrmPartidaEnCurso
      */
     public FrmPartidaEnCurso() {
         initComponents();
-        
+
         ControlVista cV = ControlVista.getInstancia();
-        
+
         cV.getCasillasEnemigas().forEach(c -> jPanel2.add(c));
         cV.getCasillasPropias().forEach(c -> jPanel1.add(c));
-        
+
         Component a = pnlTimer.add(cV.getTimer());
         pnlTimer.revalidate();
         pnlTimer.repaint();
-        
+
         cV.setPuntajePanel(pnlPuntaje);
-        
+
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.

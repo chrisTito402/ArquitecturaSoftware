@@ -10,7 +10,7 @@ import models.enums.ResultadoDisparo;
  * @author Fred
  */
 public class Puntaje {
-    
+
     public static final int PUNTOS_AGUA = 0; //Impacto en agua
     public static final int PUNTOS_IMPACTO = 10; //Impacto a Barco
     public static final int PUNTOS_HUNDIMIENTO = 50; //Barco hundido
@@ -26,10 +26,10 @@ public class Puntaje {
         this.disparosFallados = 0;
         this.navesHundidas = 0;
     }
-    
+
     public int calcularPuntos(ResultadoDisparo resultado) {
         int puntosObtenidos = 0;
-        
+
         switch (resultado) {
             case AGUA -> {
                 puntosObtenidos = PUNTOS_AGUA;
@@ -48,11 +48,11 @@ public class Puntaje {
                 puntosObtenidos = 0;
             }
         }
-        
+
         puntosTotales += puntosObtenidos;
         return puntosObtenidos;
     }
-    
+
     public void sumarVictoria() {
         puntosTotales += PUNTOS_VICTORIA;
     }
@@ -73,7 +73,7 @@ public class Puntaje {
     public int getNavesHundidas() {
         return navesHundidas;
     }
-    
+
     public double getPrecision() {
         int totalDisparos = disparosAcertados + disparosFallados;
         if (totalDisparos == 0) {
@@ -84,12 +84,12 @@ public class Puntaje {
 
     @Override
     public String toString() {
-        return "Puntaje{" + 
-                "puntosTotales=" + puntosTotales + 
-                ", disparosAcertados=" + disparosAcertados + 
-                ", disparosFallados=" + disparosFallados + 
-                ", navesHundidas=" + navesHundidas + 
-                ", precision=" + String.format("%.2f", getPrecision()) + "%" +
-                '}';
+        return "Puntaje{"
+                + "puntosTotales=" + puntosTotales
+                + ", disparosAcertados=" + disparosAcertados
+                + ", disparosFallados=" + disparosFallados
+                + ", navesHundidas=" + navesHundidas
+                + ", precision=" + String.format("%.2f", getPrecision()) + "%"
+                + '}';
     }
 }

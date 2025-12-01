@@ -10,7 +10,7 @@ import java.util.List;
  * @author daniel
  */
 public class Tablero {
-    
+
     private Casilla[][] casillas;
     private int limiteX;
     private int limiteY;
@@ -20,7 +20,7 @@ public class Tablero {
         this.limiteX = limiteX;
         this.limiteY = limiteY;
     }
-    
+
     public ResultadoDisparo realizarDisparo(Coordenadas c) {
         if (c.getX() >= limiteX || c.getX() < 0 || c.getY() >= limiteY || c.getY() < 0) {
             System.out.println("Error: coordenada fuera de rango (" + c.getX() + ", " + c.getY() + ")");
@@ -50,13 +50,13 @@ public class Tablero {
         }
 
         casilla.setEstado(EstadoCasilla.YA_DISPARADO);
-        
+
         return ResultadoDisparo.AGUA;
     }
-    
+
     public boolean addNave(Nave nave, List<Coordenadas> coordenadas) {
         coordenadas.forEach(c -> casillas[c.getX()][c.getY()].setNave(nave));
-        
+
         return true;
     }
 

@@ -10,11 +10,11 @@ import views.DTOs.JugadorDTO;
  * @author Ángel Ruíz García - 248171
  */
 public class FrmLobby extends javax.swing.JFrame {
-    
+
     private ControlVista cv;
     private JugadorDTO jugador;
     private List<JugadorDTO> jugadores;
-    
+
     /**
      * Creates new form FrmLobby
      */
@@ -23,10 +23,10 @@ public class FrmLobby extends javax.swing.JFrame {
         this.cv = ControlVista.getInstancia();
         cargarLobby();
     }
-    
+
     private void cargarLobby() {
         jugadores = this.cv.getJugadores();
-        
+
         if (jugadores.size() > 1) {
             // Jugador 1
             lblJugadorUno.setText(jugadores.getFirst().getNombre());
@@ -42,7 +42,7 @@ public class FrmLobby extends javax.swing.JFrame {
             lblJugadorDos.setText("(Buscando)");
         }
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -218,8 +218,7 @@ public class FrmLobby extends javax.swing.JFrame {
         menu.setLocationRelativeTo(this);
         dispose();
     }//GEN-LAST:event_btnRegresarActionPerformed
-    
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEmpezar;
     private javax.swing.JButton btnRegresar;

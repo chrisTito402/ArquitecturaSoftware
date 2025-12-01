@@ -7,7 +7,7 @@ import com.google.gson.JsonElement;
  * @author daniel
  */
 public class Mensaje {
-    
+
     private TipoAccion accion;
     private String evento;
     private JsonElement data;

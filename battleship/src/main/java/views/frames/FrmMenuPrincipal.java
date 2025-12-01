@@ -9,7 +9,7 @@ import models.control.ControlModelo;
  * @author Knocmare
  */
 public class FrmMenuPrincipal extends javax.swing.JFrame {
-    
+
     /**
      * Creates new form FrmMenuPrincipal
      */
@@ -117,7 +117,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
-        
+
         FrmRegistrarJugador r = new FrmRegistrarJugador();
         r.setLocationRelativeTo(this);
         r.setVisible(true);

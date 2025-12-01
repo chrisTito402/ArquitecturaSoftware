@@ -9,7 +9,7 @@ import models.enums.ResultadoDisparo;
  * @author daniel
  */
 public class Disparo {
-    
+
     private Jugador jugador;
     private Coordenadas coordenadas;
     private ResultadoDisparo resultadoDisparo;
@@ -73,5 +73,5 @@ public class Disparo {
     public void setTiempo(Instant tiempo) {
         this.tiempo = tiempo;
     }
-    
+
 }

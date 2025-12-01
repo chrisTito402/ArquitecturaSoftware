@@ -8,7 +8,7 @@ import models.enums.EstadoJugador;
  * @author daniel
  */
 public class JugadorDTO {
-    
+
     private String nombre;
     private ColorJugador color;
     private EstadoJugador estado;
@@ -50,5 +50,5 @@ public class JugadorDTO {
     public String toString() {
         return "JugadorDTO{" + "nombre=" + nombre + ", color=" + color + ", estado=" + estado + '}';
     }
-    
+
 }

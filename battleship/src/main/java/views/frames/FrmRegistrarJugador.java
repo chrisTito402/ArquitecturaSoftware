@@ -14,10 +14,10 @@ import views.DTOs.JugadorDTO;
  * @author Gael
  */
 public class FrmRegistrarJugador extends javax.swing.JFrame {
-    
+
     private ButtonGroup grupoColores;
     private ControlVista cv;
-    
+
     /**
      * Creates new form RegistrarJugador
      */
@@ -26,7 +26,7 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         configurarComponentesAdicionales();
         this.cv = ControlVista.getInstancia();
     }
-    
+
     private void configurarComponentesAdicionales() {
         grupoColores = new ButtonGroup();
         grupoColores.add(cBoxRojo);
@@ -34,7 +34,7 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
 
         this.setLocationRelativeTo(null);
     }
-    
+
     private ColorJugador getColorSeleccionado() {
         if (cBoxRojo.isSelected()) {
             return ColorJugador.ROJO;
@@ -42,11 +42,10 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         if (cBoxAzul.isSelected()) {
             return ColorJugador.AZUL;
         }
-        
+
         return null;
     }
-    
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -170,15 +169,15 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Color no válido. Por favor selecciona ROJO o AZUL.");
             return;
         }
-        
+
         IJugadorBuilder builder = new JugadorBuilder();
         builder.setNombre(nombre);
         builder.setColor(colorSeleccionado);
-        builder.setEstado(EstadoJugador.JUGANDO); 
+        builder.setEstado(EstadoJugador.JUGANDO);
 //        JugadorDTO nuevoJugador = builder.getResult();
         JugadorDTO nuevoJugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
         this.cv.unirsePartida(nuevoJugador);
-        
+
         FrmLobby lobby = new FrmLobby();
         lobby.setLocationRelativeTo(this);
         lobby.setVisible(true);
@@ -192,7 +191,6 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         m.setLocationRelativeTo(this);
         dispose();
     }//GEN-LAST:event_btnRegresarActionPerformed
-    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnContinuar;

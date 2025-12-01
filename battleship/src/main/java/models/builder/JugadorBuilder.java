@@ -12,7 +12,7 @@ import java.util.List;
  * @author daniel
  */
 public class JugadorBuilder implements IJugadorBuilder {
-    
+
     private String nombre;
     private ColorJugador color;
     private List<Nave> naves;

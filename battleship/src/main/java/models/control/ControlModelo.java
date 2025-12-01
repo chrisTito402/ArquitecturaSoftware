@@ -218,7 +218,6 @@ public class ControlModelo implements IModeloCliente {
             return null;
         }
 
-      
         return new JugadorDTO(
                 jugador.getNombre(),
                 jugador.getColor(),

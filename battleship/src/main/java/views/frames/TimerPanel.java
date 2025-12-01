@@ -11,7 +11,7 @@ import javax.swing.Timer;
  * @author daniel
  */
 public class TimerPanel extends JLabel {
-    
+
     private Timer timer;
     private int[] tiempo;
     private int total;
@@ -21,7 +21,7 @@ public class TimerPanel extends JLabel {
         this.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         this.setBackground(Color.GREEN);
         this.setText("00:30");
-        
+
         this.total = total;
         this.tiempo = new int[1];
         tiempo[0] = total;
@@ -37,10 +37,10 @@ public class TimerPanel extends JLabel {
                     }
                 }
         );
-        
+
         this.setVisible(true);
     }
-    
+
     public void initTimer(int milis) {
         if (!timer.isRunning()) {
             timer.start();
@@ -48,7 +48,7 @@ public class TimerPanel extends JLabel {
             tiempo[0] = total;
         }
     }
-    
+
     public void initTimer() {
         if (!timer.isRunning()) {
             timer.start();
@@ -56,7 +56,7 @@ public class TimerPanel extends JLabel {
             tiempo[0] = total;
         }
     }
-    
+
     public void stopTimer() {
         if (timer.isRunning()) {
             timer.stop();

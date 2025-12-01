@@ -6,7 +6,7 @@ import models.enums.OrientacionNave;
  *
  * @author daniel
  */
-public class Submarino extends Nave{
+public class Submarino extends Nave {
 
     public Submarino(OrientacionNave orientacion) {
         super(orientacion);
@@ -16,5 +16,5 @@ public class Submarino extends Nave{
     public int getTamanio() {
         return 2;
     }
-    
+
 }

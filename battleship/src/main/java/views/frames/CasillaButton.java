@@ -8,8 +8,8 @@ import javax.swing.JButton;
  *
  * @author daniel
  */
-public class CasillaButton extends JButton{
-    
+public class CasillaButton extends JButton {
+
     private Coordenadas coordenadas;
 
     public CasillaButton(Coordenadas coordenadas) {
@@ -19,5 +19,5 @@ public class CasillaButton extends JButton{
     public Coordenadas getCoordenadas() {
         return coordenadas;
     }
-    
+
 }

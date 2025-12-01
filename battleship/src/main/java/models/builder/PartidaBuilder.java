@@ -13,7 +13,7 @@ import models.control.IModeloCliente;
  * @author daniel
  */
 public class PartidaBuilder implements IPartidaBuilder {
-    
+
     private Jugador turno;
     private List<Jugador> jugadores;
     private int cantBarcos;
@@ -80,5 +80,5 @@ public class PartidaBuilder implements IPartidaBuilder {
         //return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
         return null;
     }
-    
+
 }

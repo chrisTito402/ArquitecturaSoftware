@@ -5,7 +5,7 @@ package views.DTOs;
  * @author daniel
  */
 public class CoordenadasDTO {
-    
+
     private int x;
     private int y;
 
@@ -37,5 +37,5 @@ public class CoordenadasDTO {
     public String toString() {
         return "CoordenadasDTO{" + "x=" + x + ", y=" + y + '}';
     }
-    
+
 }

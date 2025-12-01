@@ -23,30 +23,30 @@ public class PruebaCliente1Puntaje {
 
     public static void main(String[] args) {
         ControlVista cV = ControlVista.getInstancia();
-        
+
         JugadorDTO jugador = new JugadorDTO("Jugador1", ColorJugador.AZUL, EstadoJugador.JUGANDO);
         TableroDTO tablero = new TableroDTO(10, 10);
-        
+
         ControlModelo cM = new ControlModelo(jugador, tablero, new ArrayList<>(), true, new ArrayList<>());
         cM.suscribirAPartida(cV);
-        
+
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);
         Controlador c = new Controlador(cM, cS, new HashMap<>());
         cS.setControl(c);
         cV.setControl(c);
-        
+
         cV.setTimer(new TimerPanel(1000, 30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
         cV.mostrarFrmPartidaEnCurso();
-        
+
         cS.execute();
-        
+
         Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_DISPARO", null, "1");
         Gson gson = new Gson();
         String json = gson.toJson(m);
         cS.enviarMensaje(json);
-        
+
         System.out.println("========================================");
         System.out.println("Cliente 1 iniciado: " + jugador.getNombre());
         System.out.println("Panel de puntaje activo");
