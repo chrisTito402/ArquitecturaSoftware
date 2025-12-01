@@ -376,10 +376,15 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(),
             "RESULTADO_UNIRSE_PARTIDA", respuesta);
 
-        // Notificar a todos los suscritos que hay un nuevo jugador
-        enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
+        // Notificar a TODOS los suscritos sobre CADA jugador de la partida
+        // Esto asegura que todos los clientes tengan la lista completa
+        for (Jugador j : partida.getJugadores()) {
+            JugadorDTO jDTO = new JugadorDTO(j.getNombre(), j.getColor(), j.getEstado());
+            enviarMensaje("JUGADOR_UNIDO", jDTO);
+        }
 
         System.out.println("Servidor: " + jugadorDTO.getNombre() + " se unio a partida " + codigo);
+        System.out.println("Servidor: Total jugadores en partida: " + partida.getJugadores().size());
     }
 
     //Recibe el mensaje enviado por el cliente

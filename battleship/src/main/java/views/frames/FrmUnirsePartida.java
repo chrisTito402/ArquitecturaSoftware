@@ -202,12 +202,12 @@ public class FrmUnirsePartida extends JFrame {
 
         JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
 
-        // IMPORTANTE: Crear el lobby PRIMERO para que se suscriba
+        // Unirse a la partida (el Controlador agrega el jugador al modelo)
+        controlVista.unirsePartidaConCodigo(jugador, codigo);
+
+        // Crear el lobby DESPUES de agregar el jugador al modelo
         FrmLobby lobby = new FrmLobby();
         lobby.setCodigoPartida(codigo);
-
-        // Unirse a la partida con validacion en el servidor
-        controlVista.unirsePartidaConCodigo(jugador, codigo);
 
         // Mostrar el lobby
         lobby.setVisible(true);

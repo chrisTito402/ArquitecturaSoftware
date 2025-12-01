@@ -140,6 +140,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         IModeloCliente modelo = d.makePartida(new PartidaBuilder());
         this.partida = modelo;
 
+        // IMPORTANTE: Suscribir ControlVista al nuevo modelo
+        ControlVista controlVista = ControlVista.getInstancia();
+        this.partida.suscribirAPartida(controlVista);
+
+        // Agregar el jugador local al modelo recién creado
+        Jugador jugadorLocal = new Jugador(
+            jugadorDTO.getNombre(),
+            jugadorDTO.getColor(),
+            jugadorDTO.getEstado()
+        );
+        this.partida.addJugador(jugadorLocal);
+
         // Preparar DTO para enviar al servidor
         CrearPartidaDTO crearDTO = new CrearPartidaDTO(codigoPartida, jugadorDTO);
 
@@ -160,6 +172,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         Director d = new Director();
         IModeloCliente modelo = d.makePartida(new PartidaBuilder());
         this.partida = modelo;
+
+        // IMPORTANTE: Suscribir ControlVista al nuevo modelo
+        ControlVista controlVista = ControlVista.getInstancia();
+        this.partida.suscribirAPartida(controlVista);
+
+        // Agregar el jugador local al modelo recién creado
+        Jugador jugadorLocal = new Jugador(
+            jugadorDTO.getNombre(),
+            jugadorDTO.getColor(),
+            jugadorDTO.getEstado()
+        );
+        this.partida.addJugador(jugadorLocal);
 
         // Preparar DTO para enviar al servidor
         UnirsePartidaDTO unirseDTO = new UnirsePartidaDTO(codigoPartida, jugadorDTO);
@@ -234,9 +258,20 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     private void manejarJugadorUnido(Mensaje mensaje) {
         System.out.println("=== RECIBIDO JUGADOR_UNIDO ===");
+        System.out.println("Data recibida: " + mensaje.getData());
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("Jugador en mensaje: " + jugadorDTO.getNombre());
+        System.out.println("Jugador deserializado - Nombre: '" + jugadorDTO.getNombre() + "', Color: " + jugadorDTO.getColor());
+
+        // Agregar el jugador al modelo local si no existe
+        boolean existe = partida.getJugadores().stream()
+            .anyMatch(j -> j.getNombre().equals(jugadorDTO.getNombre()));
+
+        if (!existe) {
+            Jugador nuevoJugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
+            partida.addJugador(nuevoJugador);
+            System.out.println("Jugador agregado al modelo local: " + jugadorDTO.getNombre());
+        }
 
         // Notificar a los suscriptores locales (esto actualiza el lobby)
         System.out.println("Notificando a suscriptores del modelo...");

@@ -216,12 +216,12 @@ public class FrmCrearPartida extends JFrame {
 
         JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
 
-        // IMPORTANTE: Crear el lobby PRIMERO para que se suscriba
+        // Crear la partida en el servidor (el Controlador agrega el jugador al modelo)
+        controlVista.crearPartidaConCodigo(jugador, codigoPartida);
+
+        // Crear el lobby DESPUES de agregar el jugador al modelo
         FrmLobby lobby = new FrmLobby();
         lobby.setCodigoPartida(codigoPartida);
-
-        // Crear la partida en el servidor con el codigo generado
-        controlVista.crearPartidaConCodigo(jugador, codigoPartida);
 
         // Mostrar el lobby
         lobby.setVisible(true);
