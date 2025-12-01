@@ -66,6 +66,11 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
         btnAbandonar.setBackground(new java.awt.Color(204, 0, 51));
         btnAbandonar.setText("Abandonar partida");
+        btnAbandonar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbandonarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlPuntajeLayout = new javax.swing.GroupLayout(pnlPuntaje);
         pnlPuntaje.setLayout(pnlPuntajeLayout);
@@ -121,6 +126,10 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAbandonarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbandonarActionPerformed
+        ControlVista.getInstancia().abandonarPartida();
+    }//GEN-LAST:event_btnAbandonarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAbandonar;

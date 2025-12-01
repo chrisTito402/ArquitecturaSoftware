@@ -128,11 +128,16 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     //Manda mensaje* al servidor
     @Override
     public void abandonarPartida(Jugador jugador) {
-        partida.abandonarLobby(jugador);
-        //Mandar mensaje al servidor para avisar al ribal
-        JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        // Validaciones del modelo
+        JugadorDTO dto = partida.abandonarPartida(jugador);
+
+        if (dto == null) {
+            System.out.println("No se pudo abandonar la partida.");
+            return;
+        }
         enviarMensaje("ABANDONAR_PARTIDA", dto);
     }
+
     @Override
     public String crearPartida(Jugador j) {
         Director d = new Director();

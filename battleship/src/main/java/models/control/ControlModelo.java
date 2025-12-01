@@ -83,13 +83,13 @@ public class ControlModelo implements IModeloCliente {
             System.out.println("Error, coordenadas vascias.");
             return null;
         }
-        
+
         // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
         if (coordenadas.size() != nave.getTamanio()) {
             System.out.println("Error, coordenadas extra o insuficientes para la Nave.");
             return null;
         }
-        
+
         // Verificar que las coordenadas no se salen del limite del tablero.
         for (Coordenadas coordenada : coordenadas) {
             if (coordenada.getY() < 0 || coordenada.getY() > tablero.getLimiteY()
@@ -98,7 +98,7 @@ public class ControlModelo implements IModeloCliente {
                 return null;
             }
         }
-        
+
         // Verificar que todas las coordenas esten con la misma orientacion.
         if (nave.getOrientacion() == OrientacionNave.VERTICAL) {
             int y = coordenadas.getFirst().getY();
@@ -117,7 +117,7 @@ public class ControlModelo implements IModeloCliente {
                 }
             }
         }
-        
+
         // Ordenar lista por "X" y "Y".
         coordenadas.sort(Comparator.comparingInt(Coordenadas::getX)
                 .thenComparingInt(Coordenadas::getY));
@@ -144,21 +144,21 @@ public class ControlModelo implements IModeloCliente {
                 }
             }
         }
-        
+
         AddNaveDTO naveDTO = new AddNaveDTO(
-                jugador, 
-                nave, 
+                jugador,
+                nave,
                 coordenadas
         );
-        
+
         return naveDTO;
     }
 
     @Override
-    public void manejarResultadoAddNave(ResultadoAddNave resultado) { 
+    public void manejarResultadoAddNave(ResultadoAddNave resultado) {
         System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
     }
-    
+
     @Override
     public void addJugador(Jugador j) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -204,4 +204,26 @@ public class ControlModelo implements IModeloCliente {
     public JugadorDTO getJugador() {
         return jugador;
     }
+
+    @Override
+    public JugadorDTO abandonarPartida(Jugador jugador) {
+
+        // VALIDACIONES (igualitas al estilo de addNave)
+        if (jugador == null) {
+            System.out.println("Error: Jugador nulo.");
+            return null;
+        }
+        if (jugador.getNombre() == null || jugador.getNombre().isBlank()) {
+            System.out.println("Error: Jugador sin nombre.");
+            return null;
+        }
+
+      
+        return new JugadorDTO(
+                jugador.getNombre(),
+                jugador.getColor(),
+                jugador.getEstado()
+        );
+    }
+
 }

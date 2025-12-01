@@ -189,13 +189,23 @@ public class ControlVista implements ISuscriptor {
 
     private void manejarAbandono(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null,
-                "El jugador " + dto.getNombre() + " abandonó la partida.");
+        JugadorDTO yo = control.getJugador();
+
+        // Si YO soy el que abandonó → no mostrar nada
+        if (dto.getNombre().equals(yo.getNombre())) {
+            return;
+        }
+
+        // Mostrar aviso SOLO al rival
+        JOptionPane.showMessageDialog(
+                null,
+                "El jugador " + dto.getNombre() + " abandonó la partida."
+        );
 
         casillasEnemigas.forEach(c -> c.setEnabled(false));
-
         timer.stopTimer();
 
+        System.out.println("Partida finalizada por abandono del rival.");
     }
 
     public void initTableroPropio() {
@@ -272,5 +282,16 @@ public class ControlVista implements ISuscriptor {
 
     public List<JugadorDTO> getJugadores() {
         return control.getJugadores();
+    }
+
+    public void abandonarPartida() {
+
+        // 1. Obtener DTO del jugador actual
+        JugadorDTO dto = control.getJugador();
+
+        // 2. Convertir DTO → ENTIDAD
+        Jugador jugador = new Jugador(dto.getNombre(), dto.getColor(), dto.getEstado());
+
+        control.abandonarPartida(jugador);
     }
 }
