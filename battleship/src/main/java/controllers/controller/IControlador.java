@@ -61,4 +61,14 @@ public interface IControlador {
 
     public List<JugadorDTO> getJugadores();
 
+    /**
+     * Notifica al guest que debe ir a la pantalla de colocar naves.
+     */
+    public void notificarIrAColocarNaves();
+
+    /**
+     * Notifica que el jugador (guest) esta listo con sus naves.
+     */
+    public void notificarJugadorListo();
+
 }

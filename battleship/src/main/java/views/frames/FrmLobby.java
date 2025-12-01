@@ -17,6 +17,7 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
     private JugadorDTO jugador;
     private List<JugadorDTO> jugadores;
     private String codigoPartida;
+    private boolean esHost;
 
     /**
      * Creates new form FrmLobby
@@ -26,11 +27,23 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
         this.cv = ControlVista.getInstancia();
         this.jugadores = new ArrayList<>();
         this.codigoPartida = cv.getCodigoPartida();
+        this.esHost = cv.isEsHost();
 
         // Suscribirse a las notificaciones
         cv.suscribirLobby(this);
 
+        configurarSegunRol();
         cargarLobby();
+    }
+
+    private void configurarSegunRol() {
+        if (esHost) {
+            btnEmpezar.setText("Empezar Partida");
+            btnEmpezar.setEnabled(false); // Se habilita cuando haya 2 jugadores
+        } else {
+            btnEmpezar.setText("Esperando Host...");
+            btnEmpezar.setEnabled(false);
+        }
     }
 
     public void setCodigoPartida(String codigo) {
@@ -61,6 +74,7 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
             lblJugadorDos.setText("(Buscando)");
             pnlEstadoUno.setBackground(Color.red);
             pnlEstadoDos.setBackground(Color.red);
+            actualizarBotonEmpezar();
             return;
         }
 
@@ -80,6 +94,27 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
         // Refrescar la UI
         pnlEstadoUno.repaint();
         pnlEstadoDos.repaint();
+
+        // Actualizar estado del boton
+        actualizarBotonEmpezar();
+    }
+
+    private void actualizarBotonEmpezar() {
+        boolean hayDosJugadores = jugadores != null && jugadores.size() >= 2;
+
+        if (esHost) {
+            // El host puede empezar cuando hay 2 jugadores
+            btnEmpezar.setEnabled(hayDosJugadores);
+            if (hayDosJugadores) {
+                btnEmpezar.setText("Empezar Partida");
+            } else {
+                btnEmpezar.setText("Esperando jugador...");
+            }
+        } else {
+            // El guest siempre ve "Esperando Host..." y el boton deshabilitado
+            btnEmpezar.setText("Esperando Host...");
+            btnEmpezar.setEnabled(false);
+        }
     }
 
     @Override
@@ -107,6 +142,19 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
                 // Refrescar la pantalla
                 actualizarUI();
             });
+        } else if ("IR_A_COLOCAR_NAVES".equals(contexto)) {
+            // Solo el guest reacciona a esta notificacion
+            // El host ya abrio la ventana directamente al presionar el boton
+            if (!esHost) {
+                // Desuscribirse antes de cerrar
+                cv.desuscribirLobby(this);
+
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    FrmColocarNaves frmNaves = new FrmColocarNaves();
+                    frmNaves.setVisible(true);
+                    dispose();
+                });
+            }
         }
     }
 
@@ -215,7 +263,7 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
         );
 
         btnRegresar.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        btnRegresar.setText("Regresar");
+        btnRegresar.setText("Abandonar");
         btnRegresar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRegresarActionPerformed(evt);
@@ -275,6 +323,11 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEmpezarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmpezarActionPerformed
+        // Solo el host puede usar este boton
+        if (!esHost) {
+            return;
+        }
+
         // Verificar que haya 2 jugadores
         if (jugadores.size() < 2) {
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -284,6 +337,12 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
             return;
         }
 
+        // Notificar al guest que vaya a colocar naves
+        cv.notificarIrAColocarNaves();
+
+        // Desuscribirse antes de cerrar
+        cv.desuscribirLobby(this);
+
         // Ir a la pantalla de colocar naves
         FrmColocarNaves frmNaves = new FrmColocarNaves();
         frmNaves.setVisible(true);
@@ -291,7 +350,17 @@ public class FrmLobby extends javax.swing.JFrame implements ISuscriptor {
     }//GEN-LAST:event_btnEmpezarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-        this.cv.abandonarLobby(jugador);
+        // Obtener el jugador actual desde el controlador
+        JugadorDTO jugadorActual = cv.getControl().getJugador();
+
+        // Desuscribirse del lobby antes de salir
+        cv.desuscribirLobby(this);
+
+        // Notificar al servidor que abandonamos el lobby
+        if (jugadorActual != null) {
+            cv.abandonarLobby(jugadorActual);
+        }
+
         FrmMenuPrincipal menu = new FrmMenuPrincipal();
         menu.setVisible(true);
         menu.setLocationRelativeTo(this);

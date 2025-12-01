@@ -58,6 +58,8 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         mapa.put("VALIDAR_CODIGO", this::manejarValidarCodigo);
         mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
+        mapa.put("IR_A_COLOCAR_NAVES", this::manejarIrAColocarNaves);
+        mapa.put("JUGADOR_LISTO", this::manejarJugadorListo);
     }
 
     // Metodo para enviar mensaje por la red.
@@ -404,6 +406,28 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         // 2. Notificar al otro jugador
         enviarMensaje("JUGADOR_ABANDONO", jugadorDTO);
+    }
+
+    /**
+     * Maneja la notificacion del host para ir a colocar naves.
+     * Reenvia el mensaje a todos los clientes (especialmente al guest).
+     */
+    private void manejarIrAColocarNaves(Mensaje mensaje) {
+        System.out.println("Servidor: Host indico ir a colocar naves, notificando al guest...");
+        // Reenviar a todos los clientes conectados
+        enviarMensaje("IR_A_COLOCAR_NAVES", null);
+    }
+
+    /**
+     * Maneja la notificacion de que un jugador (guest) esta listo.
+     * Reenvia como OPONENTE_LISTO al host.
+     */
+    private void manejarJugadorListo(Mensaje mensaje) {
+        System.out.println("Servidor: Un jugador esta listo con sus naves, notificando al oponente...");
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        // Reenviar a todos los clientes conectados
+        enviarMensaje("OPONENTE_LISTO", jugadorDTO);
     }
 
 }

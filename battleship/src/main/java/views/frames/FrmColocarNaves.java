@@ -6,7 +6,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,9 +32,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import models.entidades.Coordenadas;
 import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
+import models.observador.ISuscriptor;
 import shared.dto.NaveDTO;
 import shared.dto.TipoNaveDTO;
 import shared.dto.CoordenadasDTO;
@@ -30,10 +44,11 @@ import shared.dto.CoordenadasDTO;
 /**
  * Pantalla para colocar las naves antes de iniciar la partida.
  * Permite seleccionar naves del "astillero" y colocarlas en el tablero.
+ * Soporta drag and drop y rotacion con click derecho.
  *
  * @author Equipo
  */
-public class FrmColocarNaves extends JFrame {
+public class FrmColocarNaves extends JFrame implements DropTargetListener, PropertyChangeListener, ISuscriptor {
 
     // Constantes del tablero
     private static final int FILAS = 10;
@@ -47,6 +62,7 @@ public class FrmColocarNaves extends JFrame {
     private JButton[][] casillas;
     private JLabel lblInstrucciones;
     private JLabel lblNaveSeleccionada;
+    private JLabel lblOrientacion;
     private JButton btnRotar;
     private JButton btnListo;
     private JButton btnRegresar;
@@ -54,6 +70,7 @@ public class FrmColocarNaves extends JFrame {
     // Estado del juego
     private ControlVista controlVista;
     private NaveDTO naveSeleccionada;
+    private NaveArrastrable naveArrastrableSeleccionada;
     private OrientacionNave orientacionActual;
     private List<Coordenadas> coordenadasPreview;
 
@@ -63,14 +80,23 @@ public class FrmColocarNaves extends JFrame {
     private List<NaveDTO> navesEnTablero;
     private boolean[][] casillaOcupada;
 
-    // Botones del shipyard
-    private Map<TipoNaveDTO, JButton> botonesShipyard;
+    // Componentes arrastrables del shipyard
+    private Map<TipoNaveDTO, NaveArrastrable> navesArrastrables;
+
+    // Control de host/guest y estado de listos
+    private boolean esHost;
+    private boolean misNavesColocadas;
+    private boolean oponenteListo;
 
     public FrmColocarNaves() {
         this.controlVista = ControlVista.getInstancia();
+        this.esHost = controlVista.isEsHost();
+        this.misNavesColocadas = false;
+        this.oponenteListo = false;
         initNavesDisponibles();
         initComponents();
         configurarEventos();
+        suscribirANotificaciones();
     }
 
     private void initNavesDisponibles() {
@@ -90,7 +116,7 @@ public class FrmColocarNaves extends JFrame {
         casillaOcupada = new boolean[FILAS][COLUMNAS];
         coordenadasPreview = new ArrayList<>();
         orientacionActual = OrientacionNave.HORIZONTAL;
-        botonesShipyard = new HashMap<>();
+        navesArrastrables = new HashMap<>();
     }
 
     private void initComponents() {
@@ -128,18 +154,26 @@ public class FrmColocarNaves extends JFrame {
         lblTitulo.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 24));
         lblTitulo.setAlignmentX(CENTER_ALIGNMENT);
 
-        lblInstrucciones = new JLabel("Selecciona una nave del astillero y haz clic en el tablero para colocarla");
+        lblInstrucciones = new JLabel("<html><center>Arrastra las naves al tablero o haz clic para seleccionar<br>" +
+                "<b>Click derecho</b> sobre la nave para rotarla</center></html>");
         lblInstrucciones.setAlignmentX(CENTER_ALIGNMENT);
 
         lblNaveSeleccionada = new JLabel("Nave seleccionada: Ninguna");
         lblNaveSeleccionada.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
         lblNaveSeleccionada.setAlignmentX(CENTER_ALIGNMENT);
 
+        lblOrientacion = new JLabel("Orientacion: HORIZONTAL");
+        lblOrientacion.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 12));
+        lblOrientacion.setForeground(new Color(0, 102, 204));
+        lblOrientacion.setAlignmentX(CENTER_ALIGNMENT);
+
         panel.add(lblTitulo);
         panel.add(Box.createVerticalStrut(5));
         panel.add(lblInstrucciones);
         panel.add(Box.createVerticalStrut(5));
         panel.add(lblNaveSeleccionada);
+        panel.add(Box.createVerticalStrut(3));
+        panel.add(lblOrientacion);
 
         return panel;
     }
@@ -186,20 +220,32 @@ public class FrmColocarNaves extends JFrame {
                 casillas[i][j].setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 casillas[i][j].setFocusPainted(false);
 
-                // Eventos del mouse para preview
-                casillas[i][j].addMouseListener(new java.awt.event.MouseAdapter() {
+                // Habilitar drop target para cada casilla
+                new DropTarget(casillas[i][j], this);
+
+                // Eventos del mouse para preview y click derecho
+                casillas[i][j].addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    public void mouseEntered(MouseEvent evt) {
                         mostrarPreview(fila, col);
                     }
 
                     @Override
-                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                    public void mouseExited(MouseEvent evt) {
                         limpiarPreview();
+                    }
+
+                    @Override
+                    public void mouseClicked(MouseEvent evt) {
+                        // Click derecho para rotar la nave seleccionada
+                        if (SwingUtilities.isRightMouseButton(evt)) {
+                            rotarNave();
+                            mostrarPreview(fila, col); // Actualizar preview con nueva orientacion
+                        }
                     }
                 });
 
-                // Click para colocar nave
+                // Click izquierdo para colocar nave
                 casillas[i][j].addActionListener((ActionEvent e) -> {
                     colocarNave(fila, col);
                 });
@@ -218,27 +264,32 @@ public class FrmColocarNaves extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 20));
-        panel.setPreferredSize(new Dimension(200, 400));
+        panel.setPreferredSize(new Dimension(220, 500));
 
-        // Título del astillero
+        // Titulo del astillero
         JLabel lblAstillero = new JLabel("ASTILLERO");
         lblAstillero.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
         lblAstillero.setAlignmentX(CENTER_ALIGNMENT);
         panel.add(lblAstillero);
+
+        JLabel lblAstilleroInfo = new JLabel("<html><center><small>Arrastra o haz clic<br>Click derecho = Rotar</small></center></html>");
+        lblAstilleroInfo.setAlignmentX(CENTER_ALIGNMENT);
+        panel.add(lblAstilleroInfo);
+        panel.add(Box.createVerticalStrut(10));
+
+        // Naves arrastrables
+        agregarNaveArrastrable(panel, TipoNaveDTO.PORTAAVIONES, 4, new Color(128, 0, 128));
+        agregarNaveArrastrable(panel, TipoNaveDTO.CRUCERO, 3, new Color(0, 100, 0));
+        agregarNaveArrastrable(panel, TipoNaveDTO.SUBMARINO, 2, new Color(0, 0, 139));
+        agregarNaveArrastrable(panel, TipoNaveDTO.BARCO, 1, new Color(139, 69, 19));
+
         panel.add(Box.createVerticalStrut(15));
 
-        // Botones de naves
-        agregarBotonNave(panel, TipoNaveDTO.PORTAAVIONES, "Portaaviones", 4, new Color(128, 0, 128));
-        agregarBotonNave(panel, TipoNaveDTO.CRUCERO, "Crucero", 3, new Color(0, 100, 0));
-        agregarBotonNave(panel, TipoNaveDTO.SUBMARINO, "Submarino", 2, new Color(0, 0, 139));
-        agregarBotonNave(panel, TipoNaveDTO.BARCO, "Barco", 1, new Color(139, 69, 19));
-
-        panel.add(Box.createVerticalStrut(20));
-
-        // Botón rotar
-        btnRotar = new JButton("Rotar (Horizontal)");
+        // Boton rotar (alternativa al click derecho)
+        btnRotar = new JButton("Rotar (R)");
         btnRotar.setAlignmentX(CENTER_ALIGNMENT);
         btnRotar.setMaximumSize(new Dimension(180, 35));
+        btnRotar.setToolTipText("Tambien puedes usar click derecho");
         btnRotar.addActionListener(e -> rotarNave());
         panel.add(btnRotar);
 
@@ -251,31 +302,39 @@ public class FrmColocarNaves extends JFrame {
         return panel;
     }
 
-    private void agregarBotonNave(JPanel panel, TipoNaveDTO tipo, String nombre, int tamanio, Color color) {
-        JPanel pnlNave = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlNave.setMaximumSize(new Dimension(200, 50));
+    private void agregarNaveArrastrable(JPanel panel, TipoNaveDTO tipo, int tamanio, Color color) {
+        // Panel contenedor con label
+        JPanel contenedor = new JPanel();
+        contenedor.setLayout(new BoxLayout(contenedor, BoxLayout.Y_AXIS));
+        contenedor.setMaximumSize(new Dimension(200, 80));
+        contenedor.setAlignmentX(CENTER_ALIGNMENT);
 
-        // Representación visual de la nave
-        JPanel pnlVisual = new JPanel(new GridLayout(1, tamanio));
-        for (int i = 0; i < tamanio; i++) {
-            JPanel celda = new JPanel();
-            celda.setPreferredSize(new Dimension(20, 20));
-            celda.setBackground(color);
-            celda.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-            pnlVisual.add(celda);
-        }
+        // Label con nombre y cantidad
+        int disponibles = navesDisponibles.get(tipo);
+        JLabel lblNave = new JLabel(getNombreNave(tipo) + " x" + disponibles);
+        lblNave.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
+        lblNave.setAlignmentX(CENTER_ALIGNMENT);
 
-        // Botón con nombre y cantidad
-        JButton btn = new JButton(nombre + " (" + navesDisponibles.get(tipo) + ")");
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setPreferredSize(new Dimension(150, 30));
-        btn.addActionListener(e -> seleccionarNave(tipo, tamanio, color));
-        botonesShipyard.put(tipo, btn);
+        // Crear la nave arrastrable
+        NaveArrastrable nave = new NaveArrastrable(tipo, tamanio, color, disponibles);
+        nave.setAlignmentX(CENTER_ALIGNMENT);
 
-        pnlNave.add(pnlVisual);
-        panel.add(pnlNave);
-        panel.add(btn);
+        // Registrar listener para cuando se seleccione la nave
+        nave.addPropertyChangeListener("naveSeleccionada", this);
+
+        // Registrar listener para cuando cambie la orientacion
+        nave.setOrientacionListener(nuevaOrientacion -> {
+            orientacionActual = nuevaOrientacion;
+            actualizarLabelOrientacion();
+        });
+
+        navesArrastrables.put(tipo, nave);
+
+        contenedor.add(lblNave);
+        contenedor.add(Box.createVerticalStrut(3));
+        contenedor.add(nave);
+
+        panel.add(contenedor);
         panel.add(Box.createVerticalStrut(10));
     }
 
@@ -310,7 +369,15 @@ public class FrmColocarNaves extends JFrame {
         btnRegresar.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
         btnRegresar.addActionListener(e -> regresar());
 
-        btnListo = new JButton("LISTO");
+        // El texto del boton depende de si es host o guest
+        if (esHost) {
+            btnListo = new JButton("EMPEZAR BATALLA");
+            btnListo.setToolTipText("Se activara cuando ambos jugadores esten listos");
+        } else {
+            btnListo = new JButton("LISTO");
+            btnListo.setToolTipText("Presiona cuando hayas colocado todas tus naves");
+        }
+
         btnListo.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
         btnListo.setBackground(new Color(0, 153, 0));
         btnListo.setForeground(Color.WHITE);
@@ -338,9 +405,105 @@ public class FrmColocarNaves extends JFrame {
         }
 
         naveSeleccionada = new NaveDTO(EstadoNave.SIN_DAÑOS, orientacionActual, tipo, tamanio);
+        naveArrastrableSeleccionada = navesArrastrables.get(tipo);
         lblNaveSeleccionada.setText("Nave seleccionada: " + getNombreNave(tipo) +
-                " (Tamaño: " + tamanio + ", Disponibles: " + disponibles + ")");
-        lblInstrucciones.setText("Haz clic en el tablero para colocar la nave");
+                " (Tam: " + tamanio + ", Disp: " + disponibles + ")");
+        lblInstrucciones.setText("<html><center>Haz clic en el tablero para colocar<br>o arrastra la nave</center></html>");
+    }
+
+    // === PropertyChangeListener - Para cuando se selecciona una nave del shipyard ===
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("naveSeleccionada".equals(evt.getPropertyName())) {
+            NaveArrastrable nave = (NaveArrastrable) evt.getNewValue();
+            if (nave != null && nave.isDisponible()) {
+                seleccionarNave(nave.getTipo(), nave.getTamanio(), nave.getColorNave());
+                orientacionActual = nave.getOrientacion();
+                actualizarLabelOrientacion();
+            }
+        }
+    }
+
+    // === DropTargetListener - Para recibir naves arrastradas ===
+    @Override
+    public void dragEnter(DropTargetDragEvent dtde) {
+        if (dtde.isDataFlavorSupported(NaveArrastrable.NAVE_FLAVOR)) {
+            dtde.acceptDrag(DnDConstants.ACTION_COPY);
+        } else {
+            dtde.rejectDrag();
+        }
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {
+        // Obtener la casilla sobre la que esta el mouse
+        java.awt.Point point = dtde.getLocation();
+        JButton casilla = (JButton) dtde.getDropTargetContext().getComponent();
+
+        // Buscar las coordenadas de la casilla
+        for (int i = 0; i < FILAS; i++) {
+            for (int j = 0; j < COLUMNAS; j++) {
+                if (casillas[i][j] == casilla) {
+                    // Mostrar preview si hay nave siendo arrastrada
+                    try {
+                        Transferable t = dtde.getTransferable();
+                        if (t.isDataFlavorSupported(NaveArrastrable.NAVE_FLAVOR)) {
+                            NaveArrastrable nave = (NaveArrastrable) t.getTransferData(NaveArrastrable.NAVE_FLAVOR);
+                            naveSeleccionada = new NaveDTO(EstadoNave.SIN_DAÑOS, nave.getOrientacion(),
+                                    nave.getTipo(), nave.getTamanio());
+                            orientacionActual = nave.getOrientacion();
+                            mostrarPreview(i, j);
+                        }
+                    } catch (Exception e) {
+                        // Ignorar errores de transferencia durante drag
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void dropActionChanged(DropTargetDragEvent dtde) {}
+
+    @Override
+    public void dragExit(DropTargetEvent dte) {
+        limpiarPreview();
+    }
+
+    @Override
+    public void drop(DropTargetDropEvent dtde) {
+        try {
+            Transferable t = dtde.getTransferable();
+            if (t.isDataFlavorSupported(NaveArrastrable.NAVE_FLAVOR)) {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+
+                NaveArrastrable nave = (NaveArrastrable) t.getTransferData(NaveArrastrable.NAVE_FLAVOR);
+                JButton casilla = (JButton) dtde.getDropTargetContext().getComponent();
+
+                // Encontrar coordenadas de la casilla
+                for (int i = 0; i < FILAS; i++) {
+                    for (int j = 0; j < COLUMNAS; j++) {
+                        if (casillas[i][j] == casilla) {
+                            // Configurar la nave seleccionada con la orientacion de la nave arrastrada
+                            naveSeleccionada = new NaveDTO(EstadoNave.SIN_DAÑOS, nave.getOrientacion(),
+                                    nave.getTipo(), nave.getTamanio());
+                            naveArrastrableSeleccionada = nave;
+                            orientacionActual = nave.getOrientacion();
+
+                            // Intentar colocar la nave
+                            colocarNave(i, j);
+                            dtde.dropComplete(true);
+                            return;
+                        }
+                    }
+                }
+            }
+            dtde.rejectDrop();
+        } catch (Exception e) {
+            e.printStackTrace();
+            dtde.rejectDrop();
+        }
     }
 
     private String getNombreNave(TipoNaveDTO tipo) {
@@ -356,15 +519,26 @@ public class FrmColocarNaves extends JFrame {
     private void rotarNave() {
         if (orientacionActual == OrientacionNave.HORIZONTAL) {
             orientacionActual = OrientacionNave.VERTICAL;
-            btnRotar.setText("Rotar (Vertical)");
         } else {
             orientacionActual = OrientacionNave.HORIZONTAL;
-            btnRotar.setText("Rotar (Horizontal)");
         }
 
+        actualizarLabelOrientacion();
+
+        // Actualizar nave seleccionada (DTO) para el preview y colocacion
         if (naveSeleccionada != null) {
             naveSeleccionada.setOrientacion(orientacionActual);
         }
+
+        // NO sincronizar con la nave en el Astillero
+        // La rotacion desde el tablero solo afecta la orientacion de colocacion,
+        // no la visualizacion de la nave en el astillero
+    }
+
+    private void actualizarLabelOrientacion() {
+        String orientacionStr = (orientacionActual == OrientacionNave.HORIZONTAL) ? "HORIZONTAL" : "VERTICAL";
+        lblOrientacion.setText("Orientacion: " + orientacionStr);
+        btnRotar.setText("Rotar (" + orientacionStr.charAt(0) + ")");
     }
 
     private void mostrarPreview(int fila, int col) {
@@ -495,10 +669,12 @@ public class FrmColocarNaves extends JFrame {
         // Enviar al servidor
         controlVista.addNave(naveSeleccionada, coordenadas);
 
-        // Limpiar selección
+        // Limpiar seleccion
         naveSeleccionada = null;
+        naveArrastrableSeleccionada = null;
         lblNaveSeleccionada.setText("Nave seleccionada: Ninguna");
-        lblInstrucciones.setText("Selecciona otra nave del astillero");
+        lblInstrucciones.setText("<html><center>Arrastra las naves al tablero o haz clic para seleccionar<br>" +
+                "<b>Click derecho</b> sobre la nave para rotarla</center></html>");
 
         // Verificar si se colocaron todas
         verificarTodasColocadas();
@@ -516,10 +692,22 @@ public class FrmColocarNaves extends JFrame {
 
     private void actualizarBotonShipyard(TipoNaveDTO tipo) {
         int disponibles = navesDisponibles.get(tipo) - navesColocadas.get(tipo);
-        JButton btn = botonesShipyard.get(tipo);
-        btn.setText(getNombreNave(tipo) + " (" + disponibles + ")");
-        if (disponibles <= 0) {
-            btn.setEnabled(false);
+
+        // Actualizar la nave arrastrable
+        NaveArrastrable nave = navesArrastrables.get(tipo);
+        if (nave != null) {
+            nave.decrementarDisponible();
+        }
+
+        // Actualizar el label del contenedor padre
+        java.awt.Container parent = nave.getParent();
+        if (parent != null) {
+            for (java.awt.Component comp : parent.getComponents()) {
+                if (comp instanceof JLabel) {
+                    ((JLabel) comp).setText(getNombreNave(tipo) + " x" + disponibles);
+                    break;
+                }
+            }
         }
     }
 
@@ -528,37 +716,105 @@ public class FrmColocarNaves extends JFrame {
         int totalColocadas = navesColocadas.values().stream().mapToInt(Integer::intValue).sum();
 
         if (totalColocadas >= totalNecesarias) {
-            btnListo.setEnabled(true);
-            lblInstrucciones.setText("¡Todas las naves colocadas! Presiona LISTO para continuar.");
+            misNavesColocadas = true;
+            actualizarEstadoBoton();
         }
     }
 
+    private void actualizarEstadoBoton() {
+        if (esHost) {
+            // El host necesita que AMBOS esten listos
+            boolean puedeEmpezar = misNavesColocadas && oponenteListo;
+            btnListo.setEnabled(puedeEmpezar);
+
+            if (misNavesColocadas && !oponenteListo) {
+                lblInstrucciones.setText("<html><center>¡Naves colocadas!<br>Esperando a que el oponente este listo...</center></html>");
+            } else if (!misNavesColocadas && oponenteListo) {
+                lblInstrucciones.setText("<html><center>El oponente esta listo.<br>Termina de colocar tus naves.</center></html>");
+            } else if (puedeEmpezar) {
+                lblInstrucciones.setText("<html><center>¡Ambos jugadores listos!<br>Presiona EMPEZAR BATALLA.</center></html>");
+            }
+        } else {
+            // El guest solo necesita terminar sus naves
+            btnListo.setEnabled(misNavesColocadas);
+            if (misNavesColocadas) {
+                lblInstrucciones.setText("<html><center>¡Todas las naves colocadas!<br>Presiona LISTO para continuar.</center></html>");
+            }
+        }
+    }
+
+    private void suscribirANotificaciones() {
+        // Suscribirse al lobby para recibir notificaciones de oponente listo
+        controlVista.suscribirLobby(this);
+    }
+
+    // === ISuscriptor - Para recibir notificaciones del servidor ===
+    @Override
+    public void notificar(String contexto, Object datos) {
+        SwingUtilities.invokeLater(() -> {
+            if ("OPONENTE_LISTO".equals(contexto)) {
+                oponenteListo = true;
+                actualizarEstadoBoton();
+                System.out.println("Oponente esta listo!");
+            } else if ("EMPEZAR_PARTIDA".equals(contexto)) {
+                // El host inicio la partida, pasar a la pantalla de juego
+                if (!esHost) {
+                    iniciarPartida();
+                }
+            }
+        });
+    }
+
     private void confirmarTablero() {
-        int opcion = JOptionPane.showConfirmDialog(this,
-                "¿Estás seguro de tu configuración?\nNo podrás modificarla después.",
-                "Confirmar tablero",
-                JOptionPane.YES_NO_OPTION);
+        String mensaje = esHost ?
+                "¿Iniciar la partida?\nAmbos jugadores estan listos." :
+                "¿Confirmar tu configuracion?\nNo podras modificarla despues.";
+        String titulo = esHost ? "Iniciar partida" : "Confirmar tablero";
+
+        int opcion = JOptionPane.showConfirmDialog(this, mensaje, titulo, JOptionPane.YES_NO_OPTION);
 
         if (opcion == JOptionPane.YES_OPTION) {
-            // Crear e inicializar el TimerPanel (30 segundos por turno)
-            TimerPanel timerPanel = new TimerPanel(1000, 30);
-            controlVista.setTimer(timerPanel);
-
-            // Inicializar tableros en ControlVista
-            controlVista.initTableroPropio();
-            controlVista.initTableroEnemigo();
-            controlVista.suscribirAModelo();
-
-            // Marcar las casillas propias donde hay naves
-            marcarNavesEnTableroPropio();
-
-            // Notificar al servidor que está listo
-            controlVista.empezarPartida();
-
-            // Abrir pantalla de partida
-            controlVista.mostrarFrmPartidaEnCurso();
-            dispose();
+            if (esHost) {
+                // El host inicia la partida para ambos
+                iniciarPartida();
+                // Notificar al guest que la partida empezo
+                controlVista.empezarPartida();
+            } else {
+                // El guest notifica que esta listo y espera
+                notificarListo();
+            }
         }
+    }
+
+    private void notificarListo() {
+        // Notificar al servidor/host que este jugador esta listo
+        controlVista.notificarJugadorListo(); // Esto notificara al host
+
+        // Deshabilitar el boton y esperar
+        btnListo.setEnabled(false);
+        btnListo.setText("ESPERANDO...");
+        lblInstrucciones.setText("<html><center>Esperando a que el host<br>inicie la batalla...</center></html>");
+    }
+
+    private void iniciarPartida() {
+        // Crear e inicializar el TimerPanel (30 segundos por turno)
+        TimerPanel timerPanel = new TimerPanel(1000, 30);
+        controlVista.setTimer(timerPanel);
+
+        // Inicializar tableros en ControlVista
+        controlVista.initTableroPropio();
+        controlVista.initTableroEnemigo();
+        controlVista.suscribirAModelo();
+
+        // Marcar las casillas propias donde hay naves
+        marcarNavesEnTableroPropio();
+
+        // Desuscribirse del lobby
+        controlVista.desuscribirLobby(this);
+
+        // Abrir pantalla de partida
+        controlVista.mostrarFrmPartidaEnCurso();
+        dispose();
     }
 
     private void marcarNavesEnTableroPropio() {

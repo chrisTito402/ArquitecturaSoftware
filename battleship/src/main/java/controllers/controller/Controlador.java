@@ -53,6 +53,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("RESULTADO_CREAR_PARTIDA", this::manejarResultadoCrearPartida);
         manejadorEventos.put("RESULTADO_VALIDAR_CODIGO", this::manejarResultadoValidarCodigo);
         manejadorEventos.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
+        manejadorEventos.put("IR_A_COLOCAR_NAVES", this::manejarIrAColocarNaves);
+        manejadorEventos.put("OPONENTE_LISTO", this::manejarOponenteListo);
     }
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
@@ -372,5 +374,31 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
                 .stream()
                 .map(jugadorEntidad -> new JugadorDTO(jugadorEntidad.getNombre(), jugadorEntidad.getColor(), jugadorEntidad.getEstado()))
                 .toList();
+    }
+
+    // ===== METODOS PARA COLOCAR NAVES Y SINCRONIZACION =====
+
+    @Override
+    public void notificarIrAColocarNaves() {
+        // Enviar mensaje al servidor para que notifique al guest
+        enviarMensaje("IR_A_COLOCAR_NAVES", null);
+    }
+
+    private void manejarIrAColocarNaves(Mensaje mensaje) {
+        System.out.println("Recibido IR_A_COLOCAR_NAVES - Pasando a pantalla de colocar naves");
+        // Notificar a ControlVista para que actualice el lobby
+        ControlVista.getInstancia().manejarIrAColocarNaves();
+    }
+
+    @Override
+    public void notificarJugadorListo() {
+        // Enviar mensaje al servidor para que notifique al host
+        enviarMensaje("JUGADOR_LISTO", partida.getJugador());
+    }
+
+    private void manejarOponenteListo(Mensaje mensaje) {
+        System.out.println("Recibido OPONENTE_LISTO - El oponente termino de colocar sus naves");
+        // Notificar a los suscriptores del lobby (FrmColocarNaves)
+        partida.notificarAllSuscriptores("OPONENTE_LISTO", null);
     }
 }

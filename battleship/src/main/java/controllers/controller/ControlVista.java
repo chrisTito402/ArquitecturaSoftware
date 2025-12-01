@@ -55,7 +55,13 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("RESULTADO_CREAR_PARTIDA", this::manejarResultadoCrearPartida);
         manejadoresNoti.put("RESULTADO_VALIDAR_CODIGO", this::manejarResultadoValidarCodigo);
         manejadoresNoti.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
+        manejadoresNoti.put("OPONENTE_LISTO", this::manejarOponenteListo);
         suscriptoresLobby = new ArrayList<>();
+    }
+
+    private void manejarOponenteListo(Object datos) {
+        System.out.println("ControlVista: Oponente esta listo, notificando a lobby...");
+        notificarLobby("OPONENTE_LISTO", datos);
     }
 
     public void suscribirLobby(ISuscriptor suscriptor) {
@@ -69,7 +75,10 @@ public class ControlVista implements ISuscriptor {
     }
 
     private void notificarLobby(String contexto, Object datos) {
-        for (ISuscriptor s : suscriptoresLobby) {
+        // Crear copia para evitar ConcurrentModificationException
+        // si un suscriptor se desuscribe durante la notificacion
+        List<ISuscriptor> copia = new ArrayList<>(suscriptoresLobby);
+        for (ISuscriptor s : copia) {
             s.notificar(contexto, datos);
         }
     }
@@ -158,11 +167,11 @@ public class ControlVista implements ISuscriptor {
 
     @Override
     public void notificar(String contexto, Object datos) {
-        if (datos == null) {
-            System.out.println("Los datos estan vacios.");
-            return;
+        Consumer<Object> manejador = manejadoresNoti.get(contexto);
+        if (manejador != null) {
+            manejador.accept(datos);
         } else {
-            manejadoresNoti.get(contexto).accept(datos);
+            System.out.println("ControlVista: No hay manejador para contexto: " + contexto);
         }
     }
 
@@ -350,8 +359,9 @@ public class ControlVista implements ISuscriptor {
     }
 
     private void manejarEmpezarPartida(Object datos) {
-        JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+        System.out.println("ControlVista: Partida empezando, notificando a lobby...");
+        // Notificar a los suscriptores del lobby (FrmColocarNaves) para que transicionen
+        notificarLobby("EMPEZAR_PARTIDA", datos);
     }
 
     private void manejarAbandonarLobby(Object datos) {
@@ -424,5 +434,27 @@ public class ControlVista implements ISuscriptor {
                 JOptionPane.ERROR_MESSAGE);
             notificarLobby("ERROR_UNIRSE_PARTIDA", resultado);
         }
+    }
+
+    /**
+     * Notifica al guest que debe ir a la pantalla de colocar naves.
+     * Llamado por el host cuando presiona "Empezar Partida" en el lobby.
+     */
+    public void notificarIrAColocarNaves() {
+        control.notificarIrAColocarNaves();
+    }
+
+    /**
+     * Maneja la notificacion de ir a colocar naves (recibida del servidor).
+     */
+    public void manejarIrAColocarNaves() {
+        notificarLobby("IR_A_COLOCAR_NAVES", null);
+    }
+
+    /**
+     * Notifica que este jugador (guest) esta listo con sus naves.
+     */
+    public void notificarJugadorListo() {
+        control.notificarJugadorListo();
     }
 }

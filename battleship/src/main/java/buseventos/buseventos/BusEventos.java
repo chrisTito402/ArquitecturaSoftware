@@ -91,6 +91,12 @@ public class BusEventos {
             case "UNIRSE_PARTIDA":
                 manejarUnirsePartida(mensaje, cliente);
                 return true;
+            case "IR_A_COLOCAR_NAVES":
+                manejarIrAColocarNaves(mensaje, cliente);
+                return true;
+            case "JUGADOR_LISTO":
+                manejarJugadorListo(mensaje, cliente);
+                return true;
             default:
                 return false;
         }
@@ -316,5 +322,43 @@ public class BusEventos {
             eventos.get(event).add(client);
             System.out.println("ID ASIGNADO");
         }
+    }
+
+    /**
+     * Maneja la notificacion del host para ir a colocar naves.
+     * Transmite a todos los clientes suscritos.
+     */
+    private void manejarIrAColocarNaves(Mensaje mensaje, UserServerThread cliente) {
+        System.out.println("BusEventos: Host indico ir a colocar naves, notificando a todos...");
+
+        // Crear mensaje para transmitir
+        Mensaje notificacion = new Mensaje(
+            TipoAccion.PUBLICAR,
+            "IR_A_COLOCAR_NAVES",
+            null,
+            mensaje.getIdPublicador()
+        );
+
+        // Publicar a todos los suscritos a este evento
+        publicar("IR_A_COLOCAR_NAVES", notificacion);
+    }
+
+    /**
+     * Maneja la notificacion de que un jugador esta listo con sus naves.
+     * Transmite como OPONENTE_LISTO a todos los clientes suscritos.
+     */
+    private void manejarJugadorListo(Mensaje mensaje, UserServerThread cliente) {
+        System.out.println("BusEventos: Jugador listo con naves, notificando al oponente...");
+
+        // Crear mensaje para transmitir
+        Mensaje notificacion = new Mensaje(
+            TipoAccion.PUBLICAR,
+            "OPONENTE_LISTO",
+            mensaje.getData(),
+            mensaje.getIdPublicador()
+        );
+
+        // Publicar a todos los suscritos a este evento
+        publicar("OPONENTE_LISTO", notificacion);
     }
 }

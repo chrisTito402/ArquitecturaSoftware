@@ -3,10 +3,13 @@ package views.frames;
 import controllers.controller.ControlVista;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,8 +18,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import models.config.ConfiguracionJugador;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
+import servidor.validacion.ValidadorJugador;
 import shared.dto.JugadorDTO;
 
 /**
@@ -28,24 +33,27 @@ public class FrmUnirsePartida extends JFrame {
 
     private JTextField txtCodigo;
     private JTextField txtNombre;
-    private JButton btnRojo;
-    private JButton btnAzul;
     private JButton btnUnirse;
     private JButton btnRegresar;
 
     private ColorJugador colorSeleccionado;
     private ControlVista controlVista;
+    private ConfiguracionJugador configuracion;
+    private Map<ColorJugador, JButton> botonesColores;
 
     public FrmUnirsePartida() {
         this.controlVista = ControlVista.getInstancia();
+        this.configuracion = ConfiguracionJugador.getInstancia();
+        this.botonesColores = new HashMap<>();
         initComponents();
+        cargarPreferenciasGuardadas();
     }
 
     private void initComponents() {
         setTitle("Battleship - Unirse a Partida");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
-        setSize(500, 450);
+        setSize(500, 500);
 
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
@@ -93,23 +101,7 @@ public class FrmUnirsePartida extends JFrame {
         gbc.gridy = 3;
         panel.add(lblColor, gbc);
 
-        JPanel panelColores = new JPanel();
-        panelColores.setBackground(Color.WHITE);
-
-        btnRojo = new JButton("ROJO");
-        btnRojo.setBackground(Color.RED);
-        btnRojo.setForeground(Color.WHITE);
-        btnRojo.setPreferredSize(new Dimension(80, 35));
-        btnRojo.addActionListener(e -> seleccionarColor(ColorJugador.ROJO));
-        panelColores.add(btnRojo);
-
-        btnAzul = new JButton("AZUL");
-        btnAzul.setBackground(Color.BLUE);
-        btnAzul.setForeground(Color.WHITE);
-        btnAzul.setPreferredSize(new Dimension(80, 35));
-        btnAzul.addActionListener(e -> seleccionarColor(ColorJugador.AZUL));
-        panelColores.add(btnAzul);
-
+        JPanel panelColores = crearPanelColores();
         gbc.gridx = 1;
         panel.add(panelColores, gbc);
 
@@ -143,14 +135,50 @@ public class FrmUnirsePartida extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    private JPanel crearPanelColores() {
+        // Panel horizontal para los 2 colores (Rojo y Azul)
+        JPanel panelColores = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panelColores.setBackground(Color.WHITE);
+
+        // Crear un boton para cada color disponible
+        for (ColorJugador color : ColorJugador.values()) {
+            JButton btnColor = new JButton(color.getNombreEspanol());
+            btnColor.setBackground(color.getColorAWT());
+            btnColor.setForeground(Color.WHITE);
+            btnColor.setPreferredSize(new Dimension(80, 35));
+            btnColor.setToolTipText(color.getNombreEspanol());
+            btnColor.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            btnColor.setFocusPainted(false);
+
+            btnColor.addActionListener(e -> seleccionarColor(color));
+            botonesColores.put(color, btnColor);
+            panelColores.add(btnColor);
+        }
+
+        return panelColores;
+    }
+
     private void seleccionarColor(ColorJugador color) {
         this.colorSeleccionado = color;
-        if (color == ColorJugador.ROJO) {
-            btnRojo.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
-            btnAzul.setBorder(BorderFactory.createEmptyBorder());
-        } else {
-            btnAzul.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
-            btnRojo.setBorder(BorderFactory.createEmptyBorder());
+
+        // Quitar seleccion de todos los botones
+        for (Map.Entry<ColorJugador, JButton> entry : botonesColores.entrySet()) {
+            if (entry.getKey() == color) {
+                entry.getValue().setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+            } else {
+                entry.getValue().setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            }
+        }
+    }
+
+    private void cargarPreferenciasGuardadas() {
+        // NO cargar el nombre automaticamente para evitar conflictos entre clientes
+        // El nombre debe ingresarse manualmente cada vez
+
+        // Solo cargar el color preferido
+        ColorJugador colorGuardado = configuracion.getColorGuardado();
+        if (colorGuardado != null) {
+            seleccionarColor(colorGuardado);
         }
     }
 
@@ -172,34 +200,25 @@ public class FrmUnirsePartida extends JFrame {
             return;
         }
 
-        // Validaciones de UI para nombre
-        if (nombre.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor ingresa tu nombre.");
-            return;
-        }
-        if (nombre.length() < 2) {
-            JOptionPane.showMessageDialog(this, "El nombre debe tener al menos 2 caracteres.");
-            return;
-        }
-        if (nombre.length() > 20) {
-            JOptionPane.showMessageDialog(this, "El nombre no puede tener mas de 20 caracteres.");
-            return;
-        }
-        if (!nombre.matches("^[a-zA-Z0-9\\s]+$")) {
-            JOptionPane.showMessageDialog(this, "El nombre solo puede contener letras, numeros y espacios.");
-            return;
-        }
-        if (colorSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Por favor selecciona un color.");
+        // Usar el validador centralizado para nombre
+        ValidadorJugador.ResultadoValidacion resultadoNombre = ValidadorJugador.validarNombre(nombre);
+        if (!resultadoNombre.isValido()) {
+            JOptionPane.showMessageDialog(this, resultadoNombre.getMensaje(),
+                "Error de validacion", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Crear el jugador usando el Builder
-        models.builder.IJugadorBuilder builder = new models.builder.JugadorBuilder();
-        builder.setNombre(nombre);
-        builder.setColor(colorSeleccionado);
-        builder.setEstado(EstadoJugador.JUGANDO);
+        ValidadorJugador.ResultadoValidacion resultadoColor = ValidadorJugador.validarColor(colorSeleccionado);
+        if (!resultadoColor.isValido()) {
+            JOptionPane.showMessageDialog(this, resultadoColor.getMensaje(),
+                "Error de validacion", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
+        // Guardar preferencias para la proxima vez
+        configuracion.guardarPreferencias(nombre, colorSeleccionado);
+
+        // Crear el jugador
         JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
 
         // Unirse a la partida (el Controlador agrega el jugador al modelo)

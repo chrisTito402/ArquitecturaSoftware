@@ -84,5 +84,13 @@ public class MainCliente {
         // Suscribirse a abandonar lobby
         Mensaje m6 = new Mensaje(TipoAccion.SUSCRIBIR, "ABANDONAR_LOBBY", null);
         cliente.enviarMensaje(gson.toJson(m6));
+
+        // Suscribirse a ir a colocar naves (del lobby a colocar naves)
+        Mensaje m7 = new Mensaje(TipoAccion.SUSCRIBIR, "IR_A_COLOCAR_NAVES", null);
+        cliente.enviarMensaje(gson.toJson(m7));
+
+        // Suscribirse a oponente listo (cuando el otro jugador termina de colocar naves)
+        Mensaje m8 = new Mensaje(TipoAccion.SUSCRIBIR, "OPONENTE_LISTO", null);
+        cliente.enviarMensaje(gson.toJson(m8));
     }
 }
