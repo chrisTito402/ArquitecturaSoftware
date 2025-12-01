@@ -9,7 +9,7 @@ import java.util.List;
  * @author daniel
  */
 public class Jugador {
-    
+
     private String nombre;
     private ColorJugador color;
     private List<Nave> naves;
@@ -26,7 +26,6 @@ public class Jugador {
         this.puntaje = new Puntaje();
     }
 
-
     public Jugador(String nombre, ColorJugador color, EstadoJugador estado) {
         this.nombre = nombre;
         this.color = color;
@@ -41,7 +40,7 @@ public class Jugador {
     public void setPuntaje(Puntaje puntaje) {
         this.puntaje = puntaje;
     }
-    
+
     public String getNombre() {
         return nombre;
     }
@@ -81,5 +80,5 @@ public class Jugador {
     public void setEstado(EstadoJugador estado) {
         this.estado = estado;
     }
-    
+
 }

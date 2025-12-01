@@ -32,34 +32,34 @@ public class PruebaCliente1 {
 
     public static void main(String[] args) {
         ControlVista cV = ControlVista.getInstancia();
-        
+
         JugadorDTO jugador = new JugadorDTO("J1", ColorJugador.AZUL, EstadoJugador.JUGANDO);
         TableroDTO tablero = new TableroDTO(10, 10);
-        
+
         ControlModelo cM = new ControlModelo(jugador, tablero, new ArrayList<>(), true, new ArrayList<>());
         cM.suscribirAPartida(cV);
-        
+
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);
         Controlador c = new Controlador(cM, cS, new HashMap<>());
         cS.setControl(c);
         cV.setControl(c);
-        
+
         cV.setTimer(new TimerPanel(1000, 30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
         cV.mostrarFrmPartidaEnCurso();
-        
+
         cS.execute();
-        
+
         Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_DISPARO", null);
         Gson gson = new Gson();
         String json = gson.toJson(m);
         cS.enviarMensaje(json);
-        
+
         NaveDTO nave = new NaveDTO(EstadoNave.SIN_DAÑOS, OrientacionNave.HORIZONTAL, TipoNaveDTO.BARCO, 1);
         List<Coordenadas> coordenadas = new ArrayList<>();
         coordenadas.add(new Coordenadas(2, 2));
         cV.addNave(nave, coordenadas);
     }
-    
+
 }

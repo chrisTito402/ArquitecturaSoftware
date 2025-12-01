@@ -32,7 +32,7 @@ public class Bot extends Jugador {
         super(nombre, color, naves, tablero, estado);
         this.disparos = disparos;
     }
-    
+
     /**
      * El bot realiza un disparo aleatorio sobre el tablero del jugador.
      *
@@ -54,10 +54,10 @@ public class Bot extends Jugador {
         System.out.println("🤖 Bot dispara en (" + x + ", " + y + ") -> " + resultado);
         return resultado;
     }
-    
+
     public Coordenadas getCoordenadas() {
         Random r = new Random();
-        
+
         int x, y;
         do {
             x = r.nextInt(10); // 0..9
@@ -66,8 +66,7 @@ public class Bot extends Jugador {
 
         disparos[x][y] = true;
         Coordenadas c = new Coordenadas(x, y);
-        
+
         return c;
     }
 }
-

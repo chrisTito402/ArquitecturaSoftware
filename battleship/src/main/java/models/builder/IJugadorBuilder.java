@@ -12,12 +12,17 @@ import models.entidades.Tablero;
  * @author daniel
  */
 public interface IJugadorBuilder {
-    
+
     public void setNombre(String nombre);
+
     public void setColor(ColorJugador color);
+
     public void setNaves(List<Nave> naves);
+
     public void setTablero(Tablero tablero);
+
     public void setEstado(EstadoJugador estado);
+
     public Jugador getResult();
 
 }

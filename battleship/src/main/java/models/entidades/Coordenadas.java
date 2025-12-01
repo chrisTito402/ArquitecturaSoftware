@@ -5,7 +5,7 @@ package models.entidades;
  * @author daniel
  */
 public class Coordenadas {
-    
+
     private int x;
     private int y;
 
@@ -26,5 +26,4 @@ public class Coordenadas {
     public String toString() {
         return "Coordenadas{" + "x=" + x + ", y=" + y + '}';
     }
-    
 }

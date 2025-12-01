@@ -6,7 +6,7 @@ import models.enums.OrientacionNave;
  *
  * @author daniel
  */
-public class PortaAviones extends Nave{
+public class PortaAviones extends Nave {
 
     public PortaAviones(OrientacionNave orientacion) {
         super(orientacion);
@@ -16,5 +16,5 @@ public class PortaAviones extends Nave{
     public int getTamanio() {
         return 4;
     }
-    
+
 }

@@ -5,15 +5,20 @@ import models.entidades.Jugador;
 import models.entidades.Partida;
 import models.enums.EstadoPartida;
 import models.observador.ISuscriptor;
+import java.util.ArrayList;
 import java.util.List;
+import models.control.ControlModelo;
 import models.control.IModeloCliente;
+import views.DTOs.JugadorDTO;
+import views.DTOs.TableroDTO;
+import views.DTOs.NaveDTO;
 
 /**
  *
  * @author daniel
  */
 public class PartidaBuilder implements IPartidaBuilder {
-    
+
     private Jugador turno;
     private List<Jugador> jugadores;
     private int cantBarcos;
@@ -77,8 +82,22 @@ public class PartidaBuilder implements IPartidaBuilder {
 
     @Override
     public IModeloCliente getResult() {
-        //return new Partida(turno, jugadores, cantBarcos, cantSubmarinos, cantCruceros, cantPortaAviones, totalNaves, estado, suscriptores);
-        return null;
+        // Crear TableroDTO con límites 10x10
+        TableroDTO tableroDTO = new TableroDTO(10, 10);
+
+        // Crear lista de naves vacía (se llenarán en FrmColocarNaves)
+        List<NaveDTO> naves = new ArrayList<>();
+
+        // Crear ControlModelo con los valores configurados
+        ControlModelo modelo = new ControlModelo(
+                null,  // jugadorDTO se asignará cuando se una
+                tableroDTO,
+                naves,
+                false, // turno inicial
+                suscriptores != null ? suscriptores : new ArrayList<>()
+        );
+
+        return modelo;
     }
-    
+
 }

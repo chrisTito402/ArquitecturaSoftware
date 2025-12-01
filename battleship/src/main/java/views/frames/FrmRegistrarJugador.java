@@ -1,13 +1,13 @@
 package views.frames;
 
-import controllers.controller.IControlador;
+import controllers.controller.ControlVista;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import models.builder.IJugadorBuilder;
 import models.builder.JugadorBuilder;
-import models.entidades.Jugador;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
+import views.DTOs.JugadorDTO;
 
 /**
  *
@@ -15,18 +15,18 @@ import models.enums.EstadoJugador;
  */
 public class FrmRegistrarJugador extends javax.swing.JFrame {
 
-    private IControlador controlador;
     private ButtonGroup grupoColores;
+    private ControlVista cv;
+
     /**
      * Creates new form RegistrarJugador
      */
     public FrmRegistrarJugador() {
-        this.controlador = controlador;
         initComponents();
         configurarComponentesAdicionales();
-        
+        this.cv = ControlVista.getInstancia();
     }
-    
+
     private void configurarComponentesAdicionales() {
         grupoColores = new ButtonGroup();
         grupoColores.add(cBoxRojo);
@@ -34,7 +34,7 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
 
         this.setLocationRelativeTo(null);
     }
-    
+
     private ColorJugador getColorSeleccionado() {
         if (cBoxRojo.isSelected()) {
             return ColorJugador.ROJO;
@@ -42,11 +42,10 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         if (cBoxAzul.isSelected()) {
             return ColorJugador.AZUL;
         }
-        
+
         return null;
     }
-    
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -170,18 +169,19 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Color no válido. Por favor selecciona ROJO o AZUL.");
             return;
         }
-        
+
         IJugadorBuilder builder = new JugadorBuilder();
         builder.setNombre(nombre);
         builder.setColor(colorSeleccionado);
-        builder.setEstado(EstadoJugador.JUGANDO); 
-        Jugador nuevoJugador = builder.getResult();
-        this.controlador.unirsePartida(nuevoJugador);
-        
-//        FrmLobby lobby = new FrmLobby(ControlVista cv);
-//        lobby.setLocationRelativeTo(this);
-//        lobby.setVisible(true);
-//        this.dispose();
+        builder.setEstado(EstadoJugador.JUGANDO);
+//        JugadorDTO nuevoJugador = builder.getResult();
+        JugadorDTO nuevoJugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
+        this.cv.unirsePartida(nuevoJugador);
+
+        FrmLobby lobby = new FrmLobby();
+        lobby.setLocationRelativeTo(this);
+        lobby.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnContinuarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
@@ -191,42 +191,6 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
         m.setLocationRelativeTo(this);
         dispose();
     }//GEN-LAST:event_btnRegresarActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmRegistrarJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmRegistrarJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmRegistrarJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmRegistrarJugador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmRegistrarJugador().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnContinuar;

@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
  * @author daniel
  */
 public class UserServerThread extends Thread {
-    
+
     private Socket socket;
     private ServidorSocket server;
     private PrintWriter writer;
@@ -35,9 +35,9 @@ public class UserServerThread extends Thread {
 
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
-            
+
             readyLatch.countDown();
-            
+
             String clientMessage;
             while (true) {
                 try {
@@ -48,19 +48,19 @@ public class UserServerThread extends Thread {
                     break;
                 }
             }
-            
+
         } catch (IOException ex) {
             System.out.println("Error in UserThread: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
-    
+
     public void sendMessage(String message) {
         writer.println(message);
     }
-    
+
     public void waitUntilReady() throws InterruptedException {
         readyLatch.await();
     }
-    
+
 }

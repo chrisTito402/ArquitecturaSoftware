@@ -8,7 +8,7 @@ package views.DTOs;
  * @author Fred
  */
 public class PuntajeDTO {
-    
+
     private int puntosTotales;
     private int disparosAcertados;
     private int disparosFallados;
@@ -69,12 +69,12 @@ public class PuntajeDTO {
 
     @Override
     public String toString() {
-        return "PuntajeDTO{" + 
-                "puntosTotales=" + puntosTotales + 
-                ", disparosAcertados=" + disparosAcertados + 
-                ", disparosFallados=" + disparosFallados + 
-                ", navesHundidas=" + navesHundidas + 
-                ", precision=" + precision + 
-                '}';
+        return "PuntajeDTO{"
+                + "puntosTotales=" + puntosTotales
+                + ", disparosAcertados=" + disparosAcertados
+                + ", disparosFallados=" + disparosFallados
+                + ", navesHundidas=" + navesHundidas
+                + ", precision=" + precision
+                + '}';
     }
 }

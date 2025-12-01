@@ -3,33 +3,30 @@ package views.frames;
 import controllers.controller.ControlVista;
 import java.awt.Component;
 
-
 /**
  *
  * @author daniel
  */
 public class FrmPartidaEnCurso extends javax.swing.JFrame {
-    
+
     /**
      * Creates new form FrmPartidaEnCurso
      */
     public FrmPartidaEnCurso() {
         initComponents();
-        
+
         ControlVista cV = ControlVista.getInstancia();
-        
+
         cV.getCasillasEnemigas().forEach(c -> jPanel2.add(c));
         cV.getCasillasPropias().forEach(c -> jPanel1.add(c));
-        
+
         Component a = pnlTimer.add(cV.getTimer());
         pnlTimer.revalidate();
         pnlTimer.repaint();
-        
+
         cV.setPuntajePanel(pnlPuntaje);
-        
+
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -66,6 +63,11 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
         btnAbandonar.setBackground(new java.awt.Color(204, 0, 51));
         btnAbandonar.setText("Abandonar partida");
+        btnAbandonar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbandonarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlPuntajeLayout = new javax.swing.GroupLayout(pnlPuntaje);
         pnlPuntaje.setLayout(pnlPuntajeLayout);
@@ -121,6 +123,10 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAbandonarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbandonarActionPerformed
+        ControlVista.getInstancia().abandonarPartida();
+    }//GEN-LAST:event_btnAbandonarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAbandonar;

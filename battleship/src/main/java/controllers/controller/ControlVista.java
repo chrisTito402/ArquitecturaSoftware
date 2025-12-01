@@ -39,11 +39,51 @@ public class ControlVista implements ISuscriptor {
     private TimerPanel timer;
     private PuntajePanel puntajePanel;
     private Map<String, Consumer<Object>> manejadoresNoti;
+    private List<ISuscriptor> suscriptoresLobby;
+    private String codigoPartida;
+    private boolean esHost;
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
+        manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);  // El servidor envía con esta clave
+        manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
+        suscriptoresLobby = new ArrayList<>();
+    }
+
+    public void suscribirLobby(ISuscriptor suscriptor) {
+        if (suscriptor != null && !suscriptoresLobby.contains(suscriptor)) {
+            suscriptoresLobby.add(suscriptor);
+        }
+    }
+
+    public void desuscribirLobby(ISuscriptor suscriptor) {
+        suscriptoresLobby.remove(suscriptor);
+    }
+
+    private void notificarLobby(String contexto, Object datos) {
+        for (ISuscriptor s : suscriptoresLobby) {
+            s.notificar(contexto, datos);
+        }
+    }
+
+    public String getCodigoPartida() {
+        return codigoPartida;
+    }
+
+    public void setCodigoPartida(String codigoPartida) {
+        this.codigoPartida = codigoPartida;
+    }
+
+    public boolean isEsHost() {
+        return esHost;
+    }
+
+    public void setEsHost(boolean esHost) {
+        this.esHost = esHost;
     }
 
     public static ControlVista getInstancia() {
@@ -189,13 +229,23 @@ public class ControlVista implements ISuscriptor {
 
     private void manejarAbandono(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null,
-                "El jugador " + dto.getNombre() + " abandonó la partida.");
+        JugadorDTO yo = control.getJugador();
+
+        // Si YO soy el que abandonó → no mostrar nada
+        if (dto.getNombre().equals(yo.getNombre())) {
+            return;
+        }
+
+        // Mostrar aviso SOLO al rival
+        JOptionPane.showMessageDialog(
+                null,
+                "El jugador " + dto.getNombre() + " abandonó la partida."
+        );
 
         casillasEnemigas.forEach(c -> c.setEnabled(false));
-
         timer.stopTimer();
 
+        System.out.println("Partida finalizada por abandono del rival.");
     }
 
     public void initTableroPropio() {
@@ -258,7 +308,7 @@ public class ControlVista implements ISuscriptor {
     }
 
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador) {
+    public void unirsePartida(JugadorDTO jugador) {
         control.unirsePartida(jugador);
     }
 
@@ -266,11 +316,42 @@ public class ControlVista implements ISuscriptor {
         control.empezarPartida();
     }
 
-    public void abandonarLobby(Jugador jugador) {
+    public void abandonarLobby(JugadorDTO jugador) {
         control.abandonarLobby(jugador);
     }
 
-    public List<Jugador> getJugadores() {
+    public List<JugadorDTO> getJugadores() {
         return control.getJugadores();
+    }
+
+    public void abandonarPartida() {
+
+        // 1. Obtener DTO del jugador actual
+        JugadorDTO dto = control.getJugador();
+
+        // 2. Convertir DTO → ENTIDAD
+        Jugador jugador = new Jugador(dto.getNombre(), dto.getColor(), dto.getEstado());
+
+        control.abandonarPartida(jugador);
+    }
+
+    private void manejarUnirsePartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        System.out.println("=== ControlVista: manejarUnirsePartida ===");
+        System.out.println("Jugador recibido: " + dto.getNombre());
+        System.out.println("Suscriptores del lobby: " + suscriptoresLobby.size());
+
+        // Notificar a los suscriptores del lobby para actualizar la UI
+        notificarLobby("JUGADOR_UNIDO", dto);
+    }
+
+    private void manejarEmpezarPartida(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+    }
+
+    private void manejarAbandonarLobby(Object datos) {
+        JugadorDTO dto = (JugadorDTO) datos;
+        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
     }
 }

@@ -8,7 +8,7 @@ import models.enums.OrientacionNave;
  * @author daniel
  */
 public class NaveDTO {
-    
+
     private EstadoNave estado;
     private OrientacionNave orientacion;
     private TipoNaveDTO tipo;
@@ -60,5 +60,5 @@ public class NaveDTO {
     public String toString() {
         return "NaveDTO{" + "estado=" + estado + ", orientacion=" + orientacion + ", tipo=" + tipo + ", tamanio=" + tamanio + '}';
     }
-    
+
 }

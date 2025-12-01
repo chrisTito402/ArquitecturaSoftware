@@ -13,16 +13,16 @@ import models.entidades.Partida;
  * @author daniel
  */
 public class Cronometro implements ICronometro {
-    
+
     private Instant min;
     private Instant max;
     private final long duracionTurnoMili;
     private Partida partida;
-    
+
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> tareaCambioTurno;
     private final AtomicBoolean procesandoDisparo;
-    
+
     public Cronometro(long mili) {
         this.duracionTurnoMili = mili;
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -32,18 +32,18 @@ public class Cronometro implements ICronometro {
     public void setPartida(Partida partida) {
         this.partida = partida;
     }
-    
+
     private void initInstance(long tiempo) {
         this.min = Instant.now();
         this.max = min.plusMillis(tiempo);
         System.out.println("SE CAMBIO EL LAS INSTANCIAS UNIX");
     }
-    
+
     @Override
     public void initCronometro() {
         System.out.println("INIT CRONOMETRO");
         if (tareaCambioTurno != null && !tareaCambioTurno.isDone()) {
-            tareaCambioTurno.cancel(false); 
+            tareaCambioTurno.cancel(false);
         }
 
         initInstance(duracionTurnoMili);
@@ -54,18 +54,18 @@ public class Cronometro implements ICronometro {
             }
         }, duracionTurnoMili, TimeUnit.MILLISECONDS);
     }
-    
+
     @Override
     public boolean isInTime(long tiempo) {
         Instant horaAccion = Instant.ofEpochMilli(tiempo);
         return horaAccion.isAfter(min) && horaAccion.isBefore(max);
     }
-    
+
     @Override
     public void setProcesandoDisparo(boolean estado) {
         procesandoDisparo.set(estado);
     }
-    
+
     @Override
     public void stop() {
         if (tareaCambioTurno != null) {

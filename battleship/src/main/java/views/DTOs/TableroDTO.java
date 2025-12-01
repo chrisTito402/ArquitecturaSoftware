@@ -5,7 +5,7 @@ package views.DTOs;
  * @author daniel
  */
 public class TableroDTO {
-    
+
     private int limiteX;
     private int limiteY;
 
@@ -37,5 +37,5 @@ public class TableroDTO {
     public String toString() {
         return "TableroDTO{" + "limiteX=" + limiteX + ", limiteY=" + limiteY + '}';
     }
-    
+
 }

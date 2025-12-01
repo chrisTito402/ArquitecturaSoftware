@@ -8,7 +8,7 @@ import models.entidades.Tablero;
  * @author daniel
  */
 public class TableroBuilder implements ITableroBuilder {
-    
+
     private Casilla[][] casillas;
     private int limiteX;
     private int limiteY;
@@ -31,5 +31,5 @@ public class TableroBuilder implements ITableroBuilder {
     public Tablero getResult() {
         return new Tablero(casillas, limiteX, limiteY);
     }
-    
+
 }

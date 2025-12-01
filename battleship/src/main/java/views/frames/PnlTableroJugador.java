@@ -32,7 +32,6 @@ public class PnlTableroJugador extends javax.swing.JPanel {
         setLayout(new java.awt.GridLayout(10, 10));
     }// </editor-fold>//GEN-END:initComponents
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 }

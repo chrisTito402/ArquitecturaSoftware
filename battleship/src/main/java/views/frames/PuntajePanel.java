@@ -17,10 +17,9 @@ import views.DTOs.PuntajeDTO;
 /**
  * @author I-Fred
  */
-
 //TEMPORAL
 public class PuntajePanel extends JPanel {
-    
+
     private JLabel lblTitulo;
     private JLabel lblPuntosTotales;
     private JLabel lblAciertos;
@@ -31,7 +30,7 @@ public class PuntajePanel extends JPanel {
     public PuntajePanel() {
         initComponents();
     }
-    
+
     private void initComponents() {
         this.setLayout(new GridLayout(6, 1, 5, 5));
         this.setPreferredSize(new Dimension(150, 180));
@@ -40,29 +39,29 @@ public class PuntajePanel extends JPanel {
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         this.setBackground(new Color(240, 240, 240));
-        
+
         Font fontTitulo = new Font("Segoe UI", Font.BOLD, 14);
         Font fontDatos = new Font("Segoe UI", Font.PLAIN, 12);
-        
+
         lblTitulo = new JLabel("PUNTAJE", SwingConstants.CENTER);
         lblTitulo.setFont(fontTitulo);
         lblTitulo.setForeground(new Color(0, 102, 153));
-        
+
         lblPuntosTotales = new JLabel("Total: 0", SwingConstants.LEFT);
         lblPuntosTotales.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        
+
         lblAciertos = new JLabel("Aciertos: 0", SwingConstants.LEFT);
         lblAciertos.setFont(fontDatos);
-        
+
         lblFallos = new JLabel("Fallos: 0", SwingConstants.LEFT);
         lblFallos.setFont(fontDatos);
-        
+
         lblHundidos = new JLabel("Hundidos: 0", SwingConstants.LEFT);
         lblHundidos.setFont(fontDatos);
-        
+
         lblPrecision = new JLabel("Precisión: 0.00%", SwingConstants.LEFT);
         lblPrecision.setFont(fontDatos);
-        
+
         this.add(lblTitulo);
         this.add(lblPuntosTotales);
         this.add(lblAciertos);
@@ -70,22 +69,22 @@ public class PuntajePanel extends JPanel {
         this.add(lblHundidos);
         this.add(lblPrecision);
     }
-    
+
     public void actualizarPuntaje(PuntajeDTO puntaje) {
         if (puntaje == null) {
             return;
         }
-        
+
         lblPuntosTotales.setText("Total: " + puntaje.getPuntosTotales());
         lblAciertos.setText("Aciertos: " + puntaje.getDisparosAcertados());
         lblFallos.setText("Fallos: " + puntaje.getDisparosFallados());
         lblHundidos.setText("Hundidos: " + puntaje.getNavesHundidas());
         lblPrecision.setText(String.format("Precisión: %.2f%%", puntaje.getPrecision()));
-        
+
         this.revalidate();
         this.repaint();
     }
-    
+
     public void resetPuntaje() {
         lblPuntosTotales.setText("Total: 0");
         lblAciertos.setText("Aciertos: 0");

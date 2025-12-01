@@ -10,22 +10,12 @@ import models.control.ControlModelo;
  */
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
-    private Controlador controlador;
-    
     /**
      * Creates new form FrmMenuPrincipal
      */
     public FrmMenuPrincipal() {
         initComponents();
-//        this.iniciarPartida();
     }
-    
-//    private void iniciarPartida() {
-//        // Crear Modelo y Vista
-//        ControlModelo modelo = new ControlModelo();
-//        ControlVista vista = ControlVista.getInstancia();
-//        controlador = new Controlador(modelo, vista);
-//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -127,10 +117,9 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
-        
-        FrmRegistrarJugador r = new FrmRegistrarJugador();
-        r.setLocationRelativeTo(this);
-        r.setVisible(true);
+        FrmSeleccionPartida seleccion = new FrmSeleccionPartida();
+        seleccion.setLocationRelativeTo(this);
+        seleccion.setVisible(true);
         dispose();
     }//GEN-LAST:event_btnJugarActionPerformed
 

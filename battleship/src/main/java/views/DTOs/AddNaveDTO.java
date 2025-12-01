@@ -9,7 +9,7 @@ import models.enums.ResultadoAddNave;
  * @author daniel
  */
 public class AddNaveDTO {
-    
+
     private JugadorDTO jugador;
     private NaveDTO nave;
     private List<Coordenadas> coordenadases;
@@ -30,7 +30,7 @@ public class AddNaveDTO {
         this.nave = nave;
         this.coordenadases = coordenadases;
     }
-    
+
     public JugadorDTO getJugador() {
         return jugador;
     }
@@ -67,5 +67,5 @@ public class AddNaveDTO {
     public String toString() {
         return "AddNaveDTO{" + "jugador=" + jugador + ", nave=" + nave + ", coordenadases=" + coordenadases + ", resultado=" + resultado + '}';
     }
-    
+
 }
