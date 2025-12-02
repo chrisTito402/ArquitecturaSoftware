@@ -44,6 +44,7 @@ public class Partida implements IModeloServidor {
         this.suscriptores = suscriptores;
         this.cronometro = cronometro;
 
+        this.turno = jugadores.get(0);
         // PROVISIONAL para simular cuando empieza la patida
         cronometro.initCronometro();
     }
@@ -185,8 +186,8 @@ public class Partida implements IModeloServidor {
         // Verificar que las coordenadas no se salen del limite del tablero.
         Tablero t = j.getTablero();
         for (Coordenadas coordenada : coordenadas) {
-            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY()
-                    || coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX()) {
+            if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY() - 1
+                    || coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX() - 1) {
                 System.out.println("Error: La nave se sale de los limites del tablero.");
                 return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
             }
@@ -243,7 +244,8 @@ public class Partida implements IModeloServidor {
         for (Coordenadas c : coordenadas) {
             for (int i = c.getX() - 1; i < c.getX() + 2; i++) {
                 for (int k = c.getY() - 1; k < c.getY() + 2; k++) {
-                    if (i >= 0 && k >= 0) {
+                    if (i >= 0 && k >= 0 &&
+                            i < t.getLimiteX() && k < t.getLimiteY()) {
                         Nave n = casillas[i][k].getNave();
                         if (n != null) {
                             if (n != nave) {

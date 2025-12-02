@@ -493,7 +493,7 @@ public class FrmColocarNaves extends JFrame {
         actualizarBotonShipyard(naveSeleccionada.getTipo());
 
         // Enviar al servidor
-        controlVista.addNave(naveSeleccionada, coordenadas);
+        //controlVista.addNave(naveSeleccionada, coordenadas);
 
         // Limpiar selección
         naveSeleccionada = null;

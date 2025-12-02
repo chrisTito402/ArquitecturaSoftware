@@ -104,7 +104,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     private void manejarResultadoAddNave(Mensaje mensaje) {
         Gson gson = new Gson();
-        ResultadoAddNave resultado = gson.fromJson(mensaje.getData(), ResultadoAddNave.class);
+        AddNaveDTO resultado = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
 
         partida.manejarResultadoAddNave(resultado);
     }

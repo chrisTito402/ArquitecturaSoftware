@@ -47,6 +47,7 @@ public class PruebaCliente1 {
         cV.setTimer(new TimerPanel(1000, 30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
+        cV.mostrarFrmAddNaves();
         cV.mostrarFrmPartidaEnCurso();
 
         cS.execute();
@@ -59,7 +60,7 @@ public class PruebaCliente1 {
         NaveDTO nave = new NaveDTO(EstadoNave.SIN_DAÑOS, OrientacionNave.HORIZONTAL, TipoNaveDTO.BARCO, 1);
         List<Coordenadas> coordenadas = new ArrayList<>();
         coordenadas.add(new Coordenadas(2, 2));
-        cV.addNave(nave, coordenadas);
+        //cV.addNave(nave, coordenadas);
     }
 
 }

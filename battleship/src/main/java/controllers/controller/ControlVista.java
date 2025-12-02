@@ -16,9 +16,15 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
+import models.enums.OrientacionNave;
+import models.enums.ResultadoAddNave;
+import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
+import views.DTOs.TipoNaveDTO;
+import views.frames.AddNavePanel;
+import views.frames.AddNaves;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
 import views.frames.FrmPartidaEnCurso;
@@ -42,6 +48,8 @@ public class ControlVista implements ISuscriptor {
     private List<ISuscriptor> suscriptoresLobby;
     private String codigoPartida;
     private boolean esHost;
+    
+    private AddNavePanel addNavePanel;
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
@@ -51,6 +59,8 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);  // El servidor envía con esta clave
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
+        manejadoresNoti.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
+        
         suscriptoresLobby = new ArrayList<>();
     }
 
@@ -227,6 +237,12 @@ public class ControlVista implements ISuscriptor {
         }
     }
 
+    private void manejarResultadoAddNave(Object datos) {
+        AddNaveDTO resultado = (AddNaveDTO) datos;
+        
+        addNavePanel.pintarNaveAñadida(resultado.getCoordenadases());
+    }
+    
     private void manejarAbandono(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
         JugadorDTO yo = control.getJugador();
@@ -286,10 +302,20 @@ public class ControlVista implements ISuscriptor {
         control.crearPartida(j);
     }
 
-    public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
+    // ADD NAVE METODOS
+    public void addNave(TipoNaveDTO tipoNave, List<Coordenadas> coordenadas) {
+        NaveDTO nave = new NaveDTO(OrientacionNave.HORIZONTAL, tipoNave, 1);
         control.addNave(nave, coordenadas);
     }
 
+    public AddNavePanel getAddNavePanel() {
+        return addNavePanel;
+    }
+
+    public void setAddNavePanel(AddNavePanel addNavePanel) {
+        this.addNavePanel = addNavePanel;
+    }
+    
     public void addJugador(Jugador j) {
         control.addJugador(j);
     }
@@ -305,6 +331,11 @@ public class ControlVista implements ISuscriptor {
     public void mostrarFrmPartidaEnCurso() {
         new FrmPartidaEnCurso().setVisible(true);
         timer.initTimer();
+    }
+    
+    public void mostrarFrmAddNaves() {
+        addNavePanel = new AddNavePanel();
+        new AddNaves(addNavePanel).setVisible(true);
     }
 
     // Caso de Uso: Unirse Partida

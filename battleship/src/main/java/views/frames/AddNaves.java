@@ -15,17 +15,17 @@ public class AddNaves extends javax.swing.JFrame {
     /**
      * Creates new form AddNaves
      */
-    public AddNaves() {
+    public AddNaves(AddNavePanel addNavePanel) {
         initComponents();
         
-        pnlContenedor.add(new AddNavePanel());
-        this.revalidate();
-        this.repaint();
-        this.pack();
+        pnlContenedor.add(addNavePanel);
         
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
+        
+        this.revalidate();
+        this.repaint();
+        this.pack();
     }
 
     /**
@@ -89,7 +89,7 @@ public class AddNaves extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new AddNaves();
+                new AddNaves(new AddNavePanel());
             }
         });
     }

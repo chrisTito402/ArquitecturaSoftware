@@ -158,8 +158,12 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
-    public void manejarResultadoAddNave(ResultadoAddNave resultado) {
+    public void manejarResultadoAddNave(AddNaveDTO resultado) {
         System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
+        
+        if (resultado.getResultado() == ResultadoAddNave.NAVE_AÑADIDA) {
+            notificarAllSuscriptores("RESULTADO_ADD_NAVE", resultado);
+        }
     }
 
     @Override

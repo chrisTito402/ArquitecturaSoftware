@@ -22,7 +22,7 @@ public interface IModeloCliente {
 
     public void addJugador(Jugador j);
 
-    public void manejarResultadoAddNave(ResultadoAddNave resultado);
+    public void manejarResultadoAddNave(AddNaveDTO resultado);
 
     public void crearTableros();
 

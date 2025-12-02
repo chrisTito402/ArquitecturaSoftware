@@ -24,6 +24,12 @@ public class NaveDTO {
         this.tamanio = tamanio;
     }
 
+    public NaveDTO(OrientacionNave orientacion, TipoNaveDTO tipo, int tamanio) {
+        this.orientacion = orientacion;
+        this.tipo = tipo;
+        this.tamanio = tamanio;
+    }
+
     public EstadoNave getEstado() {
         return estado;
     }

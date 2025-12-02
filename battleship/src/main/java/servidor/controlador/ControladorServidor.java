@@ -126,7 +126,8 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
             }
         }
 
-        ResultadoAddNave resultado = servidor.addNave(jugador, nave, coordenadas);
+        ResultadoAddNave resultadoAddNave = servidor.addNave(jugador, nave, coordenadas);
+        AddNaveDTO resultado = new AddNaveDTO(jugadorDTO, naveDTO, coordenadas, resultadoAddNave);
 
         enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESULTADO_ADD_NAVE", resultado);
     }
