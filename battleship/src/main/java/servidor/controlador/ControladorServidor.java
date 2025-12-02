@@ -1,29 +1,33 @@
 package servidor.controlador;
 
-import buseventos.Mensaje;
-import buseventos.TipoAccion;
-import clientesocket.IClienteSocket;
+import compartido.comunicacion.Mensaje;
+import compartido.comunicacion.TipoAccion;
+import compartido.comunicacion.socket.IClienteSocket;
 import com.google.gson.Gson;
-import controllers.controller.ManejadorRespuestaCliente;
+import compartido.ManejadorRespuestaCliente;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
-import models.entidades.Barco;
-import models.entidades.Coordenadas;
-import models.entidades.Crucero;
-import models.entidades.Disparo;
-import models.entidades.Jugador;
-import models.entidades.Nave;
-import models.entidades.PortaAviones;
-import models.entidades.Puntaje;
-import models.entidades.Submarino;
-import models.enums.ResultadoAddNave;
-import servidor.modelo.IModeloServidor;
-import views.DTOs.AddNaveDTO;
-import views.DTOs.DisparoDTO;
-import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
-import views.DTOs.PuntajeDTO;
+import compartido.entidades.Barco;
+import compartido.entidades.Coordenadas;
+import compartido.entidades.Crucero;
+import compartido.entidades.Disparo;
+import compartido.entidades.Jugador;
+import compartido.entidades.Nave;
+import compartido.entidades.PortaAviones;
+import compartido.entidades.Submarino;
+import compartido.enums.ResultadoAddNave;
+import servidor.negocio.IModeloServidor;
+import compartido.comunicacion.dto.AddNaveDTO;
+import compartido.comunicacion.dto.CoordenadasDTO;
+import compartido.comunicacion.dto.DisparoDTO;
+import compartido.comunicacion.dto.JugadorDTO;
+import compartido.comunicacion.dto.NaveDTO;
+import compartido.comunicacion.dto.RespuestaUnirseDTO;
+import compartido.comunicacion.dto.TurnoDTO;
+import compartido.enums.EstadoPartida;
 
 /**
  *
@@ -35,6 +39,10 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadoresEventos;
 
+    // Control de tableros confirmados
+    private static Set<String> tablerosConfirmados = new HashSet<>();
+    private static final Object lockTableros = new Object();
+
     public ControladorServidor(IModeloServidor servidor, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
         this.servidor = servidor;
         this.cliente = cliente;
@@ -44,6 +52,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         mapa.put("ADD_NAVE", this::addNave);
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
+        mapa.put("CONFIRMAR_TABLERO", this::manejarConfirmarTablero);
     }
 
     // Metodo para enviar mensaje por la red.
@@ -101,7 +110,11 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         AddNaveDTO dto = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
 
-        List<Coordenadas> coordenadas = dto.getCoordenadases();
+        // Convertir CoordenadasDTO a Coordenadas (entidad del modelo)
+        List<Coordenadas> coordenadas = dto.getCoordenadas().stream()
+                .map(c -> new Coordenadas(c.getX(), c.getY()))
+                .toList();
+
         JugadorDTO jugadorDTO = dto.getJugador();
         Jugador jugador = new Jugador(
                 jugadorDTO.getNombre(),
@@ -135,7 +148,10 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         DisparoDTO disparoDTO = gson.fromJson(mensaje.getData(), DisparoDTO.class);
 
-        Coordenadas coordenadas = disparoDTO.getCoordenadas();
+        // Convertir CoordenadasDTO a Coordenadas (entidad del modelo)
+        CoordenadasDTO coordDTO = disparoDTO.getCoordenadas();
+        Coordenadas coordenadas = new Coordenadas(coordDTO.getX(), coordDTO.getY());
+
         JugadorDTO jugadorDTO = disparoDTO.getJugador();
         Jugador jugador = new Jugador(
                 jugadorDTO.getNombre(),
@@ -145,44 +161,63 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         Disparo disparo = servidor.realizarDisparo(coordenadas, jugador, disparoDTO.getTiempo());
 
-        PuntajeDTO puntajeDTO = null;
-        Jugador jugadorConPuntaje = servidor.getJugadores().stream()
-                .filter(j -> j.getNombre().equals(jugador.getNombre()))
-                .findFirst()
-                .orElse(null);
-
-        if (jugadorConPuntaje != null && jugadorConPuntaje.getPuntaje() != null) {
-            Puntaje p = jugadorConPuntaje.getPuntaje();
-            puntajeDTO = new PuntajeDTO(
-                    p.getPuntosTotales(),
-                    p.getDisparosAcertados(),
-                    p.getDisparosFallados(),
-                    p.getNavesHundidas(),
-                    p.getPrecision()
-            );
-        }
+        // Convertir Coordenadas (entidad) a CoordenadasDTO para el resultado
+        Coordenadas dispCoord = disparo.getCoordenadas();
+        CoordenadasDTO resultCoordDTO = new CoordenadasDTO(dispCoord.getX(), dispCoord.getY());
 
         DisparoDTO resultado = new DisparoDTO(
                 new JugadorDTO(
                         disparo.getJugador().getNombre(),
                         disparo.getJugador().getColor(),
                         disparo.getJugador().getEstado()),
-                disparo.getCoordenadas(),
+                resultCoordDTO,
                 disparo.getResultadoDisparo(),
                 disparo.getEstadoPartida()
         );
 
-        resultado.setPuntaje(puntajeDTO);
+        // Copiar informacion del tipo de nave para el marcador
+        resultado.setTipoNaveImpactada(disparo.getTipoNaveImpactada());
+        resultado.setTipoNaveHundida(disparo.getTipoNaveHundida());
 
         enviarMensaje("RESULTADO_DISPARO", resultado);
+
+        // Si la partida termino, enviar evento FIN_PARTIDA
+        if (disparo.getEstadoPartida() == EstadoPartida.FINALIZADA) {
+            System.out.println("[SERVIDOR] Partida finalizada - Ganador: " + jugador.getNombre());
+            enviarMensaje("FIN_PARTIDA", jugadorDTO);
+        }
     }
 
     private void manejarUnirsePartida(Mensaje mensaje) {
-        //unicamente para pruebas este print v
-        System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");
+        System.out.println("[SERVIDOR] Recibio 'UNIRSE_PARTIDA'.");
 
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+
+        // Validar que el nombre no este duplicado
+        List<Jugador> jugadoresActuales = servidor.getJugadores();
+        boolean nombreDuplicado = jugadoresActuales.stream()
+                .anyMatch(j -> j.getNombre().equalsIgnoreCase(jugadorDTO.getNombre()));
+
+        if (nombreDuplicado) {
+            System.out.println("[SERVIDOR] ERROR: Nombre duplicado - " + jugadorDTO.getNombre());
+            RespuestaUnirseDTO respuesta = RespuestaUnirseDTO.errorNombreDuplicado(jugadorDTO.getNombre());
+            enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESPUESTA_UNIRSE", respuesta);
+            return;
+        }
+
+        // Validar que la partida no este llena
+        if (jugadoresActuales.size() >= 2) {
+            System.out.println("[SERVIDOR] ERROR: Partida llena");
+            RespuestaUnirseDTO respuesta = RespuestaUnirseDTO.errorPartidaLlena();
+            enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESPUESTA_UNIRSE", respuesta);
+            return;
+        }
+
+        // Todo bien, notificar a todos que un jugador se unio
+        System.out.println("[SERVIDOR] Jugador aceptado: " + jugadorDTO.getNombre());
+        RespuestaUnirseDTO respuestaExito = RespuestaUnirseDTO.exito(jugadorDTO);
+        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESPUESTA_UNIRSE", respuestaExito);
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
     }
 
@@ -203,6 +238,45 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         // 2. Notificar al otro jugador
         enviarMensaje("JUGADOR_ABANDONO", jugadorDTO);
+
+        // Limpiar tableros confirmados si abandona
+        synchronized (lockTableros) {
+            tablerosConfirmados.remove(jugadorDTO.getNombre());
+        }
+    }
+
+    /**
+     * Maneja la confirmacion del tablero de un jugador.
+     * La logica de sincronizacion (TABLEROS_LISTOS, TURNO_INICIAL)
+     * se maneja en BusEventos para evitar duplicados.
+     */
+    private void manejarConfirmarTablero(Mensaje mensaje) {
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+
+        System.out.println("[SERVIDOR] Tablero confirmado por: " + jugadorDTO.getNombre());
+
+        // Solo reenviar el evento CONFIRMAR_TABLERO al bus
+        // BusEventos se encarga de la logica de sincronizacion
+        enviarMensaje("CONFIRMAR_TABLERO", jugadorDTO);
+
+        // Iniciar partida en el modelo del servidor si es necesario
+        synchronized (lockTableros) {
+            tablerosConfirmados.add(jugadorDTO.getNombre());
+            if (tablerosConfirmados.size() >= 2) {
+                servidor.empezarPartida();
+                tablerosConfirmados.clear();
+            }
+        }
+    }
+
+    /**
+     * Reinicia el estado de tableros confirmados (para nueva partida).
+     */
+    public static void resetTablerosConfirmados() {
+        synchronized (lockTableros) {
+            tablerosConfirmados.clear();
+        }
     }
 
 }

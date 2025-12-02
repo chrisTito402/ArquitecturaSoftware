@@ -1,0 +1,58 @@
+package compartido.comunicacion.dto;
+
+import compartido.enums.ColorJugador;
+import compartido.enums.EstadoJugador;
+
+/**
+ * DTO para transferir informacion del jugador entre capas.
+ * Capa compartida - no pertenece a Vista ni Modelo.
+ *
+ * Nota: Los enums del modelo (ColorJugador, EstadoJugador) son tipos
+ * de datos compartidos que no violan MVC.
+ *
+ * @author daniel
+ */
+public class JugadorDTO {
+
+    private String nombre;
+    private ColorJugador color;
+    private EstadoJugador estado;
+
+    public JugadorDTO() {
+    }
+
+    public JugadorDTO(String nombre, ColorJugador color, EstadoJugador estado) {
+        this.nombre = nombre;
+        this.color = color;
+        this.estado = estado;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public ColorJugador getColor() {
+        return color;
+    }
+
+    public void setColor(ColorJugador color) {
+        this.color = color;
+    }
+
+    public EstadoJugador getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoJugador estado) {
+        this.estado = estado;
+    }
+
+    @Override
+    public String toString() {
+        return "JugadorDTO{" + "nombre=" + nombre + ", color=" + color + ", estado=" + estado + '}';
+    }
+}
