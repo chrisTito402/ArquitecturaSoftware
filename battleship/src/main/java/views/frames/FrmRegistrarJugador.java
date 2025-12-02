@@ -7,7 +7,7 @@ import models.builder.IJugadorBuilder;
 import models.builder.JugadorBuilder;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
-import shared.dto.JugadorDTO;
+import views.DTOs.JugadorDTO;
 
 /**
  *
@@ -158,41 +158,24 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
     }//GEN-LAST:event_cBoxAzulActionPerformed
 
     private void btnContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnContinuarActionPerformed
+        // TODO add your handling code here:
         String nombre = nombreJugador.getText().trim();
-
-        // Validaciones de nombre
         if (nombre.isEmpty() || nombre.isBlank()) {
             JOptionPane.showMessageDialog(this, "Por favor, ingresa un nombre.");
             return;
         }
-        if (nombre.length() < 2) {
-            JOptionPane.showMessageDialog(this, "El nombre debe tener al menos 2 caracteres.");
-            return;
-        }
-        if (nombre.length() > 20) {
-            JOptionPane.showMessageDialog(this, "El nombre no puede tener mas de 20 caracteres.");
-            return;
-        }
-        if (!nombre.matches("^[a-zA-Z0-9\\s]+$")) {
-            JOptionPane.showMessageDialog(this, "El nombre solo puede contener letras, numeros y espacios.");
-            return;
-        }
-
         ColorJugador colorSeleccionado = getColorSeleccionado();
         if (colorSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Por favor selecciona un color (ROJO o AZUL).");
+            JOptionPane.showMessageDialog(this, "Color no válido. Por favor selecciona ROJO o AZUL.");
             return;
         }
 
-        // Usar el Builder para crear el jugador
         IJugadorBuilder builder = new JugadorBuilder();
         builder.setNombre(nombre);
         builder.setColor(colorSeleccionado);
         builder.setEstado(EstadoJugador.JUGANDO);
-
+//        JugadorDTO nuevoJugador = builder.getResult();
         JugadorDTO nuevoJugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
-
-        // Usar el metodo legacy por compatibilidad
         this.cv.unirsePartida(nuevoJugador);
 
         FrmLobby lobby = new FrmLobby();

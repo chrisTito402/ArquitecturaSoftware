@@ -14,8 +14,8 @@ import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
 import servidor.controlador.ControladorServidor;
 import servidor.cronometro.Cronometro;
-import shared.dto.JugadorDTO;
-import shared.dto.TableroDTO;
+import views.DTOs.JugadorDTO;
+import views.DTOs.TableroDTO;
 import views.frames.FrmLobby;
 
 /**

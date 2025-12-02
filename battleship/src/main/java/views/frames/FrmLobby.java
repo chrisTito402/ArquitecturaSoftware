@@ -5,7 +5,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import models.observador.ISuscriptor;
-import shared.dto.JugadorDTO;
+import views.DTOs.JugadorDTO;
 
 /**
  *

@@ -23,9 +23,9 @@ import javax.swing.SwingConstants;
 import models.entidades.Coordenadas;
 import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
-import shared.dto.NaveDTO;
-import shared.dto.TipoNaveDTO;
-import shared.dto.CoordenadasDTO;
+import views.DTOs.NaveDTO;
+import views.DTOs.TipoNaveDTO;
+import views.DTOs.CoordenadasDTO;
 
 /**
  * Pantalla para colocar las naves antes de iniciar la partida.

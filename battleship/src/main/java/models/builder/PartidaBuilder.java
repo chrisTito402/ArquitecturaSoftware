@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import models.control.ControlModelo;
 import models.control.IModeloCliente;
-import shared.dto.JugadorDTO;
-import shared.dto.TableroDTO;
-import shared.dto.NaveDTO;
+import views.DTOs.JugadorDTO;
+import views.DTOs.TableroDTO;
+import views.DTOs.NaveDTO;
 
 /**
  *

@@ -4,8 +4,8 @@ import models.entidades.Jugador;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.entidades.Coordenadas;
-import shared.dto.JugadorDTO;
-import shared.dto.NaveDTO;
+import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 
 /**
  *
@@ -13,33 +13,7 @@ import shared.dto.NaveDTO;
  */
 public interface IControlador {
 
-    /**
-     * Crea una nueva partida en el servidor.
-     * @param jugadorDTO datos del jugador que crea la partida
-     * @param codigoPartida codigo de la partida (puede ser generado por el cliente)
-     */
-    public void crearPartida(JugadorDTO jugadorDTO, String codigoPartida);
-
-    /**
-     * Valida si un codigo de partida existe y puede recibir jugadores.
-     * @param codigo codigo a validar
-     */
-    public void validarCodigoPartida(String codigo);
-
-    /**
-     * Se une a una partida existente usando el codigo.
-     * @param jugadorDTO datos del jugador
-     * @param codigoPartida codigo de la partida a unirse
-     */
-    public void unirsePartida(JugadorDTO jugadorDTO, String codigoPartida);
-
-    // Metodo legacy para compatibilidad
-    @Deprecated
     public String crearPartida(Jugador j);
-
-    // Metodo legacy para compatibilidad
-    @Deprecated
-    public void unirsePartida(JugadorDTO jugadorDTO);
 
     public void addJugador(Jugador j);
 
@@ -54,6 +28,9 @@ public interface IControlador {
     public void addNave(NaveDTO nave, List<Coordenadas> coordenadas);
 
     public void abandonarPartida(Jugador jugador);
+
+    // Caso de Uso: Unirse Partida
+    public void unirsePartida(JugadorDTO jugadorDTO);
 
     public void empezarPartida();
 

@@ -17,11 +17,11 @@ import models.enums.EstadoJugador;
 import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
-import shared.dto.AddNaveDTO;
-import shared.dto.JugadorDTO;
-import shared.dto.NaveDTO;
-import shared.dto.TableroDTO;
-import shared.dto.TipoNaveDTO;
+import views.DTOs.AddNaveDTO;
+import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
+import views.DTOs.TableroDTO;
+import views.DTOs.TipoNaveDTO;
 import views.frames.TimerPanel;
 
 /**

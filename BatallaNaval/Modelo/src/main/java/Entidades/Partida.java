@@ -1,0 +1,158 @@
+package Entidades;
+
+import Enums.EstadoNave;
+import Enums.EstadoPartida;
+import Enums.ResultadoDisparo;
+import control.IModelo;
+import control.IObervable;
+import control.ISuscriptor;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author daniel
+ */
+public class Partida implements IModelo, IObervable {
+
+    private Jugador turno;
+    private List<Jugador> jugadores;
+    private int cantBarcos;
+    private int cantSubmarinos;
+    private int cantCruceros;
+    private int cantPortaAviones;
+    private int totalNaves;
+    private EstadoPartida estado;
+    private Disparo disparo;
+    private List<ISuscriptor> suscriptores;
+
+    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores) {
+        this.turno = turno;
+        this.jugadores = jugadores;
+        this.cantBarcos = cantBarcos;
+        this.cantSubmarinos = cantSubmarinos;
+        this.cantCruceros = cantCruceros;
+        this.cantPortaAviones = cantPortaAviones;
+        this.totalNaves = totalNaves;
+        this.estado = estado;
+        this.suscriptores = suscriptores;
+    }
+
+    public List<Jugador> getJugadores() {
+        return jugadores;
+    }
+
+    public void setJugadores(List<Jugador> jugadores) {
+        this.jugadores = jugadores;
+    }
+    
+    public void setSuscriptor(ISuscriptor suscriptor) {
+        suscriptores.add(suscriptor);
+    }
+
+    public void notificarAllSuscriptores() {
+        suscriptores.forEach(s -> s.notificar());
+    }
+
+    @Override
+    public void addJugador(Jugador j) {
+        jugadores.add(j);
+    }
+    
+    @Override
+    public ResultadoDisparo realizarDisparo(Coordenadas coordenadas, Jugador jugador) {
+        if (jugador.getNombre() != turno.getNombre()) {
+            System.out.println("Error, no es el turno del jugador seleccionado");
+            return null;
+        }
+
+        //Obtener al oponente
+        Jugador j2 = jugadores.stream().filter(e -> e != turno)
+                .findFirst()
+                .orElse(null);
+
+        if (j2 == null) {
+            System.out.println("Error, no se encontró al oponente.");
+            return null;
+        }
+
+        //Disparo del jugador actual
+        Tablero tablero = j2.getTablero();
+        ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
+
+        // Si falla, pasa turno
+        if (resultadoDisparo == ResultadoDisparo.AGUA) {
+            turno = j2;
+
+            //Si el siguiente es un Bot, dispara automáticamente
+            if (turno instanceof Bot) {
+                System.out.println("ES UN BOT");
+                Bot bot = (Bot) turno;
+//                ResultadoDisparo resultadoBot = bot.dispararAutomatico(jugador.getTablero());
+                realizarDisparo(bot.getCoordenadas(), turno);
+
+//                // Si el Bot falla, regresa turno al jugador humano
+//                if (resultadoBot == ResultadoDisparo.AGUA) {
+//                    turno = jugador;
+//                }
+            }
+        }
+        if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
+            Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
+                    || n.getEstado() == EstadoNave.AVERIADO)
+                    .findFirst()
+                    .orElse(null);
+
+            if (nave == null) {
+                System.out.println("Jugador: " + turno.getNombre() + " GANO!");
+                estado = EstadoPartida.FINALIZADA;
+                disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+                notificarAllSuscriptores();
+                return resultadoDisparo;
+            }
+        }
+
+        if (turno instanceof Bot) {
+            if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO
+                    || resultadoDisparo == ResultadoDisparo.IMPACTO) {
+                Bot bot = (Bot) turno;
+                realizarDisparo(bot.getCoordenadas(), turno);
+            }
+        }
+
+        disparo = new Disparo(jugador, coordenadas, resultadoDisparo);
+        notificarAllSuscriptores();
+
+        return resultadoDisparo;
+    }
+
+    @Override
+    public Disparo getDisparo() {
+        return disparo;
+    }
+
+    @Override
+    public EstadoPartida getEstado() {
+        return estado;
+    }
+
+    @Override
+    public boolean addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+        Jugador j = jugadores.stream().filter(e -> e.getNombre() == jugador.getNombre())
+                .findFirst()
+                .orElse(null);
+        
+        j.getTablero();
+        
+        return false;
+    }
+
+    @Override
+    public void crearTableros() {
+        
+        for (Jugador j : jugadores) {
+            
+        }
+    }
+    
+}

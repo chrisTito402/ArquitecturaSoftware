@@ -1,6 +1,6 @@
 package views.frames;
 
-import shared.dto.CoordenadasDTO;
+import views.DTOs.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import javax.swing.JButton;
 
