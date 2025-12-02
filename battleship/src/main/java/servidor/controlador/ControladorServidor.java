@@ -184,6 +184,8 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
 
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        Mensaje respuesta = new Mensaje(TipoAccion.PUBLICAR, "ACTUALIZAR_LOBBY", mensaje.getData(), "SERVIDOR");
+        cliente.enviarMensaje(gson.toJson(respuesta));
         enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
     }
 

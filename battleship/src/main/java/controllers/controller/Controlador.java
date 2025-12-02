@@ -5,6 +5,7 @@ import buseventos.TipoAccion;
 import clientesocket.ClienteSocket;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import models.entidades.Coordenadas;
@@ -49,6 +50,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
+        manejadorEventos.put("ACTUALIZAR_LOBBY", this::actualizarLobby);
     }
 
 //    public Controlador(ControlModelo modelo, ControlVista vista) {
@@ -198,6 +200,12 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void unirsePartida(JugadorDTO jugadorDTO) {
         Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
         partida.unirsePartida(jugador);
+        
+        Gson gson = new Gson();
+        JsonElement data = gson.toJsonTree(jugador);
+        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, "UNIRSE_PARTIDA", data, "ID_CLIENTE");
+        String mensajeJSON = gson.toJson(mensaje);
+        cliente.enviarMensaje(mensajeJSON);
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
 
@@ -259,4 +267,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
                 .map(jugadorEntidad -> new JugadorDTO(jugadorEntidad.getNombre(), jugadorEntidad.getColor(), jugadorEntidad.getEstado()))
                 .toList();
     }
+    
+    private void actualizarLobby(Mensaje mensaje) {
+    Gson gson = new Gson();
+    JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+    
+    partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
+}
 }
