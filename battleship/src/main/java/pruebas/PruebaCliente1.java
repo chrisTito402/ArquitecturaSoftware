@@ -47,7 +47,7 @@ public class PruebaCliente1 {
         cV.setTimer(new TimerPanel(1000, 30));
         cV.initTableroPropio();
         cV.initTableroEnemigo();
-        cV.mostrarFrmAddNaves();
+        //cV.mostrarFrmAddNaves();
         cV.mostrarFrmPartidaEnCurso();
 
         cS.execute();
