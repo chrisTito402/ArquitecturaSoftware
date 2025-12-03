@@ -106,6 +106,11 @@ public class PruebaServer {
         gson = new Gson();
         json = gson.toJson(m);
         cliente.enviarMensaje(json);
+        
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "CONFIRMAR_NAVES", null);
+        gson = new Gson();
+        json = gson.toJson(m);
+        cliente.enviarMensaje(json);
 
 //        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "ADD_NAVE", null, "1");
 //        Gson gson = new Gson();

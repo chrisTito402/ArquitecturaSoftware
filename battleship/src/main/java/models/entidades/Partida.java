@@ -45,10 +45,6 @@ public class Partida implements IModeloServidor {
         this.estado = estado;
         this.suscriptores = suscriptores;
         this.cronometro = cronometro;
-
-        this.turno = jugadores.get(0);
-        // PROVISIONAL para simular cuando empieza la patida
-        cronometro.initCronometro();
     }
 
     public boolean cambiarTurno() {
@@ -284,7 +280,7 @@ public class Partida implements IModeloServidor {
             return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
         }
         
-        if (j.getNaves().size() != totalNaves) {
+        if (j.getNaves().size() == 0) {
             System.out.println("Error: jugador no ha puesto todas sus naves.");
             return ResultadoConfirmarNaves.NAVES_SIN_COLOCAR;
         }
@@ -293,16 +289,12 @@ public class Partida implements IModeloServidor {
         j.setEstado(EstadoJugador.NAVES_CONFIRMADAS);
         
         // Comprobar que todos los Jugadores esten listos.
-        boolean todosListos = true;
-        for (Jugador e: jugadores) {
-            if (e.getEstado() == EstadoJugador.NAVES_CONFIRMADAS) {
-                todosListos = false;
-                break;
-            }
-        }
+        boolean todosListos = jugadores.stream()
+                .allMatch(e -> e.getEstado() == EstadoJugador.NAVES_CONFIRMADAS);
         
         if (todosListos) {
             estado = EstadoPartida.EN_CURSO;
+            startGame();
             return ResultadoConfirmarNaves.EMPEZAR_PARTIDA;
         }
         
@@ -343,7 +335,22 @@ public class Partida implements IModeloServidor {
         // Notificar a observadores (socktes)
 //        notificarAllSuscriptores("JUGADOR_UNIDO", jugador);
     }
-
+    
+    private void startGame() {
+        // Comprobar que este llena
+        if (jugadores.size() < 2) {
+            System.out.println("No hay suficientes jugadores para iniciar.");
+            return;
+        }
+        
+        // Cambiar estado
+        estado = EstadoPartida.EN_CURSO;
+        
+        this.turno = jugadores.get(0);
+        
+        cronometro.initCronometro();
+    }
+    
     @Override
     public void empezarPartida() {
         // Comprobar que este llena

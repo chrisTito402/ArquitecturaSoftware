@@ -187,7 +187,7 @@ public class ControlModelo implements IModeloCliente {
             return;
         }
         
-        notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", naves);
+        notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", resultado);
     }
 
     @Override

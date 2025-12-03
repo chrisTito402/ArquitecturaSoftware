@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
@@ -49,6 +50,7 @@ public class ControlVista implements ISuscriptor {
     private List<ISuscriptor> suscriptoresLobby;
     private String codigoPartida;
     private boolean esHost;
+    private JFrame frameActual;
     
     private AddNavePanel addNavePanel;
 
@@ -248,11 +250,12 @@ public class ControlVista implements ISuscriptor {
     private void manejarResultadoConfirmarNaves(Object datos) {
         ResultadoConfirmarNaves resultado = (ResultadoConfirmarNaves) datos;
         
-        if (resultado == ResultadoConfirmarNaves.NAVES_CONFIRMADAS) {
-            
-        }
+        System.out.println(resultado);
         if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
-            
+            timer = new TimerPanel(1000, 30);
+            initTableroPropio();
+            initTableroEnemigo();
+            mostrarFrmPartidaEnCurso();
         }
     }
     
@@ -346,13 +349,21 @@ public class ControlVista implements ISuscriptor {
     }
 
     public void mostrarFrmPartidaEnCurso() {
-        new FrmPartidaEnCurso().setVisible(true);
+        if (frameActual != null) {
+            frameActual.dispose();
+        }
+        frameActual = new FrmPartidaEnCurso();
+        frameActual.setVisible(true);
         timer.initTimer();
     }
     
     public void mostrarFrmAddNaves() {
+        if (frameActual != null) {
+            frameActual.dispose();
+        }
         addNavePanel = new AddNavePanel();
-        new AddNaves(addNavePanel).setVisible(true);
+        frameActual = new AddNaves(addNavePanel);
+        frameActual.setVisible(true);
     }
 
     // Caso de Uso: Unirse Partida

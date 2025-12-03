@@ -9,15 +9,12 @@ import controllers.controller.Controlador;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.Timer;
 import models.control.ControlModelo;
 import models.entidades.Coordenadas;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
-import models.enums.ResultadoAddNave;
-import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
 import views.DTOs.TableroDTO;
@@ -33,7 +30,7 @@ public class PruebaCliente1 {
     public static void main(String[] args) {
         ControlVista cV = ControlVista.getInstancia();
 
-        JugadorDTO jugador = new JugadorDTO("J1", ColorJugador.AZUL, EstadoJugador.JUGANDO);
+        JugadorDTO jugador = new JugadorDTO("J1", ColorJugador.AZUL, EstadoJugador.EN_LOBBY);
         TableroDTO tablero = new TableroDTO(10, 10);
 
         ControlModelo cM = new ControlModelo(jugador, tablero, new ArrayList<>(), true, new ArrayList<>());
@@ -44,17 +41,18 @@ public class PruebaCliente1 {
         cS.setControl(c);
         cV.setControl(c);
 
-        cV.setTimer(new TimerPanel(1000, 30));
-        cV.initTableroPropio();
-        cV.initTableroEnemigo();
         cV.mostrarFrmAddNaves();
-        cV.mostrarFrmPartidaEnCurso();
 
         cS.execute();
 
         Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_DISPARO", null);
         Gson gson = new Gson();
         String json = gson.toJson(m);
+        cS.enviarMensaje(json);
+        
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "RESULTADO_CONFIRMAR_NAVES", null);
+        gson = new Gson();
+        json = gson.toJson(m);
         cS.enviarMensaje(json);
 
         NaveDTO nave = new NaveDTO(EstadoNave.SIN_DAÑOS, OrientacionNave.HORIZONTAL, TipoNaveDTO.BARCO, 1);
