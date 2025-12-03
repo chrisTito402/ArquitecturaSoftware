@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
 import models.entidades.Coordenadas;
+import models.enums.OrientacionNave;
 import views.DTOs.TipoNaveDTO;
 
 /**
@@ -30,10 +31,10 @@ public class AddNavePanel extends JPanel {
     private ArrayList<Celda> grid = new ArrayList<>();
 
     // LISTA de cuadrados disponibles para arrastrar (Barcos en el puerto)
-    private ArrayList<Rectangle> navesDisponibles = new ArrayList<>();
+    private ArrayList<RectangleNave> navesDisponibles = new ArrayList<>();
 
     // La nave que estamos arrastrando actualmente (puede ser null si no arrastramos nada)
-    private Rectangle naveSeleccionada = null;
+    private RectangleNave naveSeleccionada = null;
 
     private int offsetX, offsetY;
 
@@ -51,21 +52,22 @@ public class AddNavePanel extends JPanel {
 
         // 2. Crear las naves iniciales a un lado (en la zona del SIDEBAR)
         // Por ejemplo, creamos 3 cuadrados
+        initNaves();
         int startX = (COLS * SIZE) + 50; // Posición X fuera de la cuadrícula
-        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
-        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
-        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
+//        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
+//        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
+//        navesDisponibles.add(new Rectangle(startX, 50, 40, 40));
 
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 // Revisar si dimos click en alguna de las naves disponibles
-                for (Rectangle nave : navesDisponibles) {
-                    if (nave.contains(e.getPoint())) {
+                for (RectangleNave nave : navesDisponibles) {
+                    if (nave.getRegtRectangle().contains(e.getPoint())) {
                         naveSeleccionada = nave; // "Agarramos" esta nave
                         estaArrastrando = true;
-                        offsetX = e.getX() - nave.x;
-                        offsetY = e.getY() - nave.y;
+                        offsetX = e.getX() - nave.getRegtRectangle().x;
+                        offsetY = e.getY() - nave.getRegtRectangle().y;
                         break; // Ya encontramos una, dejamos de buscar
                     }
                 }
@@ -85,7 +87,11 @@ public class AddNavePanel extends JPanel {
                         }
                     }
                     
-                    ControlVista.getInstancia().addNave(TipoNaveDTO.BARCO, coordenadas);
+                    ControlVista.getInstancia().addNave(
+                            naveSeleccionada.getNave(), 
+                            naveSeleccionada.getOrientacion(), 
+                            coordenadas
+                    );
                     
                 }
 
@@ -100,7 +106,7 @@ public class AddNavePanel extends JPanel {
                 if (estaArrastrando && naveSeleccionada != null) {
                     int nuevoX = e.getX() - offsetX;
                     int nuevoY = e.getY() - offsetY;
-                    naveSeleccionada.setLocation(nuevoX, nuevoY);
+                    naveSeleccionada.getRegtRectangle().setLocation(nuevoX, nuevoY);
 
                     checkCollisions(); // Revisar vista previa
                 }
@@ -111,12 +117,56 @@ public class AddNavePanel extends JPanel {
         this.addMouseMotionListener(mouseHandler);
     }
 
+    private void initNaves() {
+        int startX = (COLS * SIZE) + 50;
+        
+        for (int i = 0; i < 3; i++) {
+            Rectangle rec = new Rectangle(startX, 50, 40, 40);
+            navesDisponibles.add(
+                    new RectangleNave(
+                            TipoNaveDTO.BARCO,
+                            OrientacionNave.HORIZONTAL,
+                            rec)
+            );
+        }
+        for (int i = 0; i < 4; i++) {
+            Rectangle rec = new Rectangle(startX, 100, 80, 40);
+            navesDisponibles.add(
+                    new RectangleNave(
+                            TipoNaveDTO.SUBMARINO, 
+                            OrientacionNave.HORIZONTAL,
+                            rec
+                    )
+            );
+        }
+        for (int i = 0; i < 2; i++) {
+            Rectangle rec = new Rectangle(startX, 150, 120, 40);
+            navesDisponibles.add(
+                    new RectangleNave(
+                            TipoNaveDTO.CRUCERO, 
+                            OrientacionNave.HORIZONTAL,
+                            rec
+                    )
+            );
+        }
+        for (int i = 0; i < 2; i++) {
+            Rectangle rec = new Rectangle(startX, 200, 160, 40);
+            navesDisponibles.add(
+                    new RectangleNave(
+                            TipoNaveDTO.PORTAAVIONES, 
+                            OrientacionNave.HORIZONTAL,
+                            rec
+                    )
+            );
+        }
+    }
+    
     // Actualiza qué celdas están siendo tocadas (Vista previa ROJA)
     private void checkCollisions() {
         if (naveSeleccionada == null) return;
 
         for (Celda celda : grid) {
-            if (naveSeleccionada.intersects(celda.rect)) {
+            if (naveSeleccionada.getRegtRectangle().intersects(celda.rect)) {
                 celda.isOverlapped = true;
             } else {
                 celda.isOverlapped = false;
@@ -180,7 +230,8 @@ public class AddNavePanel extends JPanel {
         // 3. Dibujar las naves disponibles (las que están a un lado o siendo arrastradas)
         g.setColor(Color.BLUE);
         // Usamos un iterador o un for simple para evitar errores de concurrencia si borramos muy rápido
-        for (Rectangle nave : navesDisponibles) {
+        for (RectangleNave rNave : navesDisponibles) {
+            Rectangle nave = rNave.getRegtRectangle();
             g.fillRect(nave.x, nave.y, nave.width, nave.height);
             g.setColor(Color.BLACK);
             g.drawRect(nave.x, nave.y, nave.width, nave.height);

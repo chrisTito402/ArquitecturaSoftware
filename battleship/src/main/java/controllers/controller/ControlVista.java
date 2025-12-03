@@ -323,9 +323,8 @@ public class ControlVista implements ISuscriptor {
     }
 
     // ADD NAVE METODOS
-    public void addNave(TipoNaveDTO tipoNave, List<Coordenadas> coordenadas) {
-        NaveDTO nave = new NaveDTO(OrientacionNave.HORIZONTAL, tipoNave, 1);
-        control.addNave(nave, coordenadas);
+    public void addNave(TipoNaveDTO tipo, OrientacionNave orientacion, List<Coordenadas> coordenadas) {
+        control.addNave(tipo, orientacion, coordenadas);
     }
 
     public AddNavePanel getAddNavePanel() {
