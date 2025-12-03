@@ -56,9 +56,6 @@ public class PruebaServer {
             }
         }
 
-        Nave n2 = new Barco(OrientacionNave.HORIZONTAL);
-        casilla2[0][0].setNave(n2);
-
         Tablero t2 = new Tablero(casilla2, 10, 10);
 
         Jugador j2 = new Jugador(
@@ -67,7 +64,6 @@ public class PruebaServer {
                 new ArrayList<>(),
                 t2,
                 EstadoJugador.JUGANDO);
-        j2.getNaves().add(n2);
 
         List<Jugador> jugadores = new ArrayList<>();
         jugadores.add(j1);

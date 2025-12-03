@@ -17,6 +17,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
@@ -186,6 +187,8 @@ public class ControlVista implements ISuscriptor {
         lblTurno.setText("Turno del Jugador: " + j.getNombre());
         lblTurno.revalidate();
         lblTurno.repaint();
+        
+        System.out.println("CAMBIAR_TURNO");
     }
     
     private void manejarDisparo(Object datos) {
@@ -367,9 +370,9 @@ public class ControlVista implements ISuscriptor {
         if (frameActual != null) {
             frameActual.dispose();
         }
+        this.lblTurno = new JLabel();
         frameActual = new FrmPartidaEnCurso();
         frameActual.setVisible(true);
-        this.lblTurno = new JLabel();
     }
     
     public void mostrarFrmAddNaves() {

@@ -58,6 +58,11 @@ public class PruebaCliente1 {
         gson = new Gson();
         json = gson.toJson(m);
         cS.enviarMensaje(json);
+        
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "CAMBIAR_TURNO", null);
+        gson = new Gson();
+        json = gson.toJson(m);
+        cS.enviarMensaje(json);
 
         NaveDTO nave = new NaveDTO(EstadoNave.SIN_DAÑOS, OrientacionNave.HORIZONTAL, TipoNaveDTO.BARCO, 1);
         List<Coordenadas> coordenadas = new ArrayList<>();

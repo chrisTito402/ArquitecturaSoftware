@@ -25,7 +25,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTimer.repaint();
 
         cV.setPuntajePanel(pnlPuntaje);
-        pnlTurno.add(cV.getPuntajePanel());
+        pnlTurno.add(cV.getLblTurno());
 
     }
 
@@ -86,7 +86,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTurno.setMinimumSize(new java.awt.Dimension(100, 30));
         pnlTurno.setName(""); // NOI18N
         pnlTurno.setPreferredSize(new java.awt.Dimension(100, 30));
-        pnlTurno.setLayout(new java.awt.GridLayout());
+        pnlTurno.setLayout(new java.awt.BorderLayout());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
