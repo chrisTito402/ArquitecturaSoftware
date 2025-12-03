@@ -4,6 +4,7 @@
  */
 package views.frames;
 
+import controllers.controller.ControlVista;
 import javax.swing.JFrame;
 
 /**
@@ -38,26 +39,47 @@ public class AddNaves extends javax.swing.JFrame {
     private void initComponents() {
 
         pnlContenedor = new javax.swing.JPanel();
+        btnConfirmarNaves = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        pnlContenedor.setMaximumSize(new java.awt.Dimension(520, 700));
+        pnlContenedor.setMinimumSize(new java.awt.Dimension(520, 700));
+        pnlContenedor.setPreferredSize(new java.awt.Dimension(520, 700));
         pnlContenedor.setLayout(new java.awt.BorderLayout());
+
+        btnConfirmarNaves.setText("Confirmar Naves");
+        btnConfirmarNaves.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmarNavesActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnlContenedor, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pnlContenedor, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(218, 218, 218)
+                .addComponent(btnConfirmarNaves, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(pnlContenedor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(pnlContenedor, javax.swing.GroupLayout.PREFERRED_SIZE, 520, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnConfirmarNaves, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 32, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnConfirmarNavesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmarNavesActionPerformed
+        ControlVista.getInstancia().confirmarNaves();
+    }//GEN-LAST:event_btnConfirmarNavesActionPerformed
 
     /**
      * @param args the command line arguments
@@ -95,6 +117,7 @@ public class AddNaves extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConfirmarNaves;
     private javax.swing.JPanel pnlContenedor;
     // End of variables declaration//GEN-END:variables
 }

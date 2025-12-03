@@ -4,6 +4,7 @@ import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import java.util.List;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import models.observador.ISuscriptor;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
@@ -21,8 +22,8 @@ public interface IModeloCliente {
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas);
 
     public void addJugador(Jugador j);
-
-    public void manejarResultadoAddNave(AddNaveDTO resultado);
+    
+    public JugadorDTO confirmarNaves();
 
     public void crearTableros();
 
@@ -45,4 +46,8 @@ public interface IModeloCliente {
 
     // Manejadores de Resultados
     public void manejarResultadoDisparo(DisparoDTO disparo);
+    
+    public void manejarResultadoAddNave(AddNaveDTO resultado);
+    
+    public void manejarResultadoConfirmarNaves(ResultadoConfirmarNaves resultado);
 }

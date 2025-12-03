@@ -7,6 +7,7 @@ import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import views.DTOs.AddNaveDTO;
@@ -158,12 +159,35 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
+    public JugadorDTO confirmarNaves() {
+        if (jugador == null) {
+            System.out.println("Error: jugador nulo.");
+            return null;
+        }
+        if (jugador.getNombre() == null || jugador.getNombre().isBlank()) {
+            System.out.println("Error: Nombre vacio.");
+            return null;
+        }
+        
+        return jugador;
+    }
+    
+    @Override
     public void manejarResultadoAddNave(AddNaveDTO resultado) {
         System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
         
         if (resultado.getResultado() == ResultadoAddNave.NAVE_AÑADIDA) {
             notificarAllSuscriptores("RESULTADO_ADD_NAVE", resultado);
         }
+    }
+    
+    @Override
+    public void manejarResultadoConfirmarNaves(ResultadoConfirmarNaves resultado) {
+        if (resultado == null) {
+            return;
+        }
+        
+        notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", naves);
     }
 
     @Override

@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -60,6 +61,7 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadoresNoti.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
+        manejadoresNoti.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
         
         suscriptoresLobby = new ArrayList<>();
     }
@@ -241,6 +243,21 @@ public class ControlVista implements ISuscriptor {
         AddNaveDTO resultado = (AddNaveDTO) datos;
         
         addNavePanel.pintarNaveAñadida(resultado.getCoordenadases());
+    }
+    
+    private void manejarResultadoConfirmarNaves(Object datos) {
+        ResultadoConfirmarNaves resultado = (ResultadoConfirmarNaves) datos;
+        
+        if (resultado == ResultadoConfirmarNaves.NAVES_CONFIRMADAS) {
+            
+        }
+        if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
+            
+        }
+    }
+    
+    public void confirmarNaves() {
+        control.setConfirmarNaves();
     }
     
     private void manejarAbandono(Object datos) {

@@ -18,6 +18,7 @@ import models.entidades.PortaAviones;
 import models.entidades.Puntaje;
 import models.entidades.Submarino;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import servidor.modelo.IModeloServidor;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
@@ -44,6 +45,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         mapa.put("ADD_NAVE", this::addNave);
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
+        mapa.put("CONFIRMAR_NAVES", this::setConfirmarNaves);
     }
 
     // Metodo para enviar mensaje por la red.
@@ -94,7 +96,6 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     }
 
     private void manejarEventoPrivado(Mensaje mensaje) {
-
     }
 
     private void addNave(Mensaje mensaje) {
@@ -178,6 +179,19 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         enviarMensaje("RESULTADO_DISPARO", resultado);
     }
 
+    private void setConfirmarNaves(Mensaje mensaje) {
+        Gson gson = new Gson();
+        Jugador jugador = gson.fromJson(mensaje.getData(), Jugador.class);
+        
+        ResultadoConfirmarNaves resultado = servidor.setConfirmarNaves(jugador);
+        if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
+            enviarMensaje("RESULTADO_CONFIRMAR_NAVES", resultado);
+            return;
+        }
+        
+        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESULTADO_CONFIRMAR_NAVES", resultado);
+    }
+    
     private void manejarUnirsePartida(Mensaje mensaje) {
         //unicamente para pruebas este print v
         System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");

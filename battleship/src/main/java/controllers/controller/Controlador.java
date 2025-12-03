@@ -21,6 +21,7 @@ import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import servidor.modelo.ServidorManager;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
@@ -51,6 +52,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadorEventos.put("ACTUALIZAR_LOBBY", this::actualizarLobby);
+        manejadorEventos.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
     }
 
 //    public Controlador(ControlModelo modelo, ControlVista vista) {
@@ -167,11 +169,26 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
 
+    private void manejarResultadoConfirmarNaves(Mensaje mensaje) {
+        Gson gson = new Gson();
+        ResultadoConfirmarNaves resultado = gson.fromJson(mensaje.getData(), ResultadoConfirmarNaves.class);
+        
+        partida.manejarResultadoConfirmarNaves(resultado);
+    }
+    
     @Override
     public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
         AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
         if (addDTO != null) {
             enviarMensaje("ADD_NAVE", addDTO);
+        }
+    }
+    
+    @Override
+    public void setConfirmarNaves() {
+        JugadorDTO jugador = partida.confirmarNaves();
+        if (jugador != null) {
+            enviarMensaje("CONFIRMAR_NAVES", jugador);
         }
     }
 

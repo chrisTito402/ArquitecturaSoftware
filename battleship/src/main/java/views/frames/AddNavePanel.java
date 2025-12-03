@@ -91,7 +91,6 @@ public class AddNavePanel extends JPanel {
 
                 // Resetear variables
                 estaArrastrando = false;
-                naveSeleccionada = null;
                 limpiarOverlaps(); // Limpiar cualquier rastro rojo
                 repaint();
             }
@@ -143,6 +142,8 @@ public class AddNavePanel extends JPanel {
                 System.out.println("Pintada celda: " + celda.coordenadas);
                 
                 navesDisponibles.remove(naveSeleccionada);
+                naveSeleccionada = null;
+                repaint();
             }
         });
     }

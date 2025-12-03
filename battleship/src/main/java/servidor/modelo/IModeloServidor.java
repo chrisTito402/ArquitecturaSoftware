@@ -6,6 +6,7 @@ import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 
 /**
  *
@@ -17,6 +18,8 @@ public interface IModeloServidor {
 
     public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
 
+    public ResultadoConfirmarNaves setConfirmarNaves(Jugador jugador);
+    
     public void addJugador(Jugador j);
 
     public List<Jugador> getJugadores();

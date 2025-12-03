@@ -8,5 +8,7 @@ public enum EstadoJugador {
 
     JUGANDO,
     DERROTADO,
-    ABANDONO;
+    ABANDONO,
+    EN_LOBBY,
+    NAVES_CONFIRMADAS;
 }

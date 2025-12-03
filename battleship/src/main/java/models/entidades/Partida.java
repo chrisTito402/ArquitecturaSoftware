@@ -8,9 +8,11 @@ import models.observador.ISuscriptor;
 import java.util.List;
 import models.builder.Director;
 import models.builder.TableroBuilder;
+import models.enums.EstadoCasilla;
 import models.enums.EstadoJugador;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
+import models.enums.ResultadoConfirmarNaves;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
 
@@ -264,6 +266,61 @@ public class Partida implements IModeloServidor {
         return ResultadoAddNave.NAVE_AÑADIDA;
     }
 
+    @Override
+    public ResultadoConfirmarNaves setConfirmarNaves(Jugador jugador) {
+        // Validar que el Jugador exista.
+        if (jugador == null) {
+            System.out.println("Error: jugador no encontrado.");
+            return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
+        }
+        
+        Jugador j = jugadores.stream()
+                .filter(e -> e.getNombre().equals(jugador.getNombre()))
+                .findFirst()
+                .orElse(null);
+        
+        if (j == null) {
+            System.out.println("Error: jugador no encontrado.");
+            return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
+        }
+        
+        if (j.getNaves().size() != totalNaves) {
+            System.out.println("Error: jugador no ha puesto todas sus naves.");
+            return ResultadoConfirmarNaves.NAVES_SIN_COLOCAR;
+        }
+        
+        // Actualizar estado jugador.
+        j.setEstado(EstadoJugador.NAVES_CONFIRMADAS);
+        
+        // Comprobar que todos los Jugadores esten listos.
+        boolean todosListos = true;
+        for (Jugador e: jugadores) {
+            if (e.getEstado() == EstadoJugador.NAVES_CONFIRMADAS) {
+                todosListos = false;
+                break;
+            }
+        }
+        
+        if (todosListos) {
+            estado = EstadoPartida.EN_CURSO;
+            return ResultadoConfirmarNaves.EMPEZAR_PARTIDA;
+        }
+        
+        return ResultadoConfirmarNaves.NAVES_CONFIRMADAS;
+    }
+    
+    private void crearTablero(Jugador jugador) {
+        Casilla[][] casillas = new Casilla[10][10];
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                casillas[i][j] = new Casilla(EstadoCasilla.AGUA, new Coordenadas(i, j));
+            }
+        }
+        
+        Tablero tablero = new Tablero(casillas, 10, 10);
+        jugador.setTablero(tablero);
+    }
+    
     // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(Jugador jugador) {

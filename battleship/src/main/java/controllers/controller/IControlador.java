@@ -26,6 +26,8 @@ public interface IControlador {
     public JugadorDTO getJugador();
 
     public void addNave(NaveDTO nave, List<Coordenadas> coordenadas);
+    
+    public void setConfirmarNaves();
 
     public void abandonarPartida(Jugador jugador);
 
