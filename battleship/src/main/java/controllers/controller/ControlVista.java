@@ -267,11 +267,13 @@ public class ControlVista implements ISuscriptor {
         
         System.out.println(resultado);
         if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
-            timer = new TimerPanel(1000, 30);
             initTableroPropio();
             initTableroEnemigo();
             mostrarFrmPartidaEnCurso();
+            return;
         }
+        
+        JOptionPane.showMessageDialog(null, resultado.toString());
     }
     
     public void confirmarNaves() {
@@ -370,7 +372,6 @@ public class ControlVista implements ISuscriptor {
         if (frameActual != null) {
             frameActual.dispose();
         }
-        this.lblTurno = new JLabel();
         frameActual = new FrmPartidaEnCurso();
         frameActual.setVisible(true);
     }
@@ -379,6 +380,7 @@ public class ControlVista implements ISuscriptor {
         if (frameActual != null) {
             frameActual.dispose();
         }
+        this.lblTurno = new JLabel();
         addNavePanel = new AddNavePanel();
         frameActual = new AddNaves(addNavePanel);
         frameActual.setVisible(true);

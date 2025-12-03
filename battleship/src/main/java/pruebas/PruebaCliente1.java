@@ -40,6 +40,7 @@ public class PruebaCliente1 {
         Controlador c = new Controlador(cM, cS, new HashMap<>());
         cS.setControl(c);
         cV.setControl(c);
+        cV.setTimer(new TimerPanel(1000, 30));
         cV.mostrarFrmAddNaves();
         
         cS.execute();

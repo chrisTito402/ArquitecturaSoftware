@@ -391,7 +391,7 @@ public class Partida implements IModeloServidor {
         
         this.turno = jugadores.get(0);
         
-        cronometro.initCronometro();
+        cambiarTurno();
     }
     
     @Override
