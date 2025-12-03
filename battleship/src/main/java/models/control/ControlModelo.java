@@ -76,6 +76,15 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
+    public void manejarCambiarTurno(JugadorDTO jugador) {
+        if (!jugador.getNombre().equals(this.jugador.getNombre())) {
+            notificarAllSuscriptores("CAMBIAR_TURNO", jugador);
+        } else if (jugador.getNombre().equals(this.jugador.getNombre())) {
+            notificarAllSuscriptores("CAMBIAR_TURNO", this.jugador);
+        }
+    }
+    
+    @Override
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
         // Verificar que la nave no sea nula.
         if (nave == null) {

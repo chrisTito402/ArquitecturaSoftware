@@ -6,14 +6,12 @@ import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import java.util.List;
-import java.util.stream.Collectors;
-import models.builder.Director;
-import models.builder.TableroBuilder;
 import models.enums.EstadoCasilla;
 import models.enums.EstadoJugador;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import servidor.controlador.INotificadorServidor;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
 
@@ -34,6 +32,7 @@ public class Partida implements IModeloServidor {
     private Disparo disparo;
     private List<ISuscriptor> suscriptores;
     private ICronometro cronometro;
+    private INotificadorServidor notificador;
 
     public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores, ICronometro cronometro) {
         this.turno = turno;
@@ -47,6 +46,20 @@ public class Partida implements IModeloServidor {
         this.suscriptores = suscriptores;
         this.cronometro = cronometro;
     }
+    
+    public Partida(Jugador turno, List<Jugador> jugadores, int cantBarcos, int cantSubmarinos, int cantCruceros, int cantPortaAviones, int totalNaves, EstadoPartida estado, List<ISuscriptor> suscriptores, ICronometro cronometro, INotificadorServidor notificador) {
+        this.turno = turno;
+        this.jugadores = jugadores;
+        this.cantBarcos = cantBarcos;
+        this.cantSubmarinos = cantSubmarinos;
+        this.cantCruceros = cantCruceros;
+        this.cantPortaAviones = cantPortaAviones;
+        this.totalNaves = totalNaves;
+        this.estado = estado;
+        this.suscriptores = suscriptores;
+        this.cronometro = cronometro;
+        this.notificador = notificador;
+    }
 
     public boolean cambiarTurno() {
         turno = jugadores.stream().filter(e -> e != turno)
@@ -58,7 +71,8 @@ public class Partida implements IModeloServidor {
         }
         cronometro.setProcesandoDisparo(false);
         cronometro.initCronometro();
-        System.out.println("SE CAMBIO EL TURNO");
+        notificador.notificar("CAMBIAR_TURNO", turno);
+        
         return true;
     }
 
@@ -427,6 +441,10 @@ public class Partida implements IModeloServidor {
         }
 
         return jugadorQueSeVa;
+    }
+
+    public void setNotificador(INotificadorServidor notificador) {
+        this.notificador = notificador;
     }
 
 }

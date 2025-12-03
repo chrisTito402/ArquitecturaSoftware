@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
@@ -51,6 +52,7 @@ public class ControlVista implements ISuscriptor {
     private String codigoPartida;
     private boolean esHost;
     private JFrame frameActual;
+    private JLabel lblTurno;
     
     private AddNavePanel addNavePanel;
 
@@ -64,6 +66,7 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadoresNoti.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadoresNoti.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
+        manejadoresNoti.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
         
         suscriptoresLobby = new ArrayList<>();
     }
@@ -176,6 +179,15 @@ public class ControlVista implements ISuscriptor {
         }
     }
 
+    private void manejarCambiarTurno(Object datos) {
+        JugadorDTO j = (JugadorDTO) datos;
+        timer.initTimer();
+        
+        lblTurno.setText("Turno del Jugador: " + j.getNombre());
+        lblTurno.revalidate();
+        lblTurno.repaint();
+    }
+    
     private void manejarDisparo(Object datos) {
         if (!(datos instanceof DisparoDTO)) {
             System.out.println("Los datos no son un objeto DisparoDTO");
@@ -343,6 +355,10 @@ public class ControlVista implements ISuscriptor {
         control.crearTableros();
     }
 
+    public JLabel getLblTurno() {
+        return lblTurno;
+    }
+
     public void suscribirAModelo() {
         control.suscribirAPartida(this);
     }
@@ -353,7 +369,7 @@ public class ControlVista implements ISuscriptor {
         }
         frameActual = new FrmPartidaEnCurso();
         frameActual.setVisible(true);
-        timer.initTimer();
+        this.lblTurno = new JLabel();
     }
     
     public void mostrarFrmAddNaves() {

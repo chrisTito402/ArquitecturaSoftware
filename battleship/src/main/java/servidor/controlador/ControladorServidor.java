@@ -17,6 +17,8 @@ import models.entidades.Nave;
 import models.entidades.PortaAviones;
 import models.entidades.Puntaje;
 import models.entidades.Submarino;
+import models.enums.ColorJugador;
+import models.enums.EstadoJugador;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
 import servidor.modelo.IModeloServidor;
@@ -30,24 +32,44 @@ import views.DTOs.PuntajeDTO;
  *
  * @author daniel
  */
-public class ControladorServidor implements ManejadorRespuestaCliente {
+public class ControladorServidor implements ManejadorRespuestaCliente, INotificadorServidor {
 
     private IModeloServidor servidor;
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadoresEventos;
+    private Map<String, Consumer<Object>> manejadorNotificaciones;
 
-    public ControladorServidor(IModeloServidor servidor, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
+    public ControladorServidor(IModeloServidor servidor, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa, Map<String, Consumer<Object>> mapaNotis) {
         this.servidor = servidor;
         this.cliente = cliente;
         this.manejadoresEventos = mapa;
+        this.manejadorNotificaciones = mapaNotis;
 
         mapa.put("DISPARO", this::realizarDisparo);
         mapa.put("ADD_NAVE", this::addNave);
         mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
         mapa.put("CONFIRMAR_NAVES", this::setConfirmarNaves);
+        
+        manejadorNotificaciones.put("CAMBIAR_TURNO", this::notificarCambiarTurno);
     }
 
+    @Override
+    public void notificar(String contexto, Object datos) {
+        manejadorNotificaciones.get(contexto).accept(datos);
+    }
+    
+    private void notificarCambiarTurno(Object datos) {
+        Jugador j = (Jugador) datos;
+        JugadorDTO jugador = new JugadorDTO(
+                j.getNombre(), 
+                j.getColor(), 
+                j.getEstado()
+        );
+        
+        enviarMensaje("CAMBIAR_TURNO", jugador);
+    }
+    
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();

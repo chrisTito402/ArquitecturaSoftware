@@ -95,7 +95,7 @@ public class PruebaServerPuntaje {
         cronometro.setPartida(p);
 
         ClienteSocket cliente = new ClienteSocket("localhost", 5000, null);
-        ControladorServidor control = new ControladorServidor(p, cliente, new HashMap<>());
+        ControladorServidor control = new ControladorServidor(p, cliente, new HashMap<>(), new HashMap<>());
         cliente.setControl(control);
         cliente.execute();
 

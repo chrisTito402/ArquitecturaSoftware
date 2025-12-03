@@ -48,6 +48,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadorEventos.put("ACTUALIZAR_LOBBY", this::actualizarLobby);
         manejadorEventos.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
+        manejadorEventos.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
     }
 
 //    public Controlador(ControlModelo modelo, ControlVista vista) {
@@ -101,6 +102,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.get(mensaje.getSubEvento()).accept(mensaje);
     }
 
+    private void manejarCambiarTurno(Mensaje mensaje) {
+        Gson gson = new Gson();
+        JugadorDTO j = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        
+        partida.manejarCambiarTurno(j);
+    }
+    
     private void manejarResultadoAddNave(Mensaje mensaje) {
         Gson gson = new Gson();
         AddNaveDTO resultado = gson.fromJson(mensaje.getData(), AddNaveDTO.class);
