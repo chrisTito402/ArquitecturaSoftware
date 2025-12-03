@@ -2,7 +2,6 @@ package views.frames;
 
 import java.awt.Rectangle;
 import models.enums.OrientacionNave;
-import views.DTOs.NaveDTO;
 import views.DTOs.TipoNaveDTO;
 
 /**

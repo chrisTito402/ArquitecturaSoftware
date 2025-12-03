@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class AddNavePanel extends JPanel {
     private final int COLS = 10;
     private final int SIZE = 50; // Tamaño de cada celda
     private final int SIDEBAR_WIDTH = 150; // Espacio extra a la derecha para las naves
-
+    
     private boolean estaArrastrando = false;
 
     // Lista para guardar nuestras celdas de la cuadrícula
@@ -115,6 +117,41 @@ public class AddNavePanel extends JPanel {
 
         this.addMouseListener(mouseHandler);
         this.addMouseMotionListener(mouseHandler);
+        
+        this.setFocusable(true);
+        this.requestFocusInWindow();
+        
+        this.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // Solo rotamos si presionamos R y tenemos una nave seleccionada
+                if (e.getKeyCode() == KeyEvent.VK_R && naveSeleccionada != null) {
+
+                    // 1. Obtener el rectángulo
+                    Rectangle r = naveSeleccionada.getRegtRectangle();
+
+                    // 2. Intercambiar ancho y alto (Rotación geométrica)
+                    int tempWidth = r.width;
+                    r.width = r.height;
+                    r.height = tempWidth;
+
+                    // 3. Cambiar el estado de orientación (Lógica de negocio)
+                    // Asumo que tienes un Setter, si no, accede a la variable directa
+                    if (naveSeleccionada.getOrientacion() == OrientacionNave.HORIZONTAL) {
+                        naveSeleccionada.setOrientacion(OrientacionNave.VERTICAL);
+                    } else {
+                        naveSeleccionada.setOrientacion(OrientacionNave.HORIZONTAL);
+                    }
+
+                    // 4. Si estamos arrastrando, recalcular colisiones inmediatamente
+                    // para que la "sombra roja" se actualice al instante
+                    checkCollisions();
+
+                    // 5. Redibujar
+                    repaint();
+                }
+            }
+        });
     }
 
     private void initNaves() {

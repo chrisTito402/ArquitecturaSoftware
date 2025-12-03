@@ -39,9 +39,6 @@ public class PruebaServer {
             }
         }
 
-        Nave n1 = new Barco(OrientacionNave.HORIZONTAL);
-        casilla1[0][0].setNave(n1);
-
         Tablero t1 = new Tablero(casilla1, 10, 10);
 
         Jugador j1 = new Jugador(
@@ -50,7 +47,6 @@ public class PruebaServer {
                 new ArrayList<>(),
                 t1,
                 EstadoJugador.JUGANDO);
-        j1.getNaves().add(n1);
 
         // JUGADOR 2 ---------------------------------------------------
         Casilla[][] casilla2 = new Casilla[10][10];
@@ -81,11 +77,11 @@ public class PruebaServer {
         Partida p = new Partida(
                 j1,
                 jugadores,
-                1,
-                0,
-                0,
-                0,
-                0,
+                3,
+                4,
+                2,
+                2,
+                11,
                 EstadoPartida.EN_CURSO,
                 new ArrayList<>(),
                 cronometro

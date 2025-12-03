@@ -6,6 +6,7 @@ import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import java.util.List;
+import java.util.stream.Collectors;
 import models.builder.Director;
 import models.builder.TableroBuilder;
 import models.enums.EstadoCasilla;
@@ -174,6 +175,34 @@ public class Partida implements IModeloServidor {
             System.out.println("Error: No se encontro al Jugador.");
             return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
         }
+        
+        
+        // Verificar que la cantidad de naves no se ha excedido.
+        Class<?> clase = nave.getClass();
+        long cantidad = j.getNaves().stream()
+                .filter(n -> n.getClass() == clase)
+                .count();
+        if (clase == Barco.class) {
+            if (cantidad == cantBarcos) {
+                System.out.println("Error: Cantidad de Naves excedida.");
+                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+            }
+        } else if (clase == Submarino.class) {
+            if (cantidad == cantSubmarinos) {
+                System.out.println("Error: Cantidad de Naves excedida.");
+                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+            }
+        } else if (clase == Crucero.class) {
+            if (cantidad == cantSubmarinos) {
+                System.out.println("Error: Cantidad de Naves excedida.");
+                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+            }
+        } else if (clase == PortaAviones.class) {
+            if (cantidad == cantSubmarinos) {
+                System.out.println("Error: Cantidad de Naves excedida.");
+                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+            }
+        }
 
         // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
         if (coordenadas.size() != nave.getTamanio()) {
@@ -280,7 +309,7 @@ public class Partida implements IModeloServidor {
             return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
         }
         
-        if (j.getNaves().size() == 0) {
+        if (j.getNaves().size() != totalNaves) {
             System.out.println("Error: jugador no ha puesto todas sus naves.");
             return ResultadoConfirmarNaves.NAVES_SIN_COLOCAR;
         }

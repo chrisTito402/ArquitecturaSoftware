@@ -16,5 +16,6 @@ public enum ResultadoAddNave {
     NO_CONSECUTIVO_X,
     NO_CONSECUTIVO_Y,
     ESPACIO_YA_OCUPADO,
-    NAVE_AÑADIDA;
+    NAVE_AÑADIDA,
+    CANTIDAD_NAVES_EXCEDIDA;
 }

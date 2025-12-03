@@ -40,11 +40,7 @@ public class PruebaCliente2 {
         Controlador c = new Controlador(cM, cS, new HashMap<>());
         cS.setControl(c);
         cV.setControl(c);
-        cV.setTimer(new TimerPanel(1000, 30));
-        cV.initTableroPropio();
-        cV.initTableroEnemigo();
-
-        cV.mostrarFrmPartidaEnCurso();
+        cV.mostrarFrmAddNaves();
 
         cS.execute();
 
