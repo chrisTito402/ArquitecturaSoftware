@@ -134,11 +134,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void abandonarPartida(Jugador jugador) {
         // Validaciones del modelo
         JugadorDTO dto = partida.abandonarPartida(jugador);
-
         if (dto == null) {
             System.out.println("No se pudo abandonar la partida.");
             return;
         }
+        System.out.println("CASI LLLEGA");
         enviarMensaje("ABANDONAR_PARTIDA", dto);
     }
 

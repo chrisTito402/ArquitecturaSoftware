@@ -28,5 +28,7 @@ public interface IModeloServidor {
 
     public void empezarPartida();
 
-    public void abandonarPartida(Jugador jugadorQueSeVa);
+
+    public Jugador abandonarPartida(Jugador jugadorQueSeVa);
+    
 }

@@ -242,8 +242,8 @@ public class Partida implements IModeloServidor {
         for (Coordenadas c : coordenadas) {
             for (int i = c.getX() - 1; i < c.getX() + 2; i++) {
                 for (int k = c.getY() - 1; k < c.getY() + 2; k++) {
-                    if (i >= 0 && k >= 0 &&
-                            i < t.getLimiteX() && k < t.getLimiteY()) {
+                    if (i >= 0 && k >= 0
+                            && i < t.getLimiteX() && k < t.getLimiteY()) {
                         Nave n = casillas[i][k].getNave();
                         if (n != null) {
                             if (n != nave) {
@@ -269,12 +269,12 @@ public class Partida implements IModeloServidor {
             System.out.println("Error: jugador no encontrado.");
             return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
         }
-        
+
         Jugador j = jugadores.stream()
                 .filter(e -> e.getNombre().equals(jugador.getNombre()))
                 .findFirst()
                 .orElse(null);
-        
+
         if (j == null) {
             System.out.println("Error: jugador no encontrado.");
             return ResultadoConfirmarNaves.JUGADOR_NO_ENCONTRADO;
@@ -284,23 +284,23 @@ public class Partida implements IModeloServidor {
             System.out.println("Error: jugador no ha puesto todas sus naves.");
             return ResultadoConfirmarNaves.NAVES_SIN_COLOCAR;
         }
-        
+
         // Actualizar estado jugador.
         j.setEstado(EstadoJugador.NAVES_CONFIRMADAS);
-        
+
         // Comprobar que todos los Jugadores esten listos.
         boolean todosListos = jugadores.stream()
                 .allMatch(e -> e.getEstado() == EstadoJugador.NAVES_CONFIRMADAS);
-        
+
         if (todosListos) {
             estado = EstadoPartida.EN_CURSO;
             startGame();
             return ResultadoConfirmarNaves.EMPEZAR_PARTIDA;
         }
-        
+
         return ResultadoConfirmarNaves.NAVES_CONFIRMADAS;
     }
-    
+
     private void crearTablero(Jugador jugador) {
         Casilla[][] casillas = new Casilla[10][10];
         for (int i = 0; i < 10; i++) {
@@ -308,11 +308,11 @@ public class Partida implements IModeloServidor {
                 casillas[i][j] = new Casilla(EstadoCasilla.AGUA, new Coordenadas(i, j));
             }
         }
-        
+
         Tablero tablero = new Tablero(casillas, 10, 10);
         jugador.setTablero(tablero);
     }
-    
+
     // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(Jugador jugador) {
@@ -373,49 +373,31 @@ public class Partida implements IModeloServidor {
     }
 
     @Override
-    public void abandonarPartida(Jugador jugadorQueSeVa) {
-
+    public Jugador abandonarPartida(Jugador jugadorQueSeVa) {
         System.out.println("Servidor: " + jugadorQueSeVa.getNombre() + " abandonó la partida.");
 
-        // 1. Marcar su estado como ABANDONO
         jugadorQueSeVa.setEstado(EstadoJugador.ABANDONO);
-
-        // 2. Eliminar al jugador de la lista
         jugadores.removeIf(j -> j.getNombre().equals(jugadorQueSeVa.getNombre()));
 
-        // 3. Si queda un jugador -> ese gana automáticamente
         if (jugadores.size() == 1) {
             Jugador ganador = jugadores.get(0);
-
-            // El ganador sigue en estado "JUGANDO" (no tienes estado GANADOR)
             ganador.setEstado(EstadoJugador.JUGANDO);
-
             estado = EstadoPartida.FINALIZADA;
-
             System.out.println("Servidor: " + ganador.getNombre() + " gana por abandono.");
-
-            // Detener el cronómetro si existe
             try {
                 cronometro.stop();
             } catch (Exception e) {
             }
-
-            return;
-        }
-
-        // 4. Si no queda nadie -> resetear la partida
-        if (jugadores.isEmpty()) {
+        } else if (jugadores.isEmpty()) {
             estado = EstadoPartida.POR_EMPEZAR;
-
             System.out.println("Servidor: no quedan jugadores, partida reseteada.");
-
             try {
                 cronometro.stop();
             } catch (Exception e) {
             }
-
-            return;
         }
+
+        return jugadorQueSeVa;
     }
 
 }

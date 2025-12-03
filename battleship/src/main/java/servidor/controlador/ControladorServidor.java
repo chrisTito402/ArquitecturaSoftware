@@ -83,9 +83,9 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     // Metodo para manejar el mensaje recibido por la red.
     @Override
     public void manejarMensaje(String json) {
+
         Gson gson = new Gson();
         Mensaje mensaje = gson.fromJson(json, Mensaje.class);
-
         manejadoresEventos.get(mensaje.getEvento()).accept(mensaje);
     }
 
@@ -182,16 +182,16 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
     private void setConfirmarNaves(Mensaje mensaje) {
         Gson gson = new Gson();
         Jugador jugador = gson.fromJson(mensaje.getData(), Jugador.class);
-        
+
         ResultadoConfirmarNaves resultado = servidor.setConfirmarNaves(jugador);
         if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
             enviarMensaje("RESULTADO_CONFIRMAR_NAVES", resultado);
             return;
         }
-        
+
         enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESULTADO_CONFIRMAR_NAVES", resultado);
     }
-    
+
     private void manejarUnirsePartida(Mensaje mensaje) {
         //unicamente para pruebas este print v
         System.out.println("Servidor: Recibio 'UNIRSE_PARTIDA'.");
@@ -208,18 +208,22 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
 
-        // Convertir DTO a entidad real
         Jugador jugador = new Jugador(
                 jugadorDTO.getNombre(),
                 jugadorDTO.getColor(),
                 jugadorDTO.getEstado()
         );
 
-        // 1. Lógica REAL del servidor
-        servidor.abandonarPartida(jugador);
+        // Recibo el jugador ya actualizado
+        Jugador jugadorActual = servidor.abandonarPartida(jugador);
 
-        // 2. Notificar al otro jugador
-        enviarMensaje("JUGADOR_ABANDONO", jugadorDTO);
+        JugadorDTO respuesta = new JugadorDTO(
+                jugadorActual.getNombre(),
+                jugadorActual.getColor(),
+                jugadorActual.getEstado()
+        );
+
+        enviarMensaje("JUGADOR_ABANDONO", respuesta);
     }
 
 }
