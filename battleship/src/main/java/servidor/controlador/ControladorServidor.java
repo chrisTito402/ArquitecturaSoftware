@@ -217,13 +217,13 @@ public class ControladorServidor implements ManejadorRespuestaCliente {
         // Recibo el jugador ya actualizado
         Jugador jugadorActual = servidor.abandonarPartida(jugador);
 
-        JugadorDTO respuesta = new JugadorDTO(
+        JugadorDTO jugadordto = new JugadorDTO(
                 jugadorActual.getNombre(),
                 jugadorActual.getColor(),
                 jugadorActual.getEstado()
         );
 
-        enviarMensaje("JUGADOR_ABANDONO", respuesta);
+        enviarMensaje("JUGADOR_ABANDONO", jugadordto);
     }
 
 }

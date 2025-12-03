@@ -168,25 +168,25 @@ public class ControlModelo implements IModeloCliente {
             System.out.println("Error: Nombre vacio.");
             return null;
         }
-        
+
         return jugador;
     }
-    
+
     @Override
     public void manejarResultadoAddNave(AddNaveDTO resultado) {
         System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
-        
+
         if (resultado.getResultado() == ResultadoAddNave.NAVE_AÑADIDA) {
             notificarAllSuscriptores("RESULTADO_ADD_NAVE", resultado);
         }
     }
-    
+
     @Override
     public void manejarResultadoConfirmarNaves(ResultadoConfirmarNaves resultado) {
         if (resultado == null) {
             return;
         }
-        
+
         notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", resultado);
     }
 
@@ -259,6 +259,7 @@ public class ControlModelo implements IModeloCliente {
         return jugador;
     }
 
+    //Envia
     @Override
     public JugadorDTO abandonarPartida(Jugador jugador) {
 
@@ -277,6 +278,16 @@ public class ControlModelo implements IModeloCliente {
                 jugador.getColor(),
                 jugador.getEstado()
         );
+    }
+
+    //Recibe
+    @Override
+    public void manejarJugadorAbandono(JugadorDTO dto) {
+        if (dto == null) {
+            System.out.println("Error el jugador regreso null desde el servidor.");
+            return;
+        }
+        notificarAllSuscriptores("ABANDONO_PARTIDA", dto);
     }
 
 }

@@ -124,8 +124,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void manejarAbandonarPartida(Mensaje mensaje) {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono la partida.");
-        partida.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
+
+        partida.manejarJugadorAbandono(jugadorDTO);
 
     }
 
@@ -172,10 +172,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private void manejarResultadoConfirmarNaves(Mensaje mensaje) {
         Gson gson = new Gson();
         ResultadoConfirmarNaves resultado = gson.fromJson(mensaje.getData(), ResultadoConfirmarNaves.class);
-        
+
         partida.manejarResultadoConfirmarNaves(resultado);
     }
-    
+
     @Override
     public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
         AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
@@ -183,7 +183,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
             enviarMensaje("ADD_NAVE", addDTO);
         }
     }
-    
+
     @Override
     public void setConfirmarNaves() {
         JugadorDTO jugador = partida.confirmarNaves();
@@ -217,7 +217,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     public void unirsePartida(JugadorDTO jugadorDTO) {
         Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
         partida.unirsePartida(jugador);
-        
+
         Gson gson = new Gson();
         JsonElement data = gson.toJsonTree(jugador);
         Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, "UNIRSE_PARTIDA", data, "ID_CLIENTE");
@@ -284,11 +284,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
                 .map(jugadorEntidad -> new JugadorDTO(jugadorEntidad.getNombre(), jugadorEntidad.getColor(), jugadorEntidad.getEstado()))
                 .toList();
     }
-    
+
     private void actualizarLobby(Mensaje mensaje) {
-    Gson gson = new Gson();
-    JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-    
-    partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
-}
+        Gson gson = new Gson();
+        JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+
+        partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
+    }
 }

@@ -50,4 +50,6 @@ public interface IModeloCliente {
     public void manejarResultadoAddNave(AddNaveDTO resultado);
     
     public void manejarResultadoConfirmarNaves(ResultadoConfirmarNaves resultado);
+    
+    public void manejarJugadorAbandono(JugadorDTO J);
 }
