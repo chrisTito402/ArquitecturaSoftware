@@ -4,8 +4,9 @@ import models.entidades.Jugador;
 import models.observador.ISuscriptor;
 import java.util.List;
 import models.entidades.Coordenadas;
+import models.enums.OrientacionNave;
 import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
+import views.DTOs.TipoNaveDTO;
 
 /**
  *
@@ -25,7 +26,7 @@ public interface IControlador {
 
     public JugadorDTO getJugador();
 
-    public void addNave(NaveDTO nave, List<Coordenadas> coordenadas);
+    public void addNave(TipoNaveDTO tipo, OrientacionNave orientacion, List<Coordenadas> coordenadas);
     
     public void setConfirmarNaves();
 

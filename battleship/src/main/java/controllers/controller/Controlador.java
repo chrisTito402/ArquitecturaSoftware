@@ -2,30 +2,25 @@ package controllers.controller;
 
 import buseventos.Mensaje;
 import buseventos.TipoAccion;
-import clientesocket.ClienteSocket;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.entidades.Nave;
 import models.builder.Director;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
-import models.control.ControlModelo;
 import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
-import models.enums.ResultadoAddNave;
+import models.enums.OrientacionNave;
 import models.enums.ResultadoConfirmarNaves;
-import servidor.modelo.ServidorManager;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
+import views.DTOs.TipoNaveDTO;
 
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
@@ -177,7 +172,22 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
     
     @Override
-    public void addNave(NaveDTO nave, List<Coordenadas> coordenadas) {
+    public void addNave(TipoNaveDTO tipo, OrientacionNave orientacion, List<Coordenadas> coordenadas) {
+        NaveDTO nave = null;
+
+        switch (tipo) {
+            case BARCO ->
+                nave = new NaveDTO(orientacion, tipo, 1);
+            case SUBMARINO ->
+                nave = new NaveDTO(orientacion, tipo, 2);
+            case CRUCERO ->
+                nave = new NaveDTO(orientacion, tipo, 3);
+            case PORTAAVIONES ->
+                nave = new NaveDTO(orientacion, tipo, 4);
+            default -> {
+            }
+        }
+        
         AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
         if (addDTO != null) {
             enviarMensaje("ADD_NAVE", addDTO);
