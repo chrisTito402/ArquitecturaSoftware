@@ -1,0 +1,281 @@
+================================================================================
+                    GUION DE PRESENTACION - BATALLA NAVAL
+                         Arquitectura de Software
+================================================================================
+
+
+================================================================================
+INTRODUCCION (1-2 minutos)
+================================================================================
+
+"Buenos dias/tardes profesor. Somos [nombres del equipo] y vamos a presentar
+nuestro proyecto de curso: Batalla Naval.
+
+El objetivo del proyecto fue aplicar diferentes patrones y estilos
+arquitectonicos para resolver los requerimientos del juego clasico de
+Batalla Naval.
+
+El juego permite que dos jugadores en red, cada uno desde su propia
+computadora, coloquen sus naves en un tablero de 10x10 y se enfrenten
+por turnos disparando para hundir las naves del oponente."
+
+
+================================================================================
+ARQUITECTURA DEL SISTEMA (3-4 minutos)
+================================================================================
+
+"Nuestro proyecto implementa tres estilos arquitectonicos principales:"
+
+--------------------------------------------------------------------------------
+1. ARQUITECTURA EN CAPAS
+--------------------------------------------------------------------------------
+
+"Organizamos el codigo en cuatro capas bien definidas:
+
+- CAPA DE PRESENTACION: Contiene las interfaces graficas con Swing,
+  los JFrames y componentes visuales.
+
+- CAPA DE CONTROL: Contiene los controladores que orquestan la
+  comunicacion entre la vista y el modelo.
+
+- CAPA DE NEGOCIO: Contiene la logica del juego, tanto en el cliente
+  como en el servidor.
+
+- CAPA DE COMUNICACION: Contiene los sockets TCP/IP y los DTOs para
+  transferencia de datos.
+
+Las dependencias siempre van hacia abajo: la presentacion depende del
+control, el control depende del negocio, y todos dependen de la capa
+compartida."
+
+--------------------------------------------------------------------------------
+2. PATRON MVC
+--------------------------------------------------------------------------------
+
+"Implementamos el patron Modelo-Vista-Controlador:
+
+- MODELO: La clase ControlModelo que implementa IModeloCliente,
+  maneja el estado del juego en el cliente.
+
+- VISTA: Los JFrames como FrmMenuPrincipal, FrmColocarNaves,
+  FrmPartidaEnCurso.
+
+- CONTROLADOR: La clase Controlador que implementa IControlador,
+  mas ControlVista que es un Singleton.
+
+La vista NUNCA accede directamente al modelo. Siempre pasa por el
+controlador usando DTOs, lo que garantiza el desacoplamiento."
+
+--------------------------------------------------------------------------------
+3. BUS DE EVENTOS CON SRP
+--------------------------------------------------------------------------------
+
+"El Bus de Eventos esta en la clase BusEventos y funciona con el
+patron Publish-Subscribe:
+
+- Los clientes se SUSCRIBEN a eventos como RESULTADO_DISPARO,
+  CAMBIO_TURNO, FIN_PARTIDA.
+
+- Cuando un cliente dispara, PUBLICA el evento al bus.
+
+- El bus NOTIFICA a todos los suscriptores.
+
+IMPORTANTE: Aplicamos el Principio de Responsabilidad Unica (SRP).
+El BusEventos SOLO rutea mensajes. Toda la logica de negocio esta
+delegada a la clase GestorPartida. Esto lo pueden ver documentado
+en el codigo."
+
+
+================================================================================
+PATRONES DE DISENO (2-3 minutos)
+================================================================================
+
+"Ademas de los estilos arquitectonicos, implementamos tres patrones
+de diseno:"
+
+--------------------------------------------------------------------------------
+1. SINGLETON
+--------------------------------------------------------------------------------
+
+"La clase ControlVista implementa el patron Singleton:
+
+    private static ControlVista controlVista;
+
+    public static synchronized ControlVista getInstancia() {
+        if (controlVista == null) {
+            controlVista = new ControlVista();
+        }
+        return controlVista;
+    }
+
+Es thread-safe gracias al synchronized, y garantiza una unica
+instancia que coordina todas las vistas del cliente."
+
+--------------------------------------------------------------------------------
+2. BUILDER
+--------------------------------------------------------------------------------
+
+"Implementamos el patron Builder para la construccion de objetos complejos:
+
+- Tenemos un Director que orquesta la construccion.
+- Tres builders: PartidaBuilder, JugadorBuilder, TableroBuilder.
+- Cada uno implementa su interfaz: IPartidaBuilder, IJugadorBuilder,
+  ITableroBuilder.
+
+Esto nos permite construir objetos paso a paso y separar la logica
+de construccion."
+
+--------------------------------------------------------------------------------
+3. OBSERVER
+--------------------------------------------------------------------------------
+
+"El patron Observer esta implementado con la interfaz ISuscriptor:
+
+    public interface ISuscriptor {
+        public void notificar(String contexto, Object datos);
+    }
+
+ControlVista implementa esta interfaz y se suscribe al modelo.
+Cuando el modelo cambia, notifica a todos los suscriptores para
+actualizar la interfaz."
+
+
+================================================================================
+DIAGRAMA DE DESPLIEGUE (1-2 minutos)
+================================================================================
+
+[Mostrar diagrama de despliegue]
+
+"Este es nuestro Diagrama de Despliegue:
+
+- Tenemos un NODO SERVIDOR que ejecuta MainServidor.jar con el
+  Bus de Eventos y el Gestor de Partida.
+
+- Tenemos un NODO CLIENTE que representa a cada jugador, ejecutando
+  MainCliente.jar con el controlador, modelo y la interfaz Swing.
+
+- La comunicacion es mediante TCP/IP en el puerto 5000.
+
+- El nodo cliente representa multiples instancias, una por cada
+  jugador que se conecte."
+
+
+================================================================================
+DIAGRAMA DE PAQUETES (1-2 minutos)
+================================================================================
+
+[Mostrar diagrama de paquetes]
+
+"Este es nuestro Diagrama de Paquetes:
+
+- El paquete CLIENTE contiene: presentacion (frames y componentes),
+  controlador, y negocio (con el sub-paquete builder).
+
+- El paquete SERVIDOR contiene: bus (el Bus de Eventos), controlador
+  y negocio (con GestorPartida).
+
+- El paquete COMPARTIDO contiene: comunicacion (DTOs y sockets),
+  entidades del dominio (Jugador, Nave, Tablero), enums, y el
+  paquete observador.
+
+Las flechas muestran las dependencias: cliente y servidor dependen
+de compartido, pero nunca al reves."
+
+
+================================================================================
+DEMOSTRACION DEL JUEGO (3-5 minutos)
+================================================================================
+
+"Ahora vamos a hacer una demostracion del juego funcionando:"
+
+PASO 1: INICIAR SERVIDOR
+"Primero ejecutamos MainServidor. El servidor inicia en el puerto
+5000 y queda esperando conexiones."
+
+PASO 2: INICIAR CLIENTES
+"Ahora ejecutamos MainCliente en dos computadoras [o dos instancias].
+Cada cliente se conecta automaticamente al servidor."
+
+PASO 3: CREAR PARTIDA
+"El Jugador 1 crea una partida y obtiene un codigo. El Jugador 2
+ingresa ese codigo para unirse."
+
+PASO 4: LOBBY
+"Ambos jugadores estan en el lobby. Cuando el host presiona
+'Empezar', ambos pasan a colocar naves."
+
+PASO 5: COLOCAR NAVES
+"Cada jugador arrastra y suelta sus naves en el tablero. El sistema
+valida que no se solapen ni esten adyacentes. Cuando confirman, se
+inicia la batalla."
+
+PASO 6: BATALLA
+"El sistema selecciona aleatoriamente quien empieza. Cada jugador
+tiene 30 segundos para disparar. Si acierta, mantiene el turno.
+Si falla, pasa al otro."
+
+[Mostrar un par de disparos, impactos, agua]
+
+PASO 7: FIN DE PARTIDA
+"Cuando un jugador hunde todas las naves del oponente, se muestra
+la pantalla de victoria/derrota."
+
+
+================================================================================
+CONCLUSIONES (1 minuto)
+================================================================================
+
+"En resumen, nuestro proyecto:
+
+- CUMPLE con la arquitectura MVC, separando vista, controlador y modelo.
+
+- CUMPLE con la arquitectura en Capas, con dependencias correctas.
+
+- CUMPLE con el Bus de Eventos aplicando SRP, separando el ruteo
+  de la logica.
+
+- IMPLEMENTA los patrones Singleton, Builder y Observer correctamente.
+
+- FUNCIONA como juego en red con todas las reglas del Batalla Naval.
+
+Tiene alguna pregunta, profesor?"
+
+
+================================================================================
+TIEMPOS ESTIMADOS
+================================================================================
+
+    Seccion                     Tiempo
+    -----------------------------------
+    Introduccion                1-2 min
+    Arquitectura                3-4 min
+    Patrones de diseno          2-3 min
+    Diagrama de Despliegue      1-2 min
+    Diagrama de Paquetes        1-2 min
+    Demostracion                3-5 min
+    Conclusiones                1 min
+    -----------------------------------
+    TOTAL                       12-19 min
+
+
+================================================================================
+TIPS PARA LA PRESENTACION
+================================================================================
+
+1. Tengan el codigo abierto en las clases clave:
+   BusEventos, ControlVista, Director, ISuscriptor
+
+2. Practiquen la demo antes para evitar errores tecnicos
+
+3. Si el profesor pregunta por SRP, muestren el comentario en
+   BusEventos.java lineas 21-24
+
+4. Si pregunta por thread-safety, mencionen ConcurrentHashMap
+   y synchronized
+
+5. Hablen con confianza, conocen bien su codigo
+
+
+================================================================================
+                            EXITO EN LA PRESENTACION!
+================================================================================

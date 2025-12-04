@@ -173,9 +173,14 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void addJugador(Jugador j) {
-        if (j != null) {
-            jugadores.add(j);
-            System.out.println("Jugador agregado: " + j.getNombre());
+        if (j != null && j.getNombre() != null) {
+            // Verificar que no exista ya
+            boolean existe = jugadores.stream()
+                    .anyMatch(existing -> existing.getNombre().equals(j.getNombre()));
+            if (!existe) {
+                jugadores.add(j);
+                System.out.println("Jugador agregado: " + j.getNombre());
+            }
         }
     }
 
@@ -191,6 +196,11 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
         suscriptores.add(suscriptor);
+    }
+
+    @Override
+    public void desuscribirDePartida(ISuscriptor suscriptor) {
+        suscriptores.remove(suscriptor);
     }
 
     @Override
@@ -263,6 +273,14 @@ public class ControlModelo implements IModeloCliente {
     // =========================================================================
     // NUEVOS METODOS PARA EL BUS DE EVENTOS
     // =========================================================================
+
+    @Override
+    public void limpiarNaves() {
+        // Reiniciar el tablero local
+        this.tablero = new TableroDTO(10, 10);
+        this.tableroConfirmado = false;
+        System.out.println("[MODELO] Naves limpiadas localmente");
+    }
 
     @Override
     public void confirmarTablero() {
@@ -346,6 +364,20 @@ public class ControlModelo implements IModeloCliente {
         }
 
         notificarAllSuscriptores("FIN_PARTIDA", ganador);
+    }
+
+    /**
+     * Reinicia completamente el estado del modelo para una nueva partida.
+     */
+    public void reiniciar() {
+        this.jugador = null;
+        this.tablero = new TableroDTO(10, 10);
+        this.naves = null;
+        this.turno = false;
+        this.tableroConfirmado = false;
+        this.jugadores.clear();
+        // No limpiar suscriptores, se mantienen
+        System.out.println("[MODELO] Estado reiniciado para nueva partida");
     }
 
 }

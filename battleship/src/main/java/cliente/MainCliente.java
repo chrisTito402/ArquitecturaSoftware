@@ -1,3 +1,4 @@
+
 package cliente;
 
 import compartido.comunicacion.Mensaje;
@@ -80,6 +81,10 @@ public class MainCliente {
         Mensaje m4 = new Mensaje(TipoAccion.SUSCRIBIR, "EMPEZAR_PARTIDA", null);
         cliente.enviarMensaje(gson.toJson(m4));
 
+        // Suscribirse a jugador listo
+        Mensaje m14 = new Mensaje(TipoAccion.SUSCRIBIR, "JUGADOR_LISTO", null);
+        cliente.enviarMensaje(gson.toJson(m14));
+
         // === EVENTOS DE COLOCACION DE NAVES ===
 
         // Suscribirse a resultado de agregar nave
@@ -118,10 +123,14 @@ public class MainCliente {
         Mensaje m11 = new Mensaje(TipoAccion.SUSCRIBIR, "JUGADOR_ABANDONO", null);
         cliente.enviarMensaje(gson.toJson(m11));
 
+        // Suscribirse a abandono de partida (evento alternativo)
+        Mensaje m15 = new Mensaje(TipoAccion.SUSCRIBIR, "ABANDONAR_PARTIDA", null);
+        cliente.enviarMensaje(gson.toJson(m15));
+
         // Suscribirse a fin de partida (victoria/derrota)
         Mensaje m12 = new Mensaje(TipoAccion.SUSCRIBIR, "FIN_PARTIDA", null);
         cliente.enviarMensaje(gson.toJson(m12));
 
-        System.out.println("[CLIENTE] Suscrito a 13 eventos del bus");
+        System.out.println("[CLIENTE] Suscrito a 15 eventos del bus");
     }
 }

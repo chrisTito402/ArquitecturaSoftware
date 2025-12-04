@@ -19,13 +19,25 @@ public interface IControlador {
 
     public String crearPartida(Jugador j);
 
+    /**
+     * Crea una partida y la registra en el servidor con el codigo dado.
+     */
+    public void crearPartidaConCodigo(JugadorDTO jugador, String codigo);
+
     public void unirsePartida(JugadorDTO jugadorDTO);
+
+    /**
+     * Solicita unirse a una partida con un codigo especifico.
+     */
+    public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo);
 
     public void empezarPartida();
 
     public void abandonarPartida(Jugador jugador);
 
     public void abandonarLobby(JugadorDTO jugadorDTO);
+
+    public void jugadorListo();
 
     // === GESTION DE JUGADORES ===
 
@@ -40,6 +52,8 @@ public interface IControlador {
     public void crearTableros();
 
     public void addNave(NaveDTO nave, List<CoordenadasDTO> coordenadas);
+
+    public void limpiarNaves();
 
     public void confirmarTablero();
 
@@ -56,5 +70,14 @@ public interface IControlador {
     // === OBSERVADORES ===
 
     public void suscribirAPartida(ISuscriptor suscriptor);
+
+    public void desuscribirDePartida(ISuscriptor suscriptor);
+
+    // === REINICIO ===
+
+    /**
+     * Reinicia el modelo para una nueva partida.
+     */
+    public void reiniciarModelo();
 
 }

@@ -2,58 +2,82 @@ package servidor.bus;
 
 import compartido.comunicacion.socket.UserServerThread;
 import com.google.gson.Gson;
-import compartido.comunicacion.dto.JugadorDTO;
-import compartido.comunicacion.dto.TurnoDTO;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import compartido.comunicacion.Mensaje;
 import compartido.comunicacion.TipoAccion;
+import servidor.negocio.GestorPartida;
+import servidor.negocio.IPublicadorEventos;
 
 /**
  * Bus de Eventos central para la comunicacion entre clientes.
+ *
  * Implementa el patron Publish-Subscribe con soporte para:
  * - PUBLICAR: Broadcast a todos los suscriptores de un evento
  * - SUSCRIBIR: Registrarse para recibir un tipo de evento
  * - SEND_UNICAST: Enviar mensaje a un cliente especifico
  *
+ * PRINCIPIO DE RESPONSABILIDAD UNICA (SRP):
+ * Esta clase SOLO maneja el routing de mensajes.
+ * La logica de negocio se delega a GestorPartida.
+ *
  * Thread-safe mediante ConcurrentHashMap y CopyOnWriteArraySet.
  *
- * @author daniel
+ * @author Equipo
  */
-public class BusEventos {
+public class BusEventos implements IPublicadorEventos {
 
+    // Mapa de eventos a suscriptores
     private final ConcurrentHashMap<String, Set<UserServerThread>> eventos;
+
+    // Mapa de ID de cliente a su thread
     private final ConcurrentHashMap<String, UserServerThread> clientesPorId;
 
-    // Control de tableros confirmados (lógica del servidor)
-    private final Set<String> tablerosConfirmados = new HashSet<>();
-    private final List<JugadorDTO> jugadoresEnPartida = new ArrayList<>();
-    private final Object lockTableros = new Object();
+    // Mapa inverso: thread a ID de cliente (para detectar desconexiones)
+    private final ConcurrentHashMap<UserServerThread, String> idPorCliente;
 
+    // Gestor de logica de negocio (Capa de Negocio)
+    private final GestorPartida gestorPartida;
+
+    // Serializador JSON
+    private final Gson gson;
+
+    /**
+     * Constructor del BusEventos.
+     * Inicializa las estructuras de datos y el gestor de partida.
+     */
     public BusEventos() {
         this.eventos = new ConcurrentHashMap<>();
         this.clientesPorId = new ConcurrentHashMap<>();
+        this.idPorCliente = new ConcurrentHashMap<>();
+        this.gson = new Gson();
+        // Inyeccion de dependencia: el GestorPartida recibe este bus como publicador
+        this.gestorPartida = new GestorPartida(this);
     }
 
     /**
-     * Constructor para compatibilidad (ignora el mapa pasado, usa ConcurrentHashMap).
+     * Constructor para compatibilidad (ignora el mapa pasado).
+     *
+     * @param mapa Parametro ignorado, mantenido por compatibilidad
      */
     public BusEventos(java.util.Map mapa) {
-        this.eventos = new ConcurrentHashMap<>();
-        this.clientesPorId = new ConcurrentHashMap<>();
+        this();
     }
+
+    // =========================================================================
+    // OPERACIONES DE ROUTING (Patron Publish-Subscribe)
+    // =========================================================================
 
     /**
      * Publica un mensaje a todos los suscriptores de un evento.
+     *
+     * @param evento Nombre del evento/canal
+     * @param mensaje Mensaje a publicar
      */
-    private void publicar(String evento, Mensaje mensaje) {
+    @Override
+    public void publicar(String evento, Mensaje mensaje) {
         System.out.println("[BUS] PUBLICAR evento: " + evento);
-        Gson gson = new Gson();
         String jsonMensaje = gson.toJson(mensaje);
 
         Set<UserServerThread> suscriptores = eventos.get(evento);
@@ -71,6 +95,9 @@ public class BusEventos {
 
     /**
      * Suscribe un cliente a un evento especifico.
+     *
+     * @param evento Nombre del evento
+     * @param suscriptor Thread del cliente suscriptor
      */
     private void suscribirse(String evento, UserServerThread suscriptor) {
         System.out.println("[BUS] SUSCRIBIR cliente a evento: " + evento);
@@ -80,6 +107,9 @@ public class BusEventos {
 
     /**
      * Desuscribe un cliente de un evento especifico.
+     *
+     * @param evento Nombre del evento
+     * @param suscriptor Thread del cliente a desuscribir
      */
     private void desuscribirse(String evento, UserServerThread suscriptor) {
         System.out.println("[BUS] DESUSCRIBIR cliente de evento: " + evento);
@@ -91,10 +121,13 @@ public class BusEventos {
 
     /**
      * Envia un mensaje unicast a un cliente especifico por su ID.
+     *
+     * @param idDestino ID del cliente destino
+     * @param mensaje Mensaje a enviar
      */
-    private void enviarUnicast(String idDestino, Mensaje mensaje) {
+    @Override
+    public void enviarUnicast(String idDestino, Mensaje mensaje) {
         System.out.println("[BUS] SEND_UNICAST a cliente: " + idDestino);
-        Gson gson = new Gson();
         String jsonMensaje = gson.toJson(mensaje);
 
         UserServerThread destinatario = clientesPorId.get(idDestino);
@@ -114,8 +147,16 @@ public class BusEventos {
         }
     }
 
+    // =========================================================================
+    // PUNTO DE ENTRADA PRINCIPAL
+    // =========================================================================
+
     /**
      * Punto de entrada principal para manejar eventos del cliente.
+     * Parsea el mensaje y lo enruta segun la accion solicitada.
+     *
+     * @param json Mensaje JSON recibido del cliente
+     * @param cliente Thread del cliente que envia el mensaje
      */
     public void manejarEvento(String json, UserServerThread cliente) {
         if (json == null || json.isEmpty()) {
@@ -123,7 +164,6 @@ public class BusEventos {
             return;
         }
 
-        Gson gson = new Gson();
         Mensaje mensaje;
         try {
             mensaje = gson.fromJson(json, Mensaje.class);
@@ -141,38 +181,86 @@ public class BusEventos {
             case SUSCRIBIR:
                 suscribirse(mensaje.getEvento(), cliente);
                 break;
+
             case PUBLICAR:
-                // Ejecutar lógica del servidor antes de publicar
-                manejarLogicaServidor(mensaje.getEvento(), mensaje);
-                publicar(mensaje.getEvento(), mensaje);
+                procesarPublicacion(mensaje);
                 break;
+
             case SEND_UNICAST:
-                String idDestino = mensaje.getSubEvento();
-                if (idDestino != null && !idDestino.isEmpty()) {
-                    enviarUnicast(idDestino, mensaje);
-                } else {
-                    System.out.println("[BUS] ERROR: SEND_UNICAST sin ID destino");
-                }
+                procesarUnicast(mensaje);
                 break;
+
             default:
                 System.out.println("[BUS] ERROR: Accion desconocida: " + mensaje.getAccion());
         }
     }
 
     /**
+     * Procesa una solicitud de publicacion.
+     * Delega la logica de negocio al GestorPartida.
+     *
+     * @param mensaje Mensaje a procesar
+     */
+    private void procesarPublicacion(Mensaje mensaje) {
+        String evento = mensaje.getEvento();
+
+        // Delegar logica de negocio al GestorPartida
+        boolean debePublicar = gestorPartida.procesarEvento(evento, mensaje);
+
+        // Si el gestor indica que debe publicarse, hacer broadcast
+        if (debePublicar) {
+            publicar(evento, mensaje);
+        }
+    }
+
+    /**
+     * Procesa una solicitud de envio unicast.
+     *
+     * @param mensaje Mensaje a enviar
+     */
+    private void procesarUnicast(Mensaje mensaje) {
+        String idDestino = mensaje.getSubEvento();
+        if (idDestino != null && !idDestino.isEmpty()) {
+            enviarUnicast(idDestino, mensaje);
+        } else {
+            System.out.println("[BUS] ERROR: SEND_UNICAST sin ID destino");
+        }
+    }
+
+    // =========================================================================
+    // GESTION DE CLIENTES
+    // =========================================================================
+
+    /**
      * Remueve un suscriptor de todos los eventos (cuando se desconecta).
+     * Notifica al GestorPartida para limpiar la partida si es necesario.
+     *
+     * @param user Thread del usuario a remover
      */
     public void removeSuscriptor(UserServerThread user) {
         if (user != null) {
+            // Obtener el ID del cliente antes de removerlo
+            String idCliente = idPorCliente.get(user);
+
+            // Remover de todas las estructuras
             eventos.values().forEach(suscriptores -> suscriptores.remove(user));
-            // Remover del mapa de clientes por ID
             clientesPorId.values().removeIf(u -> u.equals(user));
-            System.out.println("[BUS] Suscriptor removido de todos los eventos");
+            idPorCliente.remove(user);
+
+            System.out.println("[BUS] Suscriptor removido de todos los eventos (ID: " + idCliente + ")");
+
+            // Notificar al GestorPartida para que limpie la partida fantasma
+            if (idCliente != null) {
+                gestorPartida.manejarDesconexionCliente(idCliente);
+            }
         }
     }
 
     /**
      * Registra un nuevo cliente con su evento privado y lo guarda por ID.
+     *
+     * @param event Evento privado del cliente (formato: MENSAJE_CLIENTE_X)
+     * @param client Thread del cliente
      */
     public void addNewClient(String event, UserServerThread client) {
         System.out.println("[BUS] Registrando nuevo cliente con evento: " + event);
@@ -182,12 +270,20 @@ public class BusEventos {
         if (event.startsWith("MENSAJE_CLIENTE_")) {
             String id = event.substring("MENSAJE_CLIENTE_".length());
             clientesPorId.put(id, client);
+            idPorCliente.put(client, id);
             System.out.println("[BUS] Cliente registrado con ID: " + id);
         }
     }
 
+    // =========================================================================
+    // UTILIDADES DE CONSULTA
+    // =========================================================================
+
     /**
      * Obtiene la cantidad de suscriptores de un evento.
+     *
+     * @param evento Nombre del evento
+     * @return Cantidad de suscriptores
      */
     public int contarSuscriptores(String evento) {
         Set<UserServerThread> suscriptores = eventos.get(evento);
@@ -196,6 +292,9 @@ public class BusEventos {
 
     /**
      * Verifica si un evento tiene suscriptores.
+     *
+     * @param evento Nombre del evento
+     * @return true si tiene al menos un suscriptor
      */
     public boolean tieneSubscriptores(String evento) {
         return contarSuscriptores(evento) > 0;
@@ -212,143 +311,19 @@ public class BusEventos {
         System.out.println("[BUS] ============================");
     }
 
-    // =========================================================================
-    // LOGICA DEL SERVIDOR
-    // =========================================================================
-
     /**
-     * Maneja la lógica del servidor para eventos específicos.
-     * Se ejecuta ANTES de publicar el evento a los clientes.
-     */
-    private void manejarLogicaServidor(String evento, Mensaje mensaje) {
-        Gson gson = new Gson();
-
-        switch (evento) {
-            case "JUGADOR_UNIDO":
-            case "UNIRSE_PARTIDA":
-                // Registrar jugador para el turno inicial
-                JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-                if (jugador != null) {
-                    synchronized (lockTableros) {
-                        // Evitar duplicados
-                        boolean existe = jugadoresEnPartida.stream()
-                                .anyMatch(j -> j.getNombre().equals(jugador.getNombre()));
-                        if (!existe) {
-                            jugadoresEnPartida.add(jugador);
-                            System.out.println("[BUS-SERVER] Jugador registrado: " + jugador.getNombre() +
-                                              " (Total: " + jugadoresEnPartida.size() + ")");
-                        }
-                    }
-                }
-                break;
-
-            case "CONFIRMAR_TABLERO":
-                manejarConfirmarTablero(mensaje);
-                break;
-
-            case "ABANDONAR_LOBBY":
-            case "JUGADOR_ABANDONO":
-                // Limpiar jugador que abandona
-                JugadorDTO jugadorAbandono = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-                if (jugadorAbandono != null) {
-                    synchronized (lockTableros) {
-                        tablerosConfirmados.remove(jugadorAbandono.getNombre());
-                        jugadoresEnPartida.removeIf(j -> j.getNombre().equals(jugadorAbandono.getNombre()));
-                        System.out.println("[BUS-SERVER] Jugador removido: " + jugadorAbandono.getNombre());
-                    }
-                }
-                break;
-
-            default:
-                // Otros eventos no requieren lógica del servidor
-                break;
-        }
-    }
-
-    /**
-     * Maneja la confirmación del tablero de un jugador.
-     * Cuando ambos jugadores confirman, envía TABLEROS_LISTOS y TURNO_INICIAL.
-     */
-    private void manejarConfirmarTablero(Mensaje mensaje) {
-        Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-
-        System.out.println("[BUS-SERVER] Tablero confirmado por: " + jugadorDTO.getNombre());
-
-        boolean ambosListos = false;
-        TurnoDTO turnoInicial = null;
-
-        synchronized (lockTableros) {
-            // Registrar el jugador con su DTO completo
-            boolean existeJugador = jugadoresEnPartida.stream()
-                    .anyMatch(j -> j.getNombre().equals(jugadorDTO.getNombre()));
-            if (!existeJugador) {
-                jugadoresEnPartida.add(jugadorDTO);
-                System.out.println("[BUS-SERVER] Jugador registrado: " + jugadorDTO.getNombre());
-            }
-
-            // Agregar a tableros confirmados
-            tablerosConfirmados.add(jugadorDTO.getNombre());
-
-            System.out.println("[BUS-SERVER] Tableros confirmados: " + tablerosConfirmados.size() + "/2 -> " + tablerosConfirmados);
-            System.out.println("[BUS-SERVER] Jugadores registrados: " + jugadoresEnPartida.size());
-
-            // Verificar si ambos jugadores han confirmado (solo necesitamos 2 tableros)
-            if (tablerosConfirmados.size() >= 2) {
-                System.out.println("[BUS-SERVER] *** AMBOS TABLEROS LISTOS - INICIANDO PARTIDA ***");
-                ambosListos = true;
-
-                // Seleccionar jugador inicial aleatoriamente
-                List<String> nombres = new ArrayList<>(tablerosConfirmados);
-                Random random = new Random();
-                String nombreInicial = nombres.get(random.nextInt(nombres.size()));
-
-                // Crear DTO del turno inicial
-                turnoInicial = new TurnoDTO(
-                        nombreInicial,
-                        nombreInicial,
-                        30, // segundos por turno
-                        1   // numero de turno
-                );
-
-                System.out.println("[BUS-SERVER] Turno inicial asignado a: " + nombreInicial);
-
-                // Limpiar para proxima partida
-                tablerosConfirmados.clear();
-                jugadoresEnPartida.clear();
-            }
-        }
-
-        // Publicar FUERA del synchronized para evitar deadlocks
-        if (ambosListos && turnoInicial != null) {
-            // Notificar que los tableros estan listos (enviar TRUE para que no sea null)
-            Mensaje msgTablerosListos = new Mensaje(
-                    TipoAccion.PUBLICAR,
-                    "TABLEROS_LISTOS",
-                    gson.toJsonTree(Boolean.TRUE),
-                    "SERVER"
-            );
-            publicar("TABLEROS_LISTOS", msgTablerosListos);
-
-            // Enviar el turno inicial
-            Mensaje msgTurnoInicial = new Mensaje(
-                    TipoAccion.PUBLICAR,
-                    "TURNO_INICIAL",
-                    gson.toJsonTree(turnoInicial),
-                    "SERVER"
-            );
-            publicar("TURNO_INICIAL", msgTurnoInicial);
-        }
-    }
-
-    /**
-     * Reinicia el estado del servidor para una nueva partida.
+     * Reinicia el estado de la partida en el gestor.
      */
     public void resetPartida() {
-        synchronized (lockTableros) {
-            tablerosConfirmados.clear();
-            jugadoresEnPartida.clear();
-            System.out.println("[BUS-SERVER] Estado de partida reiniciado");
-        }
+        gestorPartida.resetPartida();
+    }
+
+    /**
+     * Obtiene el gestor de partida (para pruebas o consultas).
+     *
+     * @return Instancia del GestorPartida
+     */
+    public GestorPartida getGestorPartida() {
+        return gestorPartida;
     }
 }

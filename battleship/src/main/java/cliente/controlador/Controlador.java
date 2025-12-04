@@ -19,6 +19,7 @@ import compartido.comunicacion.dto.DisparoDTO;
 import compartido.comunicacion.dto.JugadorDTO;
 import compartido.comunicacion.dto.NaveDTO;
 import compartido.comunicacion.dto.RespuestaUnirseDTO;
+import compartido.comunicacion.dto.SolicitudUnirseDTO;
 import compartido.comunicacion.dto.TurnoDTO;
 import compartido.ManejadorRespuestaCliente;
 
@@ -55,6 +56,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("RESPUESTA_UNIRSE", this::manejarRespuestaUnirse);
+        manejadorEventos.put("JUGADOR_LISTO", this::manejarJugadorListo);
 
         // === EVENTOS DE COLOCACION DE NAVES ===
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
@@ -69,6 +71,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
         // === EVENTOS DE FIN DE PARTIDA ===
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
+        manejadorEventos.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartida);
         manejadorEventos.put("FIN_PARTIDA", this::manejarFinPartida);
 
         System.out.println("[CONTROLADOR] Registrados " + manejadorEventos.size() + " manejadores de eventos");
@@ -186,6 +189,12 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("Jugador en mensaje: " + jugadorDTO.getNombre());
 
+        // Agregar el jugador al modelo local si no existe
+        if (jugadorDTO != null && jugadorDTO.getNombre() != null) {
+            Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
+            partida.addJugador(jugador);
+        }
+
         // Notificar a los suscriptores locales (esto actualiza el lobby)
         System.out.println("Notificando a suscriptores del modelo...");
         partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
@@ -196,6 +205,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
         if (addDTO != null) {
             enviarMensaje("ADD_NAVE", addDTO);
+        }
+    }
+
+    @Override
+    public void limpiarNaves() {
+        // Limpiar en el modelo local
+        partida.limpiarNaves();
+        // Notificar al servidor para limpiar las naves registradas
+        JugadorDTO jugador = partida.getJugador();
+        if (jugador != null) {
+            enviarMensaje("LIMPIAR_TABLERO", jugador);
+            System.out.println("[CONTROLADOR] Tablero limpiado para: " + jugador.getNombre());
         }
     }
 
@@ -215,6 +236,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
+    public void desuscribirDePartida(ISuscriptor suscriptor) {
+        partida.desuscribirDePartida(suscriptor);
+    }
+
+    @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
     }
@@ -225,6 +251,26 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
         partida.unirsePartida(jugador);
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
+    }
+
+    @Override
+    public void crearPartidaConCodigo(JugadorDTO jugador, String codigo) {
+        // Registrar jugador en el modelo local
+        Jugador j = new Jugador(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
+        partida.unirsePartida(j);
+
+        // Enviar al servidor para registrar la partida
+        SolicitudUnirseDTO solicitud = new SolicitudUnirseDTO(jugador, codigo, true);
+        enviarMensaje("CREAR_PARTIDA", solicitud);
+        System.out.println("[CONTROLADOR] Partida creada con codigo: " + codigo);
+    }
+
+    @Override
+    public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo) {
+        // NO registrar en modelo local hasta recibir confirmacion
+        SolicitudUnirseDTO solicitud = new SolicitudUnirseDTO(jugador, codigo, false);
+        enviarMensaje("UNIRSE_PARTIDA", solicitud);
+        System.out.println("[CONTROLADOR] Solicitud de union enviada - Codigo: " + codigo);
     }
 
     private void manejarUnirsePartida(Mensaje mensaje) {
@@ -255,7 +301,24 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     @Override
     public void empezarPartida() {
         partida.empezarPartida();
-        enviarMensaje("EMPEZAR_PARTIDA", null);
+        JugadorDTO jugador = partida.getJugador();
+        enviarMensaje("EMPEZAR_PARTIDA", jugador);
+    }
+
+    @Override
+    public void jugadorListo() {
+        JugadorDTO jugador = partida.getJugador();
+        if (jugador != null) {
+            enviarMensaje("JUGADOR_LISTO", jugador);
+            System.out.println("[CONTROLADOR] Jugador listo enviado: " + jugador.getNombre());
+        }
+    }
+
+    private void manejarJugadorListo(Mensaje mensaje) {
+        Gson gson = new Gson();
+        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        System.out.println("[CONTROLADOR] Jugador listo recibido: " + jugadorDTO.getNombre());
+        partida.notificarAllSuscriptores("JUGADOR_LISTO", jugadorDTO);
     }
 
     private void manejarEmpezarPartida(Mensaje mensaje) {
@@ -406,5 +469,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         } else {
             System.out.println("[CONTROLADOR] Union exitosa");
         }
+    }
+
+    @Override
+    public void reiniciarModelo() {
+        partida.reiniciar();
+        System.out.println("[CONTROLADOR] Modelo reiniciado");
     }
 }

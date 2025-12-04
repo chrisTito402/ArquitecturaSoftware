@@ -43,6 +43,8 @@ public interface IModeloCliente {
 
     public AddNaveDTO addNave(NaveDTO nave, List<CoordenadasDTO> coordenadas);
 
+    public void limpiarNaves();
+
     public void confirmarTablero();
 
     public boolean tableroConfirmado();
@@ -75,5 +77,14 @@ public interface IModeloCliente {
 
     public void suscribirAPartida(ISuscriptor suscriptor);
 
+    public void desuscribirDePartida(ISuscriptor suscriptor);
+
     public void notificarAllSuscriptores(String contexto, Object datos);
+
+    // === REINICIO ===
+
+    /**
+     * Reinicia completamente el estado del modelo para una nueva partida.
+     */
+    public void reiniciar();
 }

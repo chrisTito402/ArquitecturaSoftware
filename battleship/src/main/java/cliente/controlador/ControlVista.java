@@ -44,6 +44,7 @@ public class ControlVista implements ISuscriptor {
     private List<ISuscriptor> suscriptoresLobby;
     private String codigoPartida;
     private boolean esHost;
+    private boolean partidaFinalizada = false; // Evita mostrar múltiples pantallas de fin
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
@@ -59,6 +60,7 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("FIN_PARTIDA", this::manejarFinPartida);
         manejadoresNoti.put("ERROR_UNIRSE", this::manejarErrorUnirse);
         manejadoresNoti.put("CAMBIO_TURNO", this::manejarCambioTurno);
+        manejadoresNoti.put("JUGADOR_LISTO", this::manejarJugadorListo);
         suscriptoresLobby = new ArrayList<>();
     }
 
@@ -226,21 +228,43 @@ public class ControlVista implements ISuscriptor {
 
         // Pintar resultado del disparo y actualizar marcador
         if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
-            componente.setBackground(Color.YELLOW);
-            // Actualizar marcador de naves - nave averiada
-            if (fueYoQuienDisparo && marcadorNavesPanel != null && d.getTipoNaveImpactada() != null) {
-                marcadorNavesPanel.naveAveriada(d.getTipoNaveImpactada());
+            if (fueYoQuienDisparo) {
+                // En tablero enemigo: fondo amarillo
+                componente.setBackground(Color.YELLOW);
+                // Actualizar marcador de naves - nave averiada (solo primer impacto)
+                if (marcadorNavesPanel != null && d.getTipoNaveImpactada() != null) {
+                    marcadorNavesPanel.naveAveriada(d.getTipoNaveImpactada());
+                }
+            } else {
+                // En mi tablero: mantener color de nave + indicador visual de impacto
+                if (componente instanceof CasillaPanel casillaPropia) {
+                    casillaPropia.setEstado(CasillaPanel.EstadoCasilla.IMPACTO);
+                }
             }
         }
         if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
-            componente.setBackground(Color.RED);
-            // Actualizar marcador de naves - nave hundida
-            if (fueYoQuienDisparo && marcadorNavesPanel != null && d.getTipoNaveHundida() != null) {
-                marcadorNavesPanel.naveHundida(d.getTipoNaveHundida());
+            if (fueYoQuienDisparo) {
+                // En tablero enemigo: fondo rojo
+                componente.setBackground(Color.RED);
+                // Actualizar marcador de naves - nave hundida
+                if (marcadorNavesPanel != null && d.getTipoNaveHundida() != null) {
+                    marcadorNavesPanel.naveHundida(d.getTipoNaveHundida());
+                }
+            } else {
+                // En mi tablero: indicador visual de hundimiento
+                if (componente instanceof CasillaPanel casillaPropia) {
+                    casillaPropia.setEstado(CasillaPanel.EstadoCasilla.HUNDIDA);
+                }
             }
         }
         if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
-            componente.setBackground(Color.BLUE);
+            if (fueYoQuienDisparo) {
+                // En tablero enemigo: fondo azul
+                componente.setBackground(Color.BLUE);
+            } else {
+                // En mi tablero: fondo azul claro para agua (no deberia pasar en casilla con nave)
+                componente.setBackground(new Color(100, 149, 237)); // Azul acero
+            }
         }
 
         // Actualizar indicador de turno
@@ -270,8 +294,6 @@ public class ControlVista implements ISuscriptor {
         System.out.println(d.getResultadoDisparo().toString());
 
         if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
-            casillasEnemigas.forEach(e -> e.setEnabled(false));
-            timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
 
             // Determinar si yo gane o perdi
@@ -279,12 +301,17 @@ public class ControlVista implements ISuscriptor {
             JugadorDTO miJugador = control.getJugador();
             boolean gane = miJugador != null && ganador.getNombre().equals(miJugador.getNombre());
 
-            // Mostrar pantalla de fin de partida
+            // Mostrar pantalla de fin de partida (maneja timer y casillas internamente)
             mostrarPantallaFinPartida(ganador, gane);
         }
     }
 
     private void manejarAbandono(Object datos) {
+        // Evitar procesar el abandono múltiples veces
+        if (partidaFinalizada) {
+            return;
+        }
+
         JugadorDTO dto = (JugadorDTO) datos;
         JugadorDTO yo = control.getJugador();
 
@@ -293,18 +320,18 @@ public class ControlVista implements ISuscriptor {
             return;
         }
 
-        // Deshabilitar controles
-        if (casillasEnemigas != null) {
-            casillasEnemigas.forEach(c -> c.setEnabled(false));
-        }
-        if (timer != null) {
-            timer.stopTimer();
-        }
-
         System.out.println("Partida finalizada por abandono del rival: " + dto.getNombre());
 
-        // El rival abandono, YO gano por abandono
-        mostrarPantallaFinPartida(yo, true);
+        // Marcar como finalizada para evitar duplicados
+        partidaFinalizada = true;
+
+        // Si hay casillas enemigas, significa que estamos en FrmPartidaEnCurso
+        if (casillasEnemigas != null && !casillasEnemigas.isEmpty()) {
+            mostrarPantallaFinPartida(yo, true);
+        } else {
+            // Estamos en FrmColocarNaves - notificar al lobby para que lo maneje
+            notificarLobby("ABANDONO_PARTIDA", dto);
+        }
     }
 
     public void initTableroPropio() {
@@ -365,6 +392,10 @@ public class ControlVista implements ISuscriptor {
         control.addNave(nave, coordenadas);
     }
 
+    public void limpiarNaves() {
+        control.limpiarNaves();
+    }
+
     public void addJugador(Jugador j) {
         control.addJugador(j);
     }
@@ -387,8 +418,31 @@ public class ControlVista implements ISuscriptor {
         control.unirsePartida(jugador);
     }
 
+    /**
+     * Crea una partida y la registra en el servidor (para el Host).
+     */
+    public void crearPartidaConCodigo(JugadorDTO jugador, String codigo) {
+        control.crearPartidaConCodigo(jugador, codigo);
+    }
+
+    /**
+     * Solicita unirse a una partida existente con un codigo.
+     */
+    public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo) {
+        control.unirsePartidaConCodigo(jugador, codigo);
+    }
+
     public void empezarPartida() {
         control.empezarPartida();
+    }
+
+    public void jugadorListo() {
+        control.jugadorListo();
+    }
+
+    private void manejarJugadorListo(Object datos) {
+        System.out.println("[ControlVista] Jugador listo recibido");
+        notificarLobby("JUGADOR_LISTO", datos);
     }
 
     public void abandonarLobby(JugadorDTO jugador) {
@@ -421,13 +475,17 @@ public class ControlVista implements ISuscriptor {
     }
 
     private void manejarEmpezarPartida(Object datos) {
-        JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+        System.out.println("[ControlVista] Empezar partida recibido - notificando al lobby");
+        // Notificar al lobby para ir a la pantalla de colocar naves
+        notificarLobby("EMPEZAR_PARTIDA", datos);
     }
 
     private void manejarAbandonarLobby(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
+        System.out.println("[ControlVista] Jugador abandono lobby: " + dto.getNombre());
+
+        // Notificar al lobby para que actualice la UI
+        notificarLobby("ABANDONAR_LOBBY", dto);
     }
 
     private void manejarTablerosListos(Object datos) {
@@ -512,29 +570,74 @@ public class ControlVista implements ISuscriptor {
             JugadorDTO miJugador = control.getJugador();
             boolean gane = miJugador != null && ganador.getNombre().equals(miJugador.getNombre());
 
-            // Detener timer
-            if (timer != null) {
-                timer.stopTimer();
-            }
-
-            // Deshabilitar casillas
-            if (casillasEnemigas != null) {
-                casillasEnemigas.forEach(c -> c.setEnabled(false));
-            }
-
-            // Mostrar pantalla de fin de partida
+            // Mostrar pantalla de fin de partida (maneja timer y casillas internamente)
             mostrarPantallaFinPartida(ganador, gane);
         }
     }
 
     /**
      * Muestra la pantalla de fin de partida.
+     * Solo se muestra una vez gracias a la bandera partidaFinalizada.
      */
     public void mostrarPantallaFinPartida(JugadorDTO ganador, boolean gane) {
+        // Evitar mostrar múltiples pantallas
+        if (partidaFinalizada) {
+            System.out.println("[ControlVista] Pantalla de fin ya mostrada, ignorando...");
+            return;
+        }
+        partidaFinalizada = true;
+
+        // Detener timer si existe
+        if (timer != null) {
+            timer.stopTimer();
+        }
+
+        // Deshabilitar casillas
+        if (casillasEnemigas != null) {
+            casillasEnemigas.forEach(c -> c.setEnabled(false));
+        }
+
         javax.swing.SwingUtilities.invokeLater(() -> {
+            // Cerrar la ventana de partida en curso
+            cerrarVentanaPartida();
+
+            // Mostrar pantalla de fin
             FrmFinPartida frmFin = new FrmFinPartida(ganador, gane);
             frmFin.setVisible(true);
         });
+    }
+
+    /**
+     * Cierra la ventana de partida en curso si existe.
+     */
+    private void cerrarVentanaPartida() {
+        java.awt.Window[] windows = java.awt.Window.getWindows();
+        for (java.awt.Window window : windows) {
+            if (window instanceof FrmPartidaEnCurso) {
+                window.dispose();
+            }
+        }
+    }
+
+    /**
+     * Reinicia el estado para una nueva partida.
+     */
+    public void reiniciarEstado() {
+        partidaFinalizada = false;
+        casillasPropias = null;
+        casillasEnemigas = null;
+        timer = null;
+        marcadorNavesPanel = null;
+        indicadorTurnoPanel = null;
+        esHost = false;
+        codigoPartida = null;
+
+        // Reiniciar el modelo (limpia jugadores, tablero, etc.)
+        if (control != null) {
+            control.reiniciarModelo();
+        }
+
+        System.out.println("[ControlVista] Estado reiniciado para nueva partida");
     }
 
     /**
@@ -543,5 +646,12 @@ public class ControlVista implements ISuscriptor {
     private void manejarErrorUnirse(Object datos) {
         System.out.println("[ControlVista] Error al unirse recibido");
         notificarLobby("ERROR_UNIRSE", datos);
+    }
+
+    /**
+     * Verifica si la partida ya terminó.
+     */
+    public boolean isPartidaFinalizada() {
+        return partidaFinalizada;
     }
 }

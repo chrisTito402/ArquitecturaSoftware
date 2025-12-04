@@ -56,6 +56,12 @@ public class RespuestaUnirseDTO {
                 "PARTIDA_EN_CURSO");
     }
 
+    public static RespuestaUnirseDTO errorCodigoInvalido(String codigo) {
+        return new RespuestaUnirseDTO(false,
+                "El codigo '" + codigo + "' no corresponde a ninguna partida activa.",
+                "CODIGO_INVALIDO");
+    }
+
     // Getters y Setters
     public boolean isExitoso() {
         return exitoso;
