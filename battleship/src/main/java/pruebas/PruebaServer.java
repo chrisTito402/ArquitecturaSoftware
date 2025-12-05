@@ -19,7 +19,7 @@ public class PruebaServer {
 
     public static void main(String[] args) {
 
-        Cronometro cronometro = new Cronometro(5000);
+        Cronometro cronometro = new Cronometro(30000);
         Partida p = new Partida(
                 null,
                 new ArrayList<>(),
