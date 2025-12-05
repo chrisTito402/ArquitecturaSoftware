@@ -13,13 +13,19 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Pantalla MultiPlayer para seleccionar entre Crear Partida o Unirse a Partida.
+ * Menu del modo multijugador. Aqui decides si crear tu propia partida
+ * (y ser el host) o unirte a la partida de alguien mas con su codigo.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmMultiPlayer extends JFrame {
 
@@ -42,10 +48,18 @@ public class FrmMultiPlayer extends JFrame {
 
     private void initComponents() {
         setTitle("Battleship - MultiPlayer");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(900, 500);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Manejar cierre con X
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                confirmarSalida();
+            }
+        });
 
         // Panel principal con gradiente
         JPanel pnlPrincipal = new JPanel() {
@@ -154,5 +168,18 @@ public class FrmMultiPlayer extends JFrame {
         FrmSeleccionModo frm = new FrmSeleccionModo();
         frm.setVisible(true);
         dispose();
+    }
+
+    private void confirmarSalida() {
+        int opcion = JOptionPane.showConfirmDialog(
+            this,
+            "¿Estás seguro de que quieres salir?",
+            "Confirmar salida",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+        if (opcion == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 }

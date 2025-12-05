@@ -19,10 +19,15 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Pantalla principal del juego Batalla Naval.
- * Estilo minimalista con fondo oscuro tipo naval.
+ * La pantalla de inicio del juego.
+ * Tiene los botones de Jugar y Salir nomas. Le pusimos colores
+ * azules/grises para que se viera como de tema naval.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmMenuPrincipal extends JFrame {
 
@@ -44,10 +49,18 @@ public class FrmMenuPrincipal extends JFrame {
 
     private void initComponents() {
         setTitle("Battleship");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(900, 500);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Manejar cierre con X
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                salir();
+            }
+        });
 
         // Panel principal con gradiente
         JPanel pnlPrincipal = new JPanel() {

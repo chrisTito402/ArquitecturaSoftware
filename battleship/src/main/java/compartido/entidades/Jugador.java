@@ -5,8 +5,14 @@ import compartido.enums.EstadoJugador;
 import java.util.List;
 
 /**
+ * Representa a un jugador con su nombre, color de naves,
+ * su tablero y en que estado esta (jugando, gano, perdio, etc).
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Jugador {
 

@@ -8,26 +8,30 @@ import compartido.comunicacion.dto.JugadorDTO;
 import compartido.comunicacion.dto.NaveDTO;
 
 /**
- * Interfaz del controlador principal del juego Batalla Naval.
- * Define todas las operaciones disponibles para la vista.
+ * Interfaz del controlador para el MVC.
+ * Aqui definimos todos los metodos que las vistas van a poder usar
+ * para comunicarse con el modelo. Tiene de todo: crear partida,
+ * unirse, disparar, poner naves, etc.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public interface IControlador {
-
-    // === GESTION DE PARTIDA ===
 
     public String crearPartida(Jugador j);
 
     /**
-     * Crea una partida y la registra en el servidor con el codigo dado.
+     * Crea partida con codigo.
      */
     public void crearPartidaConCodigo(JugadorDTO jugador, String codigo);
 
     public void unirsePartida(JugadorDTO jugadorDTO);
 
     /**
-     * Solicita unirse a una partida con un codigo especifico.
+     * Unirse con codigo.
      */
     public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo);
 
@@ -39,15 +43,11 @@ public interface IControlador {
 
     public void jugadorListo();
 
-    // === GESTION DE JUGADORES ===
-
     public void addJugador(Jugador j);
 
     public JugadorDTO getJugador();
 
     public List<JugadorDTO> getJugadores();
-
-    // === GESTION DE TABLERO Y NAVES ===
 
     public void crearTableros();
 
@@ -57,8 +57,6 @@ public interface IControlador {
 
     public void confirmarTablero();
 
-    // === BATALLA ===
-
     public void realizarDisparo(CoordenadasDTO c);
 
     public boolean esMiTurno();
@@ -67,16 +65,12 @@ public interface IControlador {
 
     public void notificarTiempoAgotado();
 
-    // === OBSERVADORES ===
-
     public void suscribirAPartida(ISuscriptor suscriptor);
 
     public void desuscribirDePartida(ISuscriptor suscriptor);
 
-    // === REINICIO ===
-
     /**
-     * Reinicia el modelo para una nueva partida.
+     * Reinicia para nueva partida.
      */
     public void reiniciarModelo();
 

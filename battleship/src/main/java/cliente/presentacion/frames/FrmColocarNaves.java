@@ -48,11 +48,16 @@ import compartido.comunicacion.dto.TurnoDTO;
 import compartido.enums.ColorJugador;
 
 /**
- * Pantalla para colocar las naves antes de iniciar la partida.
- * Permite ARRASTRAR Y SOLTAR naves del astillero al tablero.
- * Click derecho para rotar las naves.
+ * Aqui es donde acomodas tus naves antes de empezar la batalla.
+ * Las arrastras desde el panel de la izquierda hacia el tablero.
+ * Con click derecho las giras. Cuando ya esten todas puestas
+ * le das confirmar y esperas a que el otro tambien termine.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmColocarNaves extends JFrame implements ISuscriptor {
 
@@ -111,6 +116,7 @@ public class FrmColocarNaves extends JFrame implements ISuscriptor {
 
     // Bandera para evitar iniciar partida multiples veces
     private boolean partidaIniciada = false;
+    private boolean confirmandoTablero = false; // Evita doble click en Comenzar/Listo
 
     // Variables para Drag & Drop
     private JPanel naveDragVisual;
@@ -152,7 +158,7 @@ public class FrmColocarNaves extends JFrame implements ISuscriptor {
         manejadoresNotificacion.put("TURNO_INICIAL", this::manejarTurnoInicial);
         manejadoresNotificacion.put("CONFIRMAR_TABLERO", this::manejarConfirmacionOtroJugador);
         manejadoresNotificacion.put("JUGADOR_LISTO", d -> { jugador2Listo = true; actualizarBotonComenzar(); });
-        manejadoresNotificacion.put("ABANDONO_PARTIDA", this::manejarAbandonoOponente);
+        manejadoresNotificacion.put("JUGADOR_ABANDONO", this::manejarAbandonoOponente);
     }
 
     private void manejarAbandonoOponente(Object datos) {
@@ -957,6 +963,13 @@ public class FrmColocarNaves extends JFrame implements ISuscriptor {
     }
 
     private void accionComenzarListo() {
+        // Evitar doble click
+        if (confirmandoTablero) {
+            return;
+        }
+        confirmandoTablero = true;
+        btnComenzarListo.setEnabled(false);
+
         TimerPanel timerPanel = new TimerPanel(1000, 30);
         controlVista.setTimer(timerPanel);
         controlVista.initTableroPropio();
@@ -967,13 +980,15 @@ public class FrmColocarNaves extends JFrame implements ISuscriptor {
             if (jugador2Listo) {
                 controlVista.getControl().confirmarTablero();
                 esperandoOtroJugador = true;
-                btnComenzarListo.setEnabled(false);
                 btnLimpiar.setEnabled(false);
                 lblEstado.setText("Esperando sincronizacion...");
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Esperando a que el otro jugador esté listo.",
                         "Esperando", JOptionPane.INFORMATION_MESSAGE);
+                // Rehabilitar si J2 no esta listo
+                confirmandoTablero = false;
+                btnComenzarListo.setEnabled(true);
             }
         } else {
             // Jugador 2 da Listo
@@ -1019,8 +1034,17 @@ public class FrmColocarNaves extends JFrame implements ISuscriptor {
                 "Confirmar abandono", JOptionPane.YES_NO_OPTION);
 
         if (opcion == JOptionPane.YES_OPTION) {
+            // Limpiar estado de drag si estaba arrastrando
+            if (arrastrando) {
+                finalizarArrastre();
+            }
+
             controlVista.abandonarPartida();
             controlVista.desuscribirLobby(this);
+
+            // Reiniciar estado para nueva partida (no notificar de nuevo)
+            controlVista.reiniciarEstado(false);
+
             FrmMenuPrincipal menu = new FrmMenuPrincipal();
             menu.setVisible(true);
             dispose();

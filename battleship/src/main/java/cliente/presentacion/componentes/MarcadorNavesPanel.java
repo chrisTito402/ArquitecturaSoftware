@@ -12,16 +12,15 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Panel que muestra el marcador de estado de las naves del oponente.
- * Muestra cuantas naves estan: Sin danos (verde), Averiadas (amarillo), Hundidas (rojo).
+ * El marcador que te dice como van las naves del enemigo.
+ * Verde = sin tocar, Amarillo = le pegaste pero no se hundio, Rojo = hundida.
+ * Lo hicimos asi porque en el PDF del profe decia que asi tenia que ser.
  *
- * Segun el PDF del proyecto:
- * "El juego debera mostrar el marcador indicando el numero de naves segun su estado.
- * Por ejemplo, 1 Submarino Averiado, 2 Submarino Hundido y 1 Submarino Sin danos.
- * Puede usar el color amarillo para las naves averiadas, rojo para las naves hundidas
- * y verde para las naves sin danos."
- *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class MarcadorNavesPanel extends JPanel {
 

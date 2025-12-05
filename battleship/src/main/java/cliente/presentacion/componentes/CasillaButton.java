@@ -4,10 +4,16 @@ import compartido.comunicacion.dto.CoordenadasDTO;
 import javax.swing.JButton;
 
 /**
- * Boton que representa una casilla del tablero enemigo.
- * Usa CoordenadasDTO para cumplir con MVC (Vista no importa del Modelo).
+ * Boton para las casillas del tablero enemigo.
+ * Cuando le das click es para disparar a esa coordenada.
+ * Usamos CoordenadasDTO y no Coordenadas directo para que la Vista
+ * no dependa del Modelo (asi nos dijeron que era el MVC).
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class CasillaButton extends JButton {
 

@@ -24,20 +24,39 @@ import compartido.comunicacion.dto.TurnoDTO;
 import compartido.ManejadorRespuestaCliente;
 
 /**
- * Controlador principal del juego Batalla Naval.
- * Maneja la comunicacion entre la vista, el modelo y el bus de eventos.
+ * Este es el controlador principal que conecta todo en el cliente.
+ * Basicamente es el que recibe lo que hace el usuario en la pantalla
+ * y se lo manda al modelo, y tambien recibe las respuestas del servidor.
  *
- * @author daniel
+ * Usamos un HashMap para manejar los eventos porque si no el switch
+ * se hacia gigantesco y era un desmadre leerlo.
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
+    // el modelo donde esta la logica
     private IModeloCliente partida;
+
+    // socket para hablar con el servidor
     private IClienteSocket cliente;
+
+    // mapa de eventos -> metodo que lo maneja
     private Map<String, Consumer<Mensaje>> manejadorEventos;
 
+    /**
+     * Constructor vacio por si se necesita.
+     */
     public Controlador() {
     }
 
+    /**
+     * Constructor que recibe todas las dependencias.
+     */
     public Controlador(IModeloCliente partida, IClienteSocket cliente, Map<String, Consumer<Mensaje>> mapa) {
         this.partida = partida;
         this.cliente = cliente;
@@ -47,37 +66,33 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Registra todos los manejadores de eventos del bus.
+     * Registra los manejadores de cada evento en el mapa.
+     * Asi cuando llega algo solo buscamos y ejecutamos.
      */
     private void registrarManejadoresDeEventos() {
-        // === EVENTOS DE LOBBY/PARTIDA ===
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("RESPUESTA_UNIRSE", this::manejarRespuestaUnirse);
         manejadorEventos.put("JUGADOR_LISTO", this::manejarJugadorListo);
-
-        // === EVENTOS DE COLOCACION DE NAVES ===
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadorEventos.put("CONFIRMAR_TABLERO", this::manejarConfirmarTablero);
         manejadorEventos.put("TABLEROS_LISTOS", this::manejarTablerosListos);
-
-        // === EVENTOS DE BATALLA ===
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("CAMBIO_TURNO", this::manejarCambioTurno);
         manejadorEventos.put("TIEMPO_AGOTADO", this::manejarTiempoAgotado);
         manejadorEventos.put("TURNO_INICIAL", this::manejarTurnoInicial);
-
-        // === EVENTOS DE FIN DE PARTIDA ===
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
         manejadorEventos.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartida);
         manejadorEventos.put("FIN_PARTIDA", this::manejarFinPartida);
-
         System.out.println("[CONTROLADOR] Registrados " + manejadorEventos.size() + " manejadores de eventos");
     }
 
-    // Metodo para enviar mensaje por la red.
+    /**
+     * Manda un mensaje al servidor.
+     * Convierte los datos a JSON y los envia.
+     */
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
 
@@ -92,7 +107,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         cliente.enviarMensaje(json);
     }
 
-    // Metodo para manejar el mensaje recibido por la red.
+    /**
+     * Recibe mensaje del servidor, lo deserializa y ejecuta el manejador.
+     */
     @Override
     public void manejarMensaje(String json) {
         Gson gson = new Gson();
@@ -101,16 +118,24 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.get(mensaje.getEvento()).accept(mensaje);
     }
 
-    // Metodo para asignar un metodo al Map cuando se asigne un id al Cliente.
+    /**
+     * El servidor nos asigna un ID y registramos el manejador de mensajes privados.
+     */
     @Override
     public void onIdSet(String id) {
         manejadorEventos.put("MENSAJE_CLIENTE_" + id, this::manejarEventoPrivado);
     }
 
+    /**
+     * Procesa mensajes que son solo para este cliente.
+     */
     private void manejarEventoPrivado(Mensaje mensaje) {
         manejadorEventos.get(mensaje.getSubEvento()).accept(mensaje);
     }
 
+    /**
+     * Maneja la respuesta de agregar nave.
+     */
     private void manejarResultadoAddNave(Mensaje mensaje) {
         Gson gson = new Gson();
         ResultadoAddNave resultado = gson.fromJson(mensaje.getData(), ResultadoAddNave.class);
@@ -118,6 +143,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.manejarResultadoAddNave(resultado);
     }
 
+    /**
+     * Maneja el resultado de un disparo.
+     */
     private void manejarResultadoDisparo(Mensaje mensaje) {
         Gson gson = new Gson();
         DisparoDTO d = gson.fromJson(mensaje.getData(), DisparoDTO.class);
@@ -125,16 +153,20 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.manejarResultadoDisparo(d);
     }
 
-    //Recibe el mensaje del servidor
+    /**
+     * Cuando alguien abandona la partida.
+     */
     public void manejarAbandonarPartida(Mensaje mensaje) {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono la partida.");
-        partida.notificarAllSuscriptores("ABANDONO_PARTIDA", jugadorDTO);
+        partida.notificarAllSuscriptores("JUGADOR_ABANDONO", jugadorDTO);
 
     }
 
-    //Manda mensaje* al servidor
+    /**
+     * Para abandonar la partida.
+     */
     @Override
     public void abandonarPartida(Jugador jugador) {
         // Validaciones del modelo
@@ -147,6 +179,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         enviarMensaje("ABANDONAR_PARTIDA", dto);
     }
 
+    /**
+     * Crea partida nueva con el Builder.
+     */
     @Override
     public String crearPartida(Jugador j) {
         Director d = new Director();
@@ -155,6 +190,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         return "Partida creada correctamente";
     }
 
+    /**
+     * Dispara a una coordenada y manda al servidor.
+     */
     @Override
     public void realizarDisparo(CoordenadasDTO coordenadas) {
         DisparoDTO disparo = partida.realizarDisparo(coordenadas);
@@ -163,16 +201,25 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Checa si es nuestro turno.
+     */
     @Override
     public boolean esMiTurno() {
         return partida.esMiTurno();
     }
 
+    /**
+     * Actualiza el turno.
+     */
     @Override
     public void setTurno(boolean esMiTurno) {
         partida.setTurno(esMiTurno);
     }
 
+    /**
+     * Avisa al servidor que se acabo el tiempo.
+     */
     @Override
     public void notificarTiempoAgotado() {
         JugadorDTO jugador = partida.getJugador();
@@ -183,6 +230,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Cuando se une un jugador nuevo.
+     */
     private void manejarJugadorUnido(Mensaje mensaje) {
         System.out.println("=== RECIBIDO JUGADOR_UNIDO ===");
         Gson gson = new Gson();
@@ -200,6 +250,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
     }
 
+    /**
+     * Agrega una nave al tablero.
+     */
     @Override
     public void addNave(NaveDTO nave, List<CoordenadasDTO> coordenadas) {
         AddNaveDTO addDTO = partida.addNave(nave, coordenadas);
@@ -208,6 +261,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Limpia las naves del tablero.
+     */
     @Override
     public void limpiarNaves() {
         // Limpiar en el modelo local
@@ -220,32 +276,49 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Agrega un jugador al modelo.
+     */
     @Override
     public void addJugador(Jugador jugador) {
         partida.addJugador(jugador);
     }
 
+    /**
+     * Crea los tableros.
+     */
     @Override
     public void crearTableros() {
         partida.crearTableros();
     }
 
+    /**
+     * Suscribe un observador al modelo (Observer).
+     */
     @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
         partida.suscribirAPartida(suscriptor);
     }
 
+    /**
+     * Quita un observador.
+     */
     @Override
     public void desuscribirDePartida(ISuscriptor suscriptor) {
         partida.desuscribirDePartida(suscriptor);
     }
 
+    /**
+     * Retorna el jugador local.
+     */
     @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
     }
 
-    // Caso de Uso: Unirse Partida
+    /**
+     * Unirse a una partida.
+     */
     @Override
     public void unirsePartida(JugadorDTO jugadorDTO) {
         Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
@@ -253,6 +326,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
     }
 
+    /**
+     * Crea partida con codigo (para el host).
+     */
     @Override
     public void crearPartidaConCodigo(JugadorDTO jugador, String codigo) {
         // Registrar jugador en el modelo local
@@ -265,6 +341,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         System.out.println("[CONTROLADOR] Partida creada con codigo: " + codigo);
     }
 
+    /**
+     * Solicita unirse a una partida con codigo.
+     */
     @Override
     public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo) {
         // NO registrar en modelo local hasta recibir confirmacion
@@ -273,6 +352,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         System.out.println("[CONTROLADOR] Solicitud de union enviada - Codigo: " + codigo);
     }
 
+    /**
+     * Cuando alguien se une a la partida.
+     */
     private void manejarUnirsePartida(Mensaje mensaje) {
         JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("=== RECIBIDO UNIRSE_PARTIDA ===");
@@ -298,6 +380,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Inicia la partida.
+     */
     @Override
     public void empezarPartida() {
         partida.empezarPartida();
@@ -305,6 +390,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         enviarMensaje("EMPEZAR_PARTIDA", jugador);
     }
 
+    /**
+     * Avisa que el jugador esta listo.
+     */
     @Override
     public void jugadorListo() {
         JugadorDTO jugador = partida.getJugador();
@@ -314,6 +402,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Recibe que un jugador esta listo.
+     */
     private void manejarJugadorListo(Mensaje mensaje) {
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
@@ -321,12 +412,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         partida.notificarAllSuscriptores("JUGADOR_LISTO", jugadorDTO);
     }
 
+    /**
+     * Recibe que la partida empezo.
+     */
     private void manejarEmpezarPartida(Mensaje mensaje) {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("La partida esta comenzando.");
         partida.notificarAllSuscriptores("EMPEZAR_PARTIDA", jugadorDTO);
     }
 
+    /**
+     * Abandonar el lobby.
+     */
     @Override
     public void abandonarLobby(JugadorDTO jugadorDTO) {
         Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
@@ -335,12 +432,18 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         enviarMensaje("ABANDONAR_LOBBY", jugadorDTO);
     }
 
+    /**
+     * Otro jugador abandono el lobby.
+     */
     private void manejarAbandonarLobby(Mensaje mensaje) {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono el lobby.");
         partida.notificarAllSuscriptores("ABANDONAR_LOBBY", jugadorDTO);
     }
 
+    /**
+     * Obtiene los jugadores de la partida.
+     */
     @Override
     public List<JugadorDTO> getJugadores() {
         return partida.getJugadores()
@@ -350,11 +453,11 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     // =========================================================================
-    // NUEVOS MANEJADORES DE EVENTOS
+    // EVENTOS DE BATALLA
     // =========================================================================
 
     /**
-     * Confirma el tablero del jugador y notifica al servidor.
+     * Confirma el tablero (ya puso todas las naves).
      */
     @Override
     public void confirmarTablero() {
@@ -365,7 +468,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja la confirmacion de tablero de otro jugador.
+     * Otro jugador confirmo su tablero.
      */
     private void manejarConfirmarTablero(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -375,7 +478,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja cuando ambos tableros estan listos para iniciar la batalla.
+     * Ambos tableros listos, empieza la batalla.
      */
     private void manejarTablerosListos(Mensaje mensaje) {
         System.out.println("[CONTROLADOR] Ambos tableros listos - Iniciando batalla");
@@ -383,7 +486,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja el cambio de turno entre jugadores.
+     * Cambio de turno.
      */
     private void manejarCambioTurno(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -393,7 +496,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja el turno inicial al comenzar la partida.
+     * Turno inicial (quien empieza).
      */
     private void manejarTurnoInicial(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -404,7 +507,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja cuando se agota el tiempo del turno.
+     * Se acabo el tiempo de alguien.
      */
     private void manejarTiempoAgotado(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -414,7 +517,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Maneja el fin de la partida (victoria/derrota).
+     * Fin de la partida, alguien gano.
      */
     private void manejarFinPartida(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -425,36 +528,35 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     /**
-     * Envia un evento de cambio de turno al bus.
+     * Notifica cambio de turno al servidor.
      */
     public void notificarCambioTurno(TurnoDTO turno) {
         enviarMensaje("CAMBIO_TURNO", turno);
     }
 
     /**
-     * Envia un evento de tiempo agotado al bus.
+     * Notifica tiempo agotado.
      */
     public void notificarTiempoAgotado(String idJugador) {
         enviarMensaje("TIEMPO_AGOTADO", idJugador);
     }
 
     /**
-     * Envia un evento de fin de partida al bus.
+     * Notifica fin de partida.
      */
     public void notificarFinPartida(JugadorDTO ganador) {
         enviarMensaje("FIN_PARTIDA", ganador);
     }
 
     /**
-     * Envia un evento de tableros listos al bus.
+     * Notifica tableros listos.
      */
     public void notificarTablerosListos() {
         enviarMensaje("TABLEROS_LISTOS", null);
     }
 
     /**
-     * Maneja la respuesta del servidor al intentar unirse a una partida.
-     * Verifica si el nombre esta duplicado u otro error.
+     * Respuesta de unirse a partida.
      */
     private void manejarRespuestaUnirse(Mensaje mensaje) {
         Gson gson = new Gson();
@@ -471,6 +573,9 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
+    /**
+     * Reinicia el modelo para nueva partida.
+     */
     @Override
     public void reiniciarModelo() {
         partida.reiniciar();

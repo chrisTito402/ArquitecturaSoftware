@@ -20,10 +20,16 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Pantalla de fin de partida que muestra el resultado (Victoria/Derrota).
- * Solo muestra un boton para volver al menu principal.
+ * La pantalla que sale cuando acaba el juego.
+ * Te dice si ganaste (fondo verde) o perdiste (fondo rojo).
+ * Si el otro jugador se salio tambien te avisa que ganaste por abandono.
+ * Tiene un boton para volver al menu y jugar otra vez.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmFinPartida extends JFrame {
 
@@ -56,10 +62,18 @@ public class FrmFinPartida extends JFrame {
 
     private void initComponents() {
         setTitle("Battleship - Fin de Partida");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(600, 520); // Aumentado para que quepa el botón
         setLocationRelativeTo(null);
         setResizable(false);
+
+        // Manejar cierre con X para limpiar estado correctamente
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                volverAlMenu();
+            }
+        });
 
         // Panel principal con gradiente segun resultado
         JPanel pnlPrincipal = new JPanel() {
@@ -150,7 +164,7 @@ public class FrmFinPartida extends JFrame {
         panel.setMaximumSize(new Dimension(350, 120));
 
         // Titulo
-        JLabel lblTitulo = new JLabel("ESTADÍSTICAS", SwingConstants.CENTER);
+        JLabel lblTitulo = new JLabel("FIN DE LA PARTIDA", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblTitulo.setForeground(COLOR_TEXTO);
         lblTitulo.setAlignmentX(CENTER_ALIGNMENT);
@@ -206,7 +220,8 @@ public class FrmFinPartida extends JFrame {
 
     private void volverAlMenu() {
         // Reiniciar el estado para permitir nueva partida
-        controlVista.reiniciarEstado();
+        // No notificar al servidor porque la partida ya termino naturalmente
+        controlVista.reiniciarEstado(false);
 
         // Abrir menu principal
         FrmMenuPrincipal menu = new FrmMenuPrincipal();

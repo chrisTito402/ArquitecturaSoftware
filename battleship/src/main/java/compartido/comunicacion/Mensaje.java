@@ -3,20 +3,42 @@ package compartido.comunicacion;
 import com.google.gson.JsonElement;
 
 /**
+ * Es como un "sobre" que usamos para mandar informacion por el bus.
+ * Tiene que tipo de accion es (suscribir, publicar, unicast),
+ * el nombre del evento, los datos en JSON y quien lo manda.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Mensaje {
 
+    // tipo de accion
     private TipoAccion accion;
+
+    // nombre del evento
     private String evento;
+
+    // datos en JSON
     private JsonElement data;
+
+    // ID del cliente
     private String idPublicador;
+
+    // subevento para mensajes privados
     private String subEvento;
 
+    /**
+     * Constructor vacio (para Gson).
+     */
     public Mensaje() {
     }
 
+    /**
+     * Constructor principal.
+     */
     public Mensaje(TipoAccion accion, String evento, JsonElement data, String idPublicador) {
         this.accion = accion;
         this.evento = evento;
@@ -24,12 +46,18 @@ public class Mensaje {
         this.idPublicador = idPublicador;
     }
 
+    /**
+     * Sin ID (para el servidor).
+     */
     public Mensaje(TipoAccion accion, String evento, JsonElement data) {
         this.accion = accion;
         this.evento = evento;
         this.data = data;
     }
 
+    /**
+     * Constructor completo.
+     */
     public Mensaje(TipoAccion accion, String evento, JsonElement data, String idPublicador, String subEvento) {
         this.accion = accion;
         this.evento = evento;

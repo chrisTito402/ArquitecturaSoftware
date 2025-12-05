@@ -32,10 +32,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 /**
- * Pantalla principal del juego donde se desarrolla la partida.
- * Muestra ambos tableros, el timer, el indicador de turno y el marcador de naves.
+ * Aqui es donde juegas la partida!
+ * Se ven los dos tableros: el tuyo a la izquierda y el del enemigo
+ * a la derecha (ahi es donde disparas). Arriba esta el timer y
+ * el indicador de turno. Tambien se ve cuantas naves le has hundido.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmPartidaEnCurso extends JFrame {
 
@@ -312,6 +318,12 @@ public class FrmPartidaEnCurso extends JFrame {
     }
 
     private void abandonarPartida() {
+        // Pausar el timer mientras se muestra el dialogo
+        TimerPanel timer = controlVista.getTimer();
+        if (timer != null) {
+            timer.pauseTimer();
+        }
+
         int opcion = JOptionPane.showConfirmDialog(
                 this,
                 "¿Estás seguro de que quieres abandonar la partida?\nEl oponente será declarado ganador.",
@@ -320,8 +332,7 @@ public class FrmPartidaEnCurso extends JFrame {
                 JOptionPane.WARNING_MESSAGE
         );
         if (opcion == JOptionPane.YES_OPTION) {
-            // Detener el timer
-            TimerPanel timer = controlVista.getTimer();
+            // Detener el timer permanentemente
             if (timer != null) {
                 timer.stopTimer();
             }
@@ -329,10 +340,18 @@ public class FrmPartidaEnCurso extends JFrame {
             // Notificar al servidor
             controlVista.abandonarPartida();
 
+            // Reiniciar estado para nueva partida (no notificar de nuevo)
+            controlVista.reiniciarEstado(false);
+
             // Volver al menu principal
             FrmMenuPrincipal menu = new FrmMenuPrincipal();
             menu.setVisible(true);
             dispose();
+        } else {
+            // Si el usuario cancela, reanudar el timer
+            if (timer != null) {
+                timer.resumeTimer();
+            }
         }
     }
 }

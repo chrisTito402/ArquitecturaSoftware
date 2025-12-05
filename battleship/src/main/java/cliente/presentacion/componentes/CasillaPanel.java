@@ -9,11 +9,16 @@ import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
 /**
- * Panel que representa una casilla del tablero propio.
- * Usa CoordenadasDTO para cumplir con MVC (Vista no importa del Modelo).
- * Soporta visualizacion de impactos y hundimientos con indicadores claros.
+ * Panel para las casillas de TU tablero (no el del enemigo).
+ * Aqui es donde pones tus naves y donde ves cuando te disparan.
+ * Puede mostrar si una casilla esta normal, si fue impactada
+ * o si ya se hundio la nave. Usamos DTO para respetar el MVC.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class CasillaPanel extends JPanel {
 

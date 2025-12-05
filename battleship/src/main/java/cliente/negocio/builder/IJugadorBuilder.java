@@ -8,8 +8,15 @@ import compartido.entidades.Jugador;
 import compartido.entidades.Tablero;
 
 /**
+ * Interfaz del Builder para armar Jugadores.
+ * Tiene los setters para ponerle nombre, color, sus naves, tablero
+ * y en que estado esta. Al final con getResult() sacas el Jugador.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public interface IJugadorBuilder {
 

@@ -8,10 +8,15 @@ import javax.swing.JLabel;
 import javax.swing.Timer;
 
 /**
- * Panel que muestra el temporizador del turno.
- * Cuando el tiempo llega a 0, notifica al sistema para cambiar de turno.
+ * El relojito de 30 segundos que aparece arriba cuando juegas.
+ * Cada turno tienes 30 segundos para disparar, si no pierdes el turno.
+ * Se pone rojo cuando te quedan menos de 5 segundos para que te apures.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class TimerPanel extends JLabel {
 
@@ -104,6 +109,26 @@ public class TimerPanel extends JLabel {
         }
         this.setText("--:--");
         this.setForeground(Color.GRAY);
+    }
+
+    /**
+     * Pausa temporalmente el timer (para mostrar dialogos).
+     * No marca la partida como terminada.
+     */
+    public void pauseTimer() {
+        if (timer.isRunning()) {
+            timer.stop();
+        }
+    }
+
+    /**
+     * Reanuda el timer despues de una pausa temporal.
+     * Solo reanuda si la partida no ha terminado.
+     */
+    public void resumeTimer() {
+        if (!detenido && !partidaTerminada && !timer.isRunning()) {
+            timer.start();
+        }
     }
 
     /**

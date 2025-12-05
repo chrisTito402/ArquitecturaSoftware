@@ -4,13 +4,17 @@ import compartido.enums.ColorJugador;
 import compartido.enums.EstadoJugador;
 
 /**
- * DTO para transferir informacion del jugador entre capas.
- * Capa compartida - no pertenece a Vista ni Modelo.
+ * DTO para transferir datos del jugador entre capas.
  *
- * Nota: Los enums del modelo (ColorJugador, EstadoJugador) son tipos
- * de datos compartidos que no violan MVC.
+ * Se usa para enviar informacion del jugador por la red sin
+ * exponer la entidad completa. Contiene solo los datos necesarios:
+ * nombre, color y estado.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class JugadorDTO {
 

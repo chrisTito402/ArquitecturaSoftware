@@ -29,9 +29,15 @@ import compartido.comunicacion.dto.JugadorDTO;
 import compartido.comunicacion.dto.RespuestaUnirseDTO;
 
 /**
- * Pantalla para que el Jugador 2 se una a una partida existente con codigo.
+ * Pantalla para unirte a una partida que ya creo alguien mas.
+ * Escribes tu nombre, escoges color y pones el codigo que te paso
+ * el host. Si el codigo esta mal o ya hay 2 jugadores te avisa.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmUnirsePartida extends JFrame implements ISuscriptor {
 
@@ -40,6 +46,7 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
     private JugadorDTO jugadorPendiente;
     private boolean navegando = false; // Evita navegacion duplicada
     private boolean errorMostrado = false; // Evita mostrar error multiples veces
+    private boolean solicitudEnviada = false; // Indica si ya se envio solicitud al servidor
 
     // Colores del tema
     private static final Color COLOR_FONDO = new Color(74, 89, 98);
@@ -70,10 +77,18 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
 
     private void initComponents() {
         setTitle("Battleship - Unirse a Partida");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(900, 500);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Manejar cierre con X
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                retroceder();
+            }
+        });
 
         // Panel principal con gradiente
         JPanel pnlPrincipal = new JPanel() {
@@ -299,8 +314,9 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
             return;
         }
 
-        // Limpiar estado anterior antes de unirse a nueva partida
-        controlVista.reiniciarEstado();
+        // Limpiar estado local antes de unirse a nueva partida
+        // No notificar al servidor ya que aun no hay partida registrada
+        controlVista.reiniciarEstado(false);
 
         // Resetear banderas para nuevo intento
         this.errorMostrado = false;
@@ -313,6 +329,9 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
         // Deshabilitar boton mientras se valida
         btnUnirse.setEnabled(false);
         btnUnirse.setText("Validando...");
+
+        // Marcar que se envio solicitud
+        solicitudEnviada = true;
 
         // Enviar solicitud con codigo al servidor (NO navegar todavia)
         controlVista.unirsePartidaConCodigo(jugadorPendiente, codigo);
@@ -336,6 +355,9 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
                 btnUnirse.setEnabled(true);
                 btnUnirse.setText("Unirse");
 
+                // Resetear bandera ya que no se unio exitosamente
+                solicitudEnviada = false;
+
                 JOptionPane.showMessageDialog(this,
                         respuesta.getMensaje(),
                         "Error al unirse",
@@ -357,6 +379,9 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
                 navegando = true; // Marcar que ya estamos navegando
 
                 javax.swing.SwingUtilities.invokeLater(() -> {
+                    // Desuscribirse antes de navegar
+                    controlVista.getControl().desuscribirDePartida(this);
+
                     // Guardar datos en ControlVista
                     controlVista.setCodigoPartida(codigoPendiente);
                     controlVista.setEsHost(false);
@@ -376,6 +401,17 @@ public class FrmUnirsePartida extends JFrame implements ISuscriptor {
     private void retroceder() {
         // Desuscribirse antes de cerrar para evitar notificaciones huerfanas
         controlVista.getControl().desuscribirDePartida(this);
+
+        // Si ya se envio solicitud y fue aceptada (jugador registrado), abandonar lobby
+        if (solicitudEnviada && jugadorPendiente != null && navegando == false) {
+            // Verificar si el jugador ya fue registrado en el modelo
+            JugadorDTO jugadorActual = controlVista.getControl().getJugador();
+            if (jugadorActual != null) {
+                controlVista.abandonarLobby(jugadorActual);
+                // No notificar de nuevo, ya se hizo arriba
+                controlVista.reiniciarEstado(false);
+            }
+        }
 
         FrmMultiPlayer frm = new FrmMultiPlayer();
         frm.setVisible(true);

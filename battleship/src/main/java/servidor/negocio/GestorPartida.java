@@ -23,54 +23,57 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Gestor de la logica de negocio de una partida en el servidor.
+ * Aqui esta toda la logica del juego en el servidor.
+ * Se encarga de las partidas, validar que las naves esten bien puestas,
+ * ver si los disparos le pegan a algo, cambiar turnos, y saber quien gano.
  *
- * Esta clase maneja toda la logica del juego:
- * - Registro de jugadores
- * - Colocacion y validacion de naves
- * - Procesamiento de disparos
- * - Control de turnos
- * - Deteccion de fin de partida
+ * Ojo: esto es diferente del BusEventos. El bus nomas manda mensajes
+ * de un lado a otro, y esta clase es la que tiene las reglas del juego.
+ * Asi cumplimos con el SRP que nos pidio el profe.
  *
- * Separada del BusEventos para cumplir con:
- * - Principio de Responsabilidad Unica (SRP)
- * - Arquitectura en Capas (Capa de Negocio)
- *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class GestorPartida {
 
-    // Publicador de eventos (inyectado - DIP)
+    // publicador de eventos (DIP)
     private final IPublicadorEventos publicador;
+
+    // para JSON
     private final Gson gson;
 
-    // Control de tableros confirmados
+    // jugadores que ya confirmaron tablero
     private final Set<String> tablerosConfirmados;
+
+    // jugadores en la partida
     private final List<JugadorDTO> jugadoresEnPartida;
+
+    // lock para sincronizar
     private final Object lockTableros;
 
-    // Control del turno actual
+    // quien tiene el turno
     private String nombreJugadorEnTurno;
 
-    // Estructura para rastrear naves: Map<nombreJugador, List<NaveInfo>>
+    // naves de cada jugador
     private final ConcurrentHashMap<String, List<NaveInfo>> navesJugadores;
 
-    // Map<nombreJugador, Set<"x,y">> - coordenadas ya disparadas al oponente
+    // disparos hechos
     private final ConcurrentHashMap<String, Set<String>> disparosRealizados;
 
-    // Registro de partidas activas: Map<codigoPartida, codigoPartida>
-    // (usamos el código como key y value para verificar existencia)
+    // partidas activas
     private final ConcurrentHashMap<String, String> partidasActivas;
 
-    // Mapa de ID de cliente a nombre de jugador (para manejar desconexiones)
+    // cliente -> jugador
     private final ConcurrentHashMap<String, String> clienteAJugador;
 
-    // Nombre del jugador que es host de la partida actual
+    // el host
     private String nombreHostPartida;
 
     /**
-     * Clase interna para rastrear informacion de cada nave.
-     * Encapsula el estado de una nave individual.
+     * Clase para guardar info de una nave.
      */
     private static class NaveInfo {
         private final TipoNaveDTO tipo;
@@ -104,8 +107,7 @@ public class GestorPartida {
         }
 
         /**
-         * Verifica si la nave acaba de recibir su primer impacto.
-         * Util para determinar si la nave paso de "sin dano" a "averiada".
+         * Checa si es el primer impacto.
          */
         boolean esPrimerImpacto() {
             return impactos.size() == 1;
@@ -113,9 +115,7 @@ public class GestorPartida {
     }
 
     /**
-     * Constructor del GestorPartida.
-     *
-     * @param publicador Interfaz para publicar eventos (inyeccion de dependencia)
+     * Constructor con inyeccion de dependencia.
      */
     public GestorPartida(IPublicadorEventos publicador) {
         this.publicador = publicador;
@@ -131,11 +131,7 @@ public class GestorPartida {
     }
 
     /**
-     * Procesa un evento y ejecuta la logica de negocio correspondiente.
-     *
-     * @param evento Nombre del evento
-     * @param mensaje Mensaje con los datos del evento
-     * @return true si el evento debe ser publicado (broadcast), false si ya fue manejado
+     * Procesa cada evento y decide que hacer.
      */
     public boolean procesarEvento(String evento, Mensaje mensaje) {
         switch (evento) {
@@ -180,7 +176,7 @@ public class GestorPartida {
     }
 
     /**
-     * Procesa la creacion de una nueva partida (registra el codigo).
+     * Crea una partida nueva.
      */
     private void procesarCrearPartida(Mensaje mensaje) {
         SolicitudUnirseDTO solicitud = gson.fromJson(mensaje.getData(), SolicitudUnirseDTO.class);
@@ -447,15 +443,19 @@ public class GestorPartida {
             coordenadas.add(coord.getX() + "," + coord.getY());
         }
 
-        // Verificar que no se solape con naves existentes
+        // Verificar que no se solape con naves existentes ni este adyacente
         List<NaveInfo> navesExistentes = navesJugadores.computeIfAbsent(nombreJugador, k -> new ArrayList<>());
 
         boolean solapamiento = verificarSolapamiento(navesExistentes, coordenadas);
+        boolean adyacencia = verificarAdyacencia(navesExistentes, coordenadas);
 
         ResultadoAddNave resultado;
         if (solapamiento) {
             resultado = ResultadoAddNave.ESPACIO_YA_OCUPADO;
             System.out.println("[GESTOR] ERROR: Solapamiento de naves");
+        } else if (adyacencia) {
+            resultado = ResultadoAddNave.NAVE_ADYACENTE;
+            System.out.println("[GESTOR] ERROR: Nave adyacente a otra existente");
         } else {
             NaveInfo nuevaNave = new NaveInfo(naveDTO.getTipo(), coordenadas);
             navesExistentes.add(nuevaNave);
@@ -475,6 +475,47 @@ public class GestorPartida {
             for (String coord : coordenadasNuevas) {
                 if (naveExistente.getCoordenadas().contains(coord)) {
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si las coordenadas de la nueva nave estan adyacentes a naves existentes.
+     * Incluye verificacion de las 8 direcciones (horizontal, vertical y diagonal).
+     *
+     * @param navesExistentes Lista de naves ya colocadas
+     * @param coordenadasNuevas Coordenadas de la nueva nave
+     * @return true si hay adyacencia invalida, false si la posicion es valida
+     */
+    private boolean verificarAdyacencia(List<NaveInfo> navesExistentes, Set<String> coordenadasNuevas) {
+        // Recolectar todas las coordenadas ocupadas por naves existentes
+        Set<String> todasCoordenadasOcupadas = new HashSet<>();
+        for (NaveInfo nave : navesExistentes) {
+            todasCoordenadasOcupadas.addAll(nave.getCoordenadas());
+        }
+
+        // Para cada coordenada de la nueva nave, verificar adyacencia
+        for (String coordNueva : coordenadasNuevas) {
+            String[] partes = coordNueva.split(",");
+            int x = Integer.parseInt(partes[0]);
+            int y = Integer.parseInt(partes[1]);
+
+            // Verificar las 8 direcciones adyacentes
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    if (dx == 0 && dy == 0) continue; // Saltar la posicion actual
+
+                    String coordAdyacente = (x + dx) + "," + (y + dy);
+
+                    // Si la coordenada adyacente esta ocupada Y no es parte de la misma nave nueva
+                    if (todasCoordenadasOcupadas.contains(coordAdyacente)
+                            && !coordenadasNuevas.contains(coordAdyacente)) {
+                        System.out.println("[GESTOR] Adyacencia detectada: " + coordNueva +
+                                          " adyacente a " + coordAdyacente);
+                        return true;
+                    }
                 }
             }
         }
@@ -950,11 +991,11 @@ public class GestorPartida {
             // Publicar evento de abandono
             Mensaje msgAbandono = new Mensaje(
                     TipoAccion.PUBLICAR,
-                    "ABANDONO_PARTIDA",
+                    "JUGADOR_ABANDONO",
                     gson.toJsonTree(jugadorDesconectado),
                     "SERVER"
             );
-            publicador.publicar("ABANDONO_PARTIDA", msgAbandono);
+            publicador.publicar("JUGADOR_ABANDONO", msgAbandono);
         }
 
         // Si no quedan jugadores, limpiar la partida completamente

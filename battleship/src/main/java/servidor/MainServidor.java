@@ -5,10 +5,15 @@ import compartido.comunicacion.socket.ServidorSocket;
 import java.util.HashMap;
 
 /**
- * Clase principal para iniciar el SERVIDOR.
- * Ejecutar PRIMERO antes de los clientes.
+ * El main del servidor. Primero hay que correr esto y luego los clientes.
+ * Crea el bus de eventos y abre el socket en el puerto 5000 para que
+ * los clientes se puedan conectar.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class MainServidor {
 

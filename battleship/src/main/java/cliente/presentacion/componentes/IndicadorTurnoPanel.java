@@ -10,9 +10,14 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Panel que indica visualmente de quien es el turno actual.
+ * El panelcito que te dice si es tu turno o del otro.
+ * Se pone verde cuando es tu turno y rojo/rosa cuando le toca al rival.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class IndicadorTurnoPanel extends JPanel {
 

@@ -30,10 +30,15 @@ import compartido.enums.EstadoJugador;
 import compartido.comunicacion.dto.JugadorDTO;
 
 /**
- * Pantalla para crear una partida MultiPlayer.
- * El Host ingresa su nombre, selecciona color y obtiene un codigo para compartir.
+ * Pantalla para cuando quieres ser el host y crear una partida.
+ * Pones tu nombre, escoges el color de tus barcos y te genera
+ * un codigo random que le pasas a tu amigo para que se conecte.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmCrearPartida extends JFrame {
 
@@ -59,6 +64,8 @@ public class FrmCrearPartida extends JFrame {
     private String codigoPartida;
     private ColorJugador colorSeleccionado;
     private ControlVista controlVista;
+    private boolean partidaCreada = false; // Bandera para saber si ya se registro en servidor
+    private boolean accionEnProceso = false; // Evita doble click en Crear Partida
 
     public FrmCrearPartida() {
         this.controlVista = ControlVista.getInstancia();
@@ -78,10 +85,18 @@ public class FrmCrearPartida extends JFrame {
 
     private void initComponents() {
         setTitle("Battleship - Crear Partida");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(900, 500);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Manejar cierre con X
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                retroceder();
+            }
+        });
 
         // Panel principal con gradiente
         JPanel pnlPrincipal = new JPanel() {
@@ -284,6 +299,11 @@ public class FrmCrearPartida extends JFrame {
     }
 
     private void crearPartida() {
+        // Evitar doble click
+        if (accionEnProceso) {
+            return;
+        }
+
         String nombre = txtNombre.getText().trim();
 
         if (nombre.isEmpty()) {
@@ -298,8 +318,13 @@ public class FrmCrearPartida extends JFrame {
             return;
         }
 
-        // Limpiar estado anterior antes de crear nueva partida
-        controlVista.reiniciarEstado();
+        // Marcar accion en proceso y deshabilitar boton
+        accionEnProceso = true;
+        btnCrearPartida.setEnabled(false);
+
+        // Limpiar estado local antes de crear nueva partida
+        // No notificar al servidor ya que aun no hay partida registrada
+        controlVista.reiniciarEstado(false);
 
         // Guardar datos en ControlVista
         controlVista.setCodigoPartida(codigoPartida);
@@ -309,6 +334,7 @@ public class FrmCrearPartida extends JFrame {
         // Asi cuando el lobby cargue los jugadores, el host ya estara registrado
         JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
         controlVista.crearPartidaConCodigo(jugador, codigoPartida);
+        partidaCreada = true; // Marcar que la partida fue registrada en el servidor
 
         // Ahora crear el lobby (cargarJugadores() encontrara al host)
         FrmLobby lobby = new FrmLobby(codigoPartida, true);
@@ -319,6 +345,11 @@ public class FrmCrearPartida extends JFrame {
     }
 
     private void retroceder() {
+        // Si la partida ya fue creada en el servidor, cancelarla
+        if (partidaCreada) {
+            controlVista.cancelarPartidaCreada();
+        }
+
         FrmMultiPlayer frm = new FrmMultiPlayer();
         frm.setVisible(true);
         dispose();

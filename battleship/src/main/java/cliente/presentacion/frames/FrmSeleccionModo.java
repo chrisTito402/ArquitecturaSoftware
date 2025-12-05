@@ -18,9 +18,15 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 /**
- * Pantalla para seleccionar el modo de juego: SinglePlayer o MultiPlayer.
+ * Donde escoges si quieres jugar solo (SinglePlayer) o contra alguien
+ * por red (MultiPlayer). Ahorita nomas funciona el MultiPlayer,
+ * el SinglePlayer lo dejamos para despues porque se nos acababa el tiempo.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmSeleccionModo extends JFrame {
 
@@ -43,10 +49,18 @@ public class FrmSeleccionModo extends JFrame {
 
     private void initComponents() {
         setTitle("Battleship - Seleccionar Modo");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setSize(900, 500);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Manejar cierre con X
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                confirmarSalida();
+            }
+        });
 
         // Panel principal con gradiente
         JPanel pnlPrincipal = new JPanel() {
@@ -149,5 +163,18 @@ public class FrmSeleccionModo extends JFrame {
         FrmMenuPrincipal menu = new FrmMenuPrincipal();
         menu.setVisible(true);
         dispose();
+    }
+
+    private void confirmarSalida() {
+        int opcion = JOptionPane.showConfirmDialog(
+            this,
+            "¿Estás seguro de que quieres salir?",
+            "Confirmar salida",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+        if (opcion == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 }

@@ -17,21 +17,46 @@ import compartido.comunicacion.dto.TableroDTO;
 import compartido.comunicacion.dto.TurnoDTO;
 
 /**
- * Modelo del cliente para el juego Batalla Naval.
- * Mantiene el estado local del jugador y maneja la logica del cliente.
+ * Esta es la clase del Modelo en el MVC del lado del cliente.
+ * Guarda todo el estado del juego: el jugador, su tablero, las naves,
+ * si es tu turno o no, etc.
  *
- * @author daniel
+ * Antes de mandar algo al servidor, aqui se valida que los datos
+ * esten bien (por ejemplo que las coordenadas no se salgan del tablero).
+ * Tambien avisa a las vistas cuando algo cambia usando Observer.
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class ControlModelo implements IModeloCliente {
 
+    // datos del jugador
     private JugadorDTO jugador;
+
+    // tablero 10x10
     private TableroDTO tablero;
+
+    // naves colocadas
     private List<NaveDTO> naves;
+
+    // si es mi turno o no
     private boolean turno;
+
+    // si ya confirme el tablero
     private boolean tableroConfirmado;
+
+    // observadores (Observer)
     private List<ISuscriptor> suscriptores;
+
+    // jugadores en la partida
     private List<Jugador> jugadores;
 
+    /**
+     * Constructor por defecto.
+     */
     public ControlModelo() {
         this.jugadores = new java.util.ArrayList<>();
         this.tableroConfirmado = false;
@@ -40,6 +65,9 @@ public class ControlModelo implements IModeloCliente {
         this.suscriptores = new java.util.ArrayList<>();
     }
 
+    /**
+     * Constructor que usa el Builder.
+     */
     public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores) {
         this.jugador = jugador;
         this.tablero = tablero;
@@ -50,6 +78,10 @@ public class ControlModelo implements IModeloCliente {
         this.tableroConfirmado = false;
     }
 
+    /**
+     * Valida y crea un disparo. Checa que sea nuestro turno
+     * y que las coordenadas esten dentro del tablero.
+     */
     @Override
     public DisparoDTO realizarDisparo(CoordenadasDTO coordenadas) {
         if (!turno) {
@@ -69,6 +101,9 @@ public class ControlModelo implements IModeloCliente {
         return disparo;
     }
 
+    /**
+     * Procesa resultado de disparo y avisa a las vistas.
+     */
     @Override
     public void manejarResultadoDisparo(DisparoDTO disparo) {
         if (disparo.getResultadoDisparo() == ResultadoDisparo.DISPARO_FUERA_TIEMPO) {
@@ -83,6 +118,11 @@ public class ControlModelo implements IModeloCliente {
         notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
     }
 
+    /**
+     * Valida y agrega una nave al tablero.
+     * Checa que no sea nula, que quepa, que la orientacion
+     * este bien y que las coordenadas sean consecutivas.
+     */
     @Override
     public AddNaveDTO addNave(NaveDTO nave, List<CoordenadasDTO> coordenadas) {
         // Verificar que la nave no sea nula.
@@ -237,7 +277,7 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void abandonarLobby(Jugador jugador) {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
-        notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
+        notificarAllSuscriptores("ABANDONAR_LOBBY", dto);
     }
 
     @Override
@@ -270,10 +310,7 @@ public class ControlModelo implements IModeloCliente {
         );
     }
 
-    // =========================================================================
-    // NUEVOS METODOS PARA EL BUS DE EVENTOS
-    // =========================================================================
-
+    // METODOS DEL BUS DE EVENTOS
     @Override
     public void limpiarNaves() {
         // Reiniciar el tablero local
@@ -367,7 +404,7 @@ public class ControlModelo implements IModeloCliente {
     }
 
     /**
-     * Reinicia completamente el estado del modelo para una nueva partida.
+     * Reinicia todo para nueva partida.
      */
     public void reiniciar() {
         this.jugador = null;

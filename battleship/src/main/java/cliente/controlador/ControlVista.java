@@ -20,36 +20,86 @@ import javax.swing.JOptionPane;
 import compartido.enums.EstadoPartida;
 import cliente.presentacion.componentes.CasillaButton;
 import cliente.presentacion.componentes.CasillaPanel;
+import cliente.presentacion.frames.FrmColocarNaves;
 import cliente.presentacion.frames.FrmFinPartida;
+import cliente.presentacion.frames.FrmLobby;
 import cliente.presentacion.frames.FrmPartidaEnCurso;
 import cliente.presentacion.componentes.IndicadorTurnoPanel;
 import cliente.presentacion.componentes.MarcadorNavesPanel;
 import cliente.presentacion.componentes.TimerPanel;
 
 /**
+ * Esta clase es como el "puente" entre las pantallas y el controlador principal.
+ * Es un Singleton porque necesitamos que solo exista una instancia que maneje
+ * todas las vistas del juego.
  *
- * @author daniel
+ * Tambien implementa ISuscriptor para que cuando algo cambie en el modelo
+ * (como un disparo o cambio de turno), esta clase se entere y actualice la pantalla.
+ *
+ * Basicamente se encarga de:
+ * - Manejar las casillas de los tableros (el tuyo y el del enemigo)
+ * - El timer de 30 segundos por turno
+ * - Mostrar quien va ganando y de quien es el turno
+ * - Cambiar de pantalla cuando toca (lobby -> colocar naves -> juego, etc)
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class ControlVista implements ISuscriptor {
 
+    /** Instancia unica del singleton */
     private static ControlVista controlVista;
 
+    /** Referencia al controlador principal */
     private IControlador control;
-    private List<CasillaPanel> casillasPropias;
-    private List<CasillaButton> casillasEnemigas;
-    private TimerPanel timer;
-    private MarcadorNavesPanel marcadorNavesPanel;
-    private IndicadorTurnoPanel indicadorTurnoPanel;
-    private Map<String, Consumer<Object>> manejadoresNoti;
-    private List<ISuscriptor> suscriptoresLobby;
-    private String codigoPartida;
-    private boolean esHost;
-    private boolean partidaFinalizada = false; // Evita mostrar múltiples pantallas de fin
 
+    /** Lista de paneles que representan las casillas del tablero propio */
+    private List<CasillaPanel> casillasPropias;
+
+    /** Lista de botones que representan las casillas del tablero enemigo */
+    private List<CasillaButton> casillasEnemigas;
+
+    /** Panel que muestra el temporizador del turno */
+    private TimerPanel timer;
+
+    /** Panel que muestra el marcador de naves (hundidas, averiadas, etc) */
+    private MarcadorNavesPanel marcadorNavesPanel;
+
+    /** Panel que indica de quien es el turno actual */
+    private IndicadorTurnoPanel indicadorTurnoPanel;
+
+    /** Mapa de manejadores para cada tipo de notificacion */
+    private Map<String, Consumer<Object>> manejadoresNoti;
+
+    /** Lista de suscriptores del lobby para notificar cambios */
+    private List<ISuscriptor> suscriptoresLobby;
+
+    /** Codigo unico de la partida actual */
+    private String codigoPartida;
+
+    /** Indica si este cliente es el host de la partida */
+    private boolean esHost;
+
+    /** Bandera para evitar mostrar multiples pantallas de fin */
+    private boolean partidaFinalizada = false;
+
+    /** Bandera para evitar abrir multiples ventanas de partida */
+    private boolean navegandoAPartida = false;
+
+    /** Indica si hay una partida registrada en el servidor */
+    private boolean partidaActiva = false;
+
+    /**
+     * Constructor privado del singleton.
+     * Inicializa el mapa de manejadores para cada tipo de evento.
+     */
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
-        manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
+        manejadoresNoti.put("JUGADOR_ABANDONO", this::manejarAbandono);
         manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);  // El servidor envía con esta clave
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
@@ -64,41 +114,60 @@ public class ControlVista implements ISuscriptor {
         suscriptoresLobby = new ArrayList<>();
     }
 
+    /**
+     * Suscribe un observador para recibir eventos del lobby.
+     * @param suscriptor el componente que quiere recibir notificaciones
+     */
     public void suscribirLobby(ISuscriptor suscriptor) {
         if (suscriptor != null && !suscriptoresLobby.contains(suscriptor)) {
             suscriptoresLobby.add(suscriptor);
         }
     }
 
+    /**
+     * Elimina un observador de la lista del lobby.
+     * @param suscriptor el observador a eliminar
+     */
     public void desuscribirLobby(ISuscriptor suscriptor) {
         suscriptoresLobby.remove(suscriptor);
     }
 
+    /**
+     * Notifica a todos los suscriptores del lobby sobre un evento.
+     * @param contexto el tipo de evento
+     * @param datos la informacion del evento
+     */
     private void notificarLobby(String contexto, Object datos) {
         for (ISuscriptor s : suscriptoresLobby) {
             s.notificar(contexto, datos);
         }
     }
 
+    /** @return el codigo de la partida actual */
     public String getCodigoPartida() {
         return codigoPartida;
     }
 
+    /** @param codigoPartida el codigo unico de la partida */
     public void setCodigoPartida(String codigoPartida) {
         this.codigoPartida = codigoPartida;
     }
 
+    /** @return true si este cliente es el host */
     public boolean isEsHost() {
         return esHost;
     }
 
+    /** @param esHost indica si somos el host de la partida */
     public void setEsHost(boolean esHost) {
         this.esHost = esHost;
     }
 
     /**
-     * Retorna la instancia única de ControlVista (Patrón Singleton).
-     * Synchronized para garantizar thread-safety en entornos multi-hilo.
+     * Retorna la instancia unica de ControlVista (Patron Singleton).
+     * El metodo es synchronized para evitar problemas en entornos multi-hilo.
+     *
+     * @return la unica instancia de ControlVista
      */
     public static synchronized ControlVista getInstancia() {
         if (controlVista == null) {
@@ -107,54 +176,72 @@ public class ControlVista implements ISuscriptor {
         return controlVista;
     }
 
+    /** @return referencia al controlador principal */
     public IControlador getControl() {
         return this.control;
     }
 
+    /** @return lista de casillas del tablero propio */
     public List<CasillaPanel> getCasillasPropias() {
         return casillasPropias;
     }
 
+    /** @return lista de casillas del tablero enemigo */
     public List<CasillaButton> getCasillasEnemigas() {
         return casillasEnemigas;
     }
 
+    /** @param control el controlador principal a usar */
     public void setControl(IControlador control) {
         this.control = control;
     }
 
+    /** @return el panel del temporizador */
     public TimerPanel getTimer() {
         return timer;
     }
 
+    /** @param timer el panel del temporizador a usar */
     public void setTimer(TimerPanel timer) {
         this.timer = timer;
     }
 
+    /** @return el panel del marcador de naves */
     public MarcadorNavesPanel getMarcadorNavesPanel() {
         return marcadorNavesPanel;
     }
 
+    /** @param panel el panel del marcador a registrar */
     public void setMarcadorNavesPanel(MarcadorNavesPanel panel) {
         this.marcadorNavesPanel = panel;
         System.out.println("MarcadorNavesPanel registrado correctamente");
     }
 
+    /** @return el panel indicador de turno */
     public IndicadorTurnoPanel getIndicadorTurnoPanel() {
         return indicadorTurnoPanel;
     }
 
+    /** @param panel el panel indicador de turno a registrar */
     public void setIndicadorTurnoPanel(IndicadorTurnoPanel panel) {
         this.indicadorTurnoPanel = panel;
         System.out.println("IndicadorTurnoPanel registrado correctamente");
     }
 
+    /**
+     * Actualiza el indicador visual del turno.
+     * @param esMiTurno true si es nuestro turno
+     */
     public void actualizarIndicadorTurno(boolean esMiTurno) {
         if (indicadorTurnoPanel != null) {
             indicadorTurnoPanel.setEsMiTurno(esMiTurno);
         }
     }
 
+    /**
+     * Solicita al controlador que realice un disparo en las coordenadas dadas.
+     * @param c las coordenadas donde se quiere disparar
+     */
     public void realizarDisparo(CoordenadasDTO c) {
         System.out.println("[ControlVista] realizarDisparo llamado en coordenadas: " + c.getX() + "," + c.getY());
         System.out.println("[ControlVista] esMiTurno: " + esMiTurno());
@@ -315,6 +402,12 @@ public class ControlVista implements ISuscriptor {
         JugadorDTO dto = (JugadorDTO) datos;
         JugadorDTO yo = control.getJugador();
 
+        // Verificación null defensiva
+        if (yo == null || dto == null || dto.getNombre() == null) {
+            System.out.println("[ControlVista] Datos incompletos en manejarAbandono");
+            return;
+        }
+
         // Si YO soy el que abandono, no mostrar nada
         if (dto.getNombre().equals(yo.getNombre())) {
             return;
@@ -322,15 +415,14 @@ public class ControlVista implements ISuscriptor {
 
         System.out.println("Partida finalizada por abandono del rival: " + dto.getNombre());
 
-        // Marcar como finalizada para evitar duplicados
-        partidaFinalizada = true;
-
         // Si hay casillas enemigas, significa que estamos en FrmPartidaEnCurso
         if (casillasEnemigas != null && !casillasEnemigas.isEmpty()) {
-            mostrarPantallaFinPartida(yo, true);
+            // mostrarPantallaFinPartida establece partidaFinalizada internamente
+            mostrarPantallaFinPartidaPorAbandono(yo);
         } else {
             // Estamos en FrmColocarNaves - notificar al lobby para que lo maneje
-            notificarLobby("ABANDONO_PARTIDA", dto);
+            partidaFinalizada = true;
+            notificarLobby("JUGADOR_ABANDONO", dto);
         }
     }
 
@@ -409,6 +501,13 @@ public class ControlVista implements ISuscriptor {
     }
 
     public void mostrarFrmPartidaEnCurso() {
+        // Evitar abrir múltiples ventanas
+        if (navegandoAPartida) {
+            System.out.println("[ControlVista] Ya se está navegando a partida, ignorando...");
+            return;
+        }
+        navegandoAPartida = true;
+
         new FrmPartidaEnCurso().setVisible(true);
         timer.initTimer();
     }
@@ -423,6 +522,7 @@ public class ControlVista implements ISuscriptor {
      */
     public void crearPartidaConCodigo(JugadorDTO jugador, String codigo) {
         control.crearPartidaConCodigo(jugador, codigo);
+        partidaActiva = true; // Marcar que hay partida registrada en servidor
     }
 
     /**
@@ -430,6 +530,7 @@ public class ControlVista implements ISuscriptor {
      */
     public void unirsePartidaConCodigo(JugadorDTO jugador, String codigo) {
         control.unirsePartidaConCodigo(jugador, codigo);
+        partidaActiva = true; // Marcar que hay partida registrada en servidor
     }
 
     public void empezarPartida() {
@@ -447,6 +548,20 @@ public class ControlVista implements ISuscriptor {
 
     public void abandonarLobby(JugadorDTO jugador) {
         control.abandonarLobby(jugador);
+    }
+
+    /**
+     * Cancela una partida que fue creada pero el host retrocedio antes de ir al lobby.
+     * Notifica al servidor para eliminar la partida fantasma.
+     */
+    public void cancelarPartidaCreada() {
+        JugadorDTO jugador = control.getJugador();
+        if (jugador != null) {
+            // Usar abandonarLobby para notificar al servidor
+            control.abandonarLobby(jugador);
+        }
+        // Limpiar estado local (no notificar de nuevo, ya se hizo arriba)
+        reiniciarEstado(false);
     }
 
     public List<JugadorDTO> getJugadores() {
@@ -587,6 +702,26 @@ public class ControlVista implements ISuscriptor {
         }
         partidaFinalizada = true;
 
+        finalizarYMostrarPantalla(ganador, gane, false);
+    }
+
+    /**
+     * Muestra la pantalla de fin de partida por abandono del oponente.
+     */
+    private void mostrarPantallaFinPartidaPorAbandono(JugadorDTO ganador) {
+        if (partidaFinalizada) {
+            System.out.println("[ControlVista] Pantalla de fin ya mostrada, ignorando...");
+            return;
+        }
+        partidaFinalizada = true;
+
+        finalizarYMostrarPantalla(ganador, true, true);
+    }
+
+    /**
+     * Lógica compartida para finalizar partida y mostrar pantalla de fin.
+     */
+    private void finalizarYMostrarPantalla(JugadorDTO ganador, boolean gane, boolean porAbandono) {
         // Detener timer si existe
         if (timer != null) {
             timer.stopTimer();
@@ -602,18 +737,20 @@ public class ControlVista implements ISuscriptor {
             cerrarVentanaPartida();
 
             // Mostrar pantalla de fin
-            FrmFinPartida frmFin = new FrmFinPartida(ganador, gane);
+            FrmFinPartida frmFin = new FrmFinPartida(ganador, gane, porAbandono);
             frmFin.setVisible(true);
         });
     }
 
     /**
-     * Cierra la ventana de partida en curso si existe.
+     * Cierra las ventanas de juego si existen (partida en curso, colocar naves, lobby).
      */
     private void cerrarVentanaPartida() {
         java.awt.Window[] windows = java.awt.Window.getWindows();
         for (java.awt.Window window : windows) {
-            if (window instanceof FrmPartidaEnCurso) {
+            if (window instanceof FrmPartidaEnCurso ||
+                window instanceof FrmColocarNaves ||
+                window instanceof FrmLobby) {
                 window.dispose();
             }
         }
@@ -621,9 +758,35 @@ public class ControlVista implements ISuscriptor {
 
     /**
      * Reinicia el estado para una nueva partida.
+     * Si hay una partida activa que no fue notificada al servidor, la notifica.
      */
     public void reiniciarEstado() {
+        reiniciarEstado(true);
+    }
+
+    /**
+     * Reinicia el estado para una nueva partida.
+     *
+     * @param notificarServidor si es true, notifica al servidor si hay partida activa
+     */
+    public void reiniciarEstado(boolean notificarServidor) {
+        // Detener timer si existe
+        if (timer != null) {
+            timer.stopTimer();
+        }
+
+        // Si hay partida activa y se debe notificar, informar al servidor
+        if (notificarServidor && partidaActiva && control != null) {
+            JugadorDTO jugador = control.getJugador();
+            if (jugador != null) {
+                // Notificar abandono al servidor para limpiar la partida
+                control.abandonarLobby(jugador);
+            }
+        }
+
         partidaFinalizada = false;
+        navegandoAPartida = false;
+        partidaActiva = false; // Marcar que ya no hay partida activa
         casillasPropias = null;
         casillasEnemigas = null;
         timer = null;
@@ -632,12 +795,25 @@ public class ControlVista implements ISuscriptor {
         esHost = false;
         codigoPartida = null;
 
+        // Limpiar suscriptores del lobby para evitar notificaciones huérfanas
+        suscriptoresLobby.clear();
+
         // Reiniciar el modelo (limpia jugadores, tablero, etc.)
         if (control != null) {
             control.reiniciarModelo();
         }
 
+        // Cerrar ventanas de partida si existen
+        cerrarVentanaPartida();
+
         System.out.println("[ControlVista] Estado reiniciado para nueva partida");
+    }
+
+    /**
+     * Marca la partida como no activa (ya se notificó al servidor por otro medio).
+     */
+    public void marcarPartidaInactiva() {
+        partidaActiva = false;
     }
 
     /**
@@ -645,6 +821,8 @@ public class ControlVista implements ISuscriptor {
      */
     private void manejarErrorUnirse(Object datos) {
         System.out.println("[ControlVista] Error al unirse recibido");
+        // Resetear bandera ya que el jugador no se unio exitosamente
+        partidaActiva = false;
         notificarLobby("ERROR_UNIRSE", datos);
     }
 

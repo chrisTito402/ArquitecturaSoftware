@@ -9,8 +9,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import servidor.negocio.Partida;
 
 /**
+ * El cronometro que controla el tiempo de cada turno (30 segundos).
+ * Usa hilos para no bloquear el programa mientras cuenta.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Cronometro implements ICronometro {
 

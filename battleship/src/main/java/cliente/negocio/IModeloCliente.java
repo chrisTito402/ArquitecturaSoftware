@@ -12,22 +12,24 @@ import compartido.comunicacion.dto.NaveDTO;
 import compartido.comunicacion.dto.TurnoDTO;
 
 /**
- * Interfaz del modelo del cliente para el juego Batalla Naval.
- * Define todas las operaciones del modelo accesibles desde el controlador.
+ * Interfaz que define lo que debe hacer el Modelo del cliente.
+ * Tiene metodos para todo lo del juego: agregar jugadores, unirse
+ * a partida, poner naves, disparar, manejar turnos, y un chorro
+ * de cosas mas que se necesitan para que funcione el juego.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public interface IModeloCliente {
-
-    // === GESTION DE JUGADORES ===
 
     public void addJugador(Jugador j);
 
     public JugadorDTO getJugador();
 
     public List<Jugador> getJugadores();
-
-    // === GESTION DE PARTIDA ===
 
     public void unirsePartida(Jugador jugador);
 
@@ -36,8 +38,6 @@ public interface IModeloCliente {
     public void abandonarLobby(Jugador jugador);
 
     public JugadorDTO abandonarPartida(Jugador jugador);
-
-    // === GESTION DE TABLERO Y NAVES ===
 
     public void crearTableros();
 
@@ -49,15 +49,11 @@ public interface IModeloCliente {
 
     public boolean tableroConfirmado();
 
-    // === BATALLA ===
-
     public DisparoDTO realizarDisparo(CoordenadasDTO coordenadas);
 
     public boolean esMiTurno();
 
     public void setTurno(boolean esMiTurno);
-
-    // === MANEJADORES DE EVENTOS RECIBIDOS ===
 
     public void manejarResultadoAddNave(ResultadoAddNave resultado);
 
@@ -73,18 +69,14 @@ public interface IModeloCliente {
 
     public void manejarFinPartida(JugadorDTO ganador);
 
-    // === OBSERVADORES ===
-
     public void suscribirAPartida(ISuscriptor suscriptor);
 
     public void desuscribirDePartida(ISuscriptor suscriptor);
 
     public void notificarAllSuscriptores(String contexto, Object datos);
 
-    // === REINICIO ===
-
     /**
-     * Reinicia completamente el estado del modelo para una nueva partida.
+     * Reinicia para nueva partida.
      */
     public void reiniciar();
 }

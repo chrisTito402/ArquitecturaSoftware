@@ -5,8 +5,14 @@ import compartido.enums.EstadoPartida;
 import compartido.enums.ResultadoDisparo;
 
 /**
+ * Guarda la info de un disparo: quien disparo, a donde, y que paso
+ * (agua, impacto o hundimiento).
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Disparo {
 

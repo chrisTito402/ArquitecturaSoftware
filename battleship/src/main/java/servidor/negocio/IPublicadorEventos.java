@@ -3,30 +3,26 @@ package servidor.negocio;
 import compartido.comunicacion.Mensaje;
 
 /**
- * Interfaz que define las operaciones de publicacion de eventos.
- * Permite desacoplar la logica de negocio (GestorPartida) del
- * mecanismo de transporte (BusEventos).
+ * Interfaz para que GestorPartida pueda mandar mensajes sin depender
+ * directamente del BusEventos. Esto es por el DIP (Dependency Inversion
+ * Principle) - asi si despues queremos cambiar como se mandan los
+ * mensajes nomas cambiamos la implementacion y ya.
  *
- * Principio de Inversion de Dependencias (DIP):
- * La capa de negocio depende de esta abstraccion, no de la implementacion concreta.
- *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public interface IPublicadorEventos {
 
     /**
-     * Publica un mensaje a todos los suscriptores de un evento.
-     *
-     * @param evento Nombre del evento/canal
-     * @param mensaje Mensaje a publicar
+     * Envia mensaje a todos los suscritos.
      */
     void publicar(String evento, Mensaje mensaje);
 
     /**
-     * Envia un mensaje unicast a un cliente especifico.
-     *
-     * @param idDestino ID del cliente destino
-     * @param mensaje Mensaje a enviar
+     * Envia mensaje a un solo cliente.
      */
     void enviarUnicast(String idDestino, Mensaje mensaje);
 }

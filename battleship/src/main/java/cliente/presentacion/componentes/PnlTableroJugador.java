@@ -1,14 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package cliente.presentacion.componentes;
 
 import java.awt.Dimension;
 
 /**
+ * Panel contenedor para el tablero del jugador.
+ * Es un grid de 10x10 donde van las casillas. Netbeans lo genera automatico.
  *
- * @author chris
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class PnlTableroJugador extends javax.swing.JPanel {
 

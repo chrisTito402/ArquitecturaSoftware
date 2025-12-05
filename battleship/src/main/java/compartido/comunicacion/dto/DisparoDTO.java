@@ -4,10 +4,16 @@ import compartido.enums.EstadoPartida;
 import compartido.enums.ResultadoDisparo;
 
 /**
- * DTO para transferir informacion de disparo entre capas.
- * Capa compartida - no pertenece a Vista ni Modelo.
+ * DTO para transferir datos de un disparo entre capas.
  *
- * @author daniel
+ * Contiene quien disparo, las coordenadas, el resultado y el
+ * estado de la partida despues del disparo.
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class DisparoDTO {
 

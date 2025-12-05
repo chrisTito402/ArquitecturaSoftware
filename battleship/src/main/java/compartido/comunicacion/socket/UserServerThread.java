@@ -11,8 +11,17 @@ import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
 
 /**
+ * Hilo que maneja la comunicacion con un cliente conectado en el servidor.
  *
- * @author daniel
+ * Cada cliente que se conecta tiene su propio hilo que se encarga de
+ * leer los mensajes entrantes y enviar respuestas. Cuando el cliente
+ * se desconecta, el hilo notifica al servidor para limpiar los recursos.
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class UserServerThread extends Thread {
 
@@ -42,16 +51,34 @@ public class UserServerThread extends Thread {
             while (true) {
                 try {
                     clientMessage = reader.readLine();
+
+                    // Si readLine() retorna null, el cliente se desconectó
+                    if (clientMessage == null) {
+                        System.out.println("[UserServerThread] Cliente desconectado (readLine null)");
+                        server.removeUser(this);
+                        break;
+                    }
+
                     server.sendToBus(clientMessage, this);
                 } catch (SocketException ex) {
+                    System.out.println("[UserServerThread] Cliente desconectado (SocketException)");
                     server.removeUser(this);
                     break;
                 }
             }
 
         } catch (IOException ex) {
-            System.out.println("Error in UserThread: " + ex.getMessage());
-            ex.printStackTrace();
+            System.out.println("[UserServerThread] Error: " + ex.getMessage());
+            server.removeUser(this);
+        } finally {
+            // Asegurar que el socket se cierre
+            try {
+                if (socket != null && !socket.isClosed()) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("[UserServerThread] Error cerrando socket: " + e.getMessage());
+            }
         }
     }
 

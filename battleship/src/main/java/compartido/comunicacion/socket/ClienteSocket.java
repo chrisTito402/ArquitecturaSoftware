@@ -8,8 +8,17 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 /**
+ * Maneja la conexion del cliente con el servidor mediante sockets.
  *
- * @author daniel
+ * Se encarga de establecer la conexion TCP con el servidor, enviar
+ * mensajes y recibir respuestas. Usa un hilo separado para leer
+ * los mensajes entrantes sin bloquear la interfaz.
+ *
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class ClienteSocket implements IClienteSocket {
 
@@ -30,7 +39,7 @@ public class ClienteSocket implements IClienteSocket {
         this.control = control;
     }
 
-    public void execute() {
+    public boolean execute() {
         try {
             socket = new Socket(hostname, port);
             System.out.println("Conectado al Servidor.");
@@ -38,10 +47,13 @@ public class ClienteSocket implements IClienteSocket {
 
             OutputStream output = socket.getOutputStream();
             writer = new PrintWriter(output, true);
+            return true;
         } catch (UnknownHostException ex) {
             System.out.println("No se encontró el servidor: " + ex.getMessage());
+            return false;
         } catch (IOException ex) {
-            System.out.println("Error: " + ex.getMessage());
+            System.out.println("Error de conexión: " + ex.getMessage());
+            return false;
         }
     }
 

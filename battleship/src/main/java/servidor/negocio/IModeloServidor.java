@@ -8,8 +8,14 @@ import compartido.entidades.Nave;
 import compartido.enums.ResultadoAddNave;
 
 /**
+ * Interfaz del modelo en el servidor.
+ * Define las operaciones basicas: disparar, agregar naves, unirse, etc.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public interface IModeloServidor {
 

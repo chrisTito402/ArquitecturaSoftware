@@ -11,41 +11,43 @@ import servidor.negocio.GestorPartida;
 import servidor.negocio.IPublicadorEventos;
 
 /**
- * Bus de Eventos central para la comunicacion entre clientes.
+ * El famoso Bus de Eventos! Es como un "cartero" que reparte mensajes.
+ * Los clientes se suscriben a eventos que les interesan y cuando alguien
+ * publica algo, el bus se lo manda a todos los que estan suscritos.
  *
- * Implementa el patron Publish-Subscribe con soporte para:
- * - PUBLICAR: Broadcast a todos los suscriptores de un evento
- * - SUSCRIBIR: Registrarse para recibir un tipo de evento
- * - SEND_UNICAST: Enviar mensaje a un cliente especifico
+ * Puede hacer tres cosas:
+ * - PUBLICAR: manda a todos los suscritos de ese evento
+ * - SUSCRIBIR: apunta a un cliente para que reciba cierto evento
+ * - UNICAST: manda a un cliente especifico nomas
  *
- * PRINCIPIO DE RESPONSABILIDAD UNICA (SRP):
- * Esta clase SOLO maneja el routing de mensajes.
- * La logica de negocio se delega a GestorPartida.
+ * Importante: esta clase SOLO manda mensajes, no tiene logica del juego.
+ * Eso va en GestorPartida. Asi respetamos el SRP.
  *
- * Thread-safe mediante ConcurrentHashMap y CopyOnWriteArraySet.
- *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class BusEventos implements IPublicadorEventos {
 
-    // Mapa de eventos a suscriptores
+    // evento -> clientes suscritos
     private final ConcurrentHashMap<String, Set<UserServerThread>> eventos;
 
-    // Mapa de ID de cliente a su thread
+    // id -> cliente
     private final ConcurrentHashMap<String, UserServerThread> clientesPorId;
 
-    // Mapa inverso: thread a ID de cliente (para detectar desconexiones)
+    // cliente -> id (para desconexiones)
     private final ConcurrentHashMap<UserServerThread, String> idPorCliente;
 
-    // Gestor de logica de negocio (Capa de Negocio)
+    // logica del juego
     private final GestorPartida gestorPartida;
 
-    // Serializador JSON
+    // para convertir a JSON
     private final Gson gson;
 
     /**
-     * Constructor del BusEventos.
-     * Inicializa las estructuras de datos y el gestor de partida.
+     * Constructor principal.
      */
     public BusEventos() {
         this.eventos = new ConcurrentHashMap<>();
@@ -57,23 +59,18 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Constructor para compatibilidad (ignora el mapa pasado).
-     *
-     * @param mapa Parametro ignorado, mantenido por compatibilidad
+     * Constructor alternativo (compatibilidad).
      */
     public BusEventos(java.util.Map mapa) {
         this();
     }
 
     // =========================================================================
-    // OPERACIONES DE ROUTING (Patron Publish-Subscribe)
+    // ROUTING - Publish-Subscribe
     // =========================================================================
 
     /**
-     * Publica un mensaje a todos los suscriptores de un evento.
-     *
-     * @param evento Nombre del evento/canal
-     * @param mensaje Mensaje a publicar
+     * Manda mensaje a todos los suscritos de un evento.
      */
     @Override
     public void publicar(String evento, Mensaje mensaje) {
@@ -94,10 +91,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Suscribe un cliente a un evento especifico.
-     *
-     * @param evento Nombre del evento
-     * @param suscriptor Thread del cliente suscriptor
+     * Registra un cliente para recibir un evento.
      */
     private void suscribirse(String evento, UserServerThread suscriptor) {
         System.out.println("[BUS] SUSCRIBIR cliente a evento: " + evento);
@@ -106,10 +100,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Desuscribe un cliente de un evento especifico.
-     *
-     * @param evento Nombre del evento
-     * @param suscriptor Thread del cliente a desuscribir
+     * Quita un cliente de un evento.
      */
     private void desuscribirse(String evento, UserServerThread suscriptor) {
         System.out.println("[BUS] DESUSCRIBIR cliente de evento: " + evento);
@@ -120,10 +111,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Envia un mensaje unicast a un cliente especifico por su ID.
-     *
-     * @param idDestino ID del cliente destino
-     * @param mensaje Mensaje a enviar
+     * Manda mensaje a un solo cliente (unicast).
      */
     @Override
     public void enviarUnicast(String idDestino, Mensaje mensaje) {
@@ -148,15 +136,11 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     // =========================================================================
-    // PUNTO DE ENTRADA PRINCIPAL
+    // PUNTO DE ENTRADA - aqui llegan los mensajes
     // =========================================================================
 
     /**
-     * Punto de entrada principal para manejar eventos del cliente.
-     * Parsea el mensaje y lo enruta segun la accion solicitada.
-     *
-     * @param json Mensaje JSON recibido del cliente
-     * @param cliente Thread del cliente que envia el mensaje
+     * Recibe mensaje del cliente y lo procesa segun el tipo de accion.
      */
     public void manejarEvento(String json, UserServerThread cliente) {
         if (json == null || json.isEmpty()) {
@@ -196,10 +180,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Procesa una solicitud de publicacion.
-     * Delega la logica de negocio al GestorPartida.
-     *
-     * @param mensaje Mensaje a procesar
+     * Procesa publicacion, delega al GestorPartida.
      */
     private void procesarPublicacion(Mensaje mensaje) {
         String evento = mensaje.getEvento();
@@ -214,9 +195,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Procesa una solicitud de envio unicast.
-     *
-     * @param mensaje Mensaje a enviar
+     * Procesa unicast.
      */
     private void procesarUnicast(Mensaje mensaje) {
         String idDestino = mensaje.getSubEvento();
@@ -232,10 +211,7 @@ public class BusEventos implements IPublicadorEventos {
     // =========================================================================
 
     /**
-     * Remueve un suscriptor de todos los eventos (cuando se desconecta).
-     * Notifica al GestorPartida para limpiar la partida si es necesario.
-     *
-     * @param user Thread del usuario a remover
+     * Quita un cliente de todos los eventos (desconexion).
      */
     public void removeSuscriptor(UserServerThread user) {
         if (user != null) {
@@ -257,10 +233,7 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Registra un nuevo cliente con su evento privado y lo guarda por ID.
-     *
-     * @param event Evento privado del cliente (formato: MENSAJE_CLIENTE_X)
-     * @param client Thread del cliente
+     * Registra un cliente nuevo.
      */
     public void addNewClient(String event, UserServerThread client) {
         System.out.println("[BUS] Registrando nuevo cliente con evento: " + event);
@@ -276,14 +249,11 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     // =========================================================================
-    // UTILIDADES DE CONSULTA
+    // UTILIDADES
     // =========================================================================
 
     /**
-     * Obtiene la cantidad de suscriptores de un evento.
-     *
-     * @param evento Nombre del evento
-     * @return Cantidad de suscriptores
+     * Cuenta suscriptores de un evento.
      */
     public int contarSuscriptores(String evento) {
         Set<UserServerThread> suscriptores = eventos.get(evento);
@@ -291,17 +261,14 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Verifica si un evento tiene suscriptores.
-     *
-     * @param evento Nombre del evento
-     * @return true si tiene al menos un suscriptor
+     * Checa si hay suscriptores.
      */
     public boolean tieneSubscriptores(String evento) {
         return contarSuscriptores(evento) > 0;
     }
 
     /**
-     * Lista todos los eventos registrados (para debug).
+     * Lista eventos (debug).
      */
     public void listarEventos() {
         System.out.println("[BUS] === Eventos registrados ===");
@@ -312,16 +279,14 @@ public class BusEventos implements IPublicadorEventos {
     }
 
     /**
-     * Reinicia el estado de la partida en el gestor.
+     * Reinicia la partida.
      */
     public void resetPartida() {
         gestorPartida.resetPartida();
     }
 
     /**
-     * Obtiene el gestor de partida (para pruebas o consultas).
-     *
-     * @return Instancia del GestorPartida
+     * Obtiene el gestor de partida.
      */
     public GestorPartida getGestorPartida() {
         return gestorPartida;

@@ -4,8 +4,14 @@ import compartido.entidades.Casilla;
 import compartido.entidades.Tablero;
 
 /**
+ * Builder para crear el Tablero de 10x10.
+ * Le pones las casillas y los limites y con getResult() te da el Tablero.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class TableroBuilder implements ITableroBuilder {
 

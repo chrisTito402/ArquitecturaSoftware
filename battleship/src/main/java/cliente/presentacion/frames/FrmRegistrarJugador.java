@@ -14,10 +14,17 @@ import compartido.enums.ColorJugador;
 import compartido.enums.EstadoJugador;
 import compartido.observador.ISuscriptor;
 import compartido.comunicacion.dto.JugadorDTO;
+import compartido.entidades.Jugador;
 
 /**
+ * Pantalla donde pones tu nombre y escoges de que color quieres tus naves.
+ * Es como el "registro" antes de entrar a una partida.
  *
- * @author Gael
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmRegistrarJugador extends javax.swing.JFrame implements ISuscriptor {
 
@@ -215,8 +222,8 @@ public class FrmRegistrarJugador extends javax.swing.JFrame implements ISuscript
         builder.setNombre(nombre);
         builder.setColor(colorSeleccionado);
         builder.setEstado(EstadoJugador.JUGANDO);
-//        JugadorDTO nuevoJugador = builder.getResult();
-        JugadorDTO nuevoJugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
+        Jugador jugador = builder.getResult();
+        JugadorDTO nuevoJugador = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         this.cv.unirsePartida(nuevoJugador);
 
         FrmLobby lobby = new FrmLobby();

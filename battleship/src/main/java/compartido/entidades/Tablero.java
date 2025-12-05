@@ -6,8 +6,14 @@ import compartido.enums.ResultadoDisparo;
 import java.util.List;
 
 /**
+ * El tablero de 10x10 donde se ponen las naves.
+ * Tiene las casillas y checa cuando te disparan si le pegaron a algo.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class Tablero {
 

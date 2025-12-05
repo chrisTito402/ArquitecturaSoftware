@@ -13,8 +13,15 @@ import compartido.comunicacion.dto.TableroDTO;
 import compartido.comunicacion.dto.NaveDTO;
 
 /**
+ * Este es el Builder que arma el ControlModelo (el modelo de la partida).
+ * Vas configurando las cosas una por una con los setters y al final
+ * llamas getResult() y te da el objeto ya armado.
  *
- * @author daniel
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class PartidaBuilder implements IPartidaBuilder {
 
@@ -79,6 +86,9 @@ public class PartidaBuilder implements IPartidaBuilder {
         this.suscriptores = suscriptores;
     }
 
+    /**
+     * Retorna el modelo construido.
+     */
     @Override
     public IModeloCliente getResult() {
         // Crear TableroDTO con límites 10x10

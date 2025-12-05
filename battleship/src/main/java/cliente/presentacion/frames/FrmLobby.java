@@ -32,10 +32,16 @@ import compartido.observador.ISuscriptor;
 import compartido.comunicacion.dto.JugadorDTO;
 
 /**
- * Pantalla de Lobby donde los jugadores esperan antes de iniciar la partida.
- * Muestra el codigo de la partida, lista de jugadores y sus estados.
+ * La sala de espera antes de empezar a jugar.
+ * Aqui se ve el codigo de la partida para pasarselo a tu amigo,
+ * y los nombres de los que ya estan conectados. Cuando los dos
+ * estan listos el host le da "Iniciar" y empieza el juego.
  *
- * @author Equipo
+ * @author Freddy Ali Castro Roman - 252191
+ * @author Christopher Alvarez Centeno - 251954
+ * @author Ethan Gael Valdez Romero - 253298
+ * @author Daniel Buelna Andujo - 260378
+ * @author Angel Ruiz Garcia - 248171
  */
 public class FrmLobby extends JFrame implements ISuscriptor {
 
@@ -58,6 +64,7 @@ public class FrmLobby extends JFrame implements ISuscriptor {
     private boolean jugador2Listo = false;
     private boolean yoDiListo = false; // Si yo (jugador 2) di click en Listo
     private boolean navegando = false; // Evita navegación duplicada
+    private boolean accionEnProceso = false; // Evita doble click en botones
 
     // Componentes UI
     private JLabel lblJugador1Nombre;
@@ -250,8 +257,10 @@ public class FrmLobby extends JFrame implements ISuscriptor {
 
         // Boton Comenzar (para Host) o Listo (para Jugador 2)
         String textBoton = esHost ? "Comenzar" : "Listo";
-        btnComenzarListo = crearBoton(textBoton, COLOR_BOTON_DESHABILITADO, COLOR_BOTON_DESHABILITADO);
+        // Crear con colores normales, el hover funciona solo si esta habilitado
+        btnComenzarListo = crearBoton(textBoton, COLOR_BOTON, COLOR_BOTON_HOVER);
         btnComenzarListo.setEnabled(false);
+        btnComenzarListo.setBackground(COLOR_BOTON_DESHABILITADO); // Inicialmente deshabilitado
         btnComenzarListo.addActionListener(e -> accionComenzarListo());
         panel.add(btnComenzarListo);
 
@@ -294,19 +303,9 @@ public class FrmLobby extends JFrame implements ISuscriptor {
 
     private void habilitarBotonComenzar(boolean habilitar) {
         btnComenzarListo.setEnabled(habilitar);
+        // Solo cambiar el color, el listener ya esta configurado en crearBoton()
         if (habilitar) {
             btnComenzarListo.setBackground(COLOR_BOTON);
-            btnComenzarListo.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    btnComenzarListo.setBackground(COLOR_BOTON_HOVER);
-                }
-
-                @Override
-                public void mouseExited(java.awt.event.MouseEvent evt) {
-                    btnComenzarListo.setBackground(COLOR_BOTON);
-                }
-            });
         } else {
             btnComenzarListo.setBackground(COLOR_BOTON_DESHABILITADO);
         }
@@ -438,10 +437,17 @@ public class FrmLobby extends JFrame implements ISuscriptor {
                 // Cuando un jugador abandona el lobby
                 if (datos instanceof JugadorDTO jugadorAbandono) {
                     SwingUtilities.invokeLater(() -> {
+                        // Si la ventana ya fue cerrada, ignorar
+                        if (!isDisplayable()) {
+                            return;
+                        }
+
                         // Verificar si yo soy el que abandonó (ignorar mi propio mensaje)
+                        // Si miJugador es null, significa que reiniciarEstado() ya se ejecutó
+                        // y probablemente soy yo quien abandonó
                         JugadorDTO miJugador = controlVista.getControl().getJugador();
-                        if (miJugador != null && jugadorAbandono.getNombre().equals(miJugador.getNombre())) {
-                            return; // Soy yo quien abandonó, ignorar
+                        if (miJugador == null || jugadorAbandono.getNombre().equals(miJugador.getNombre())) {
+                            return; // Estado limpiado o soy yo quien abandonó, ignorar
                         }
 
                         // Si yo NO soy el Host, significa que el Host abandonó → ir al menú
@@ -452,7 +458,8 @@ public class FrmLobby extends JFrame implements ISuscriptor {
                                     JOptionPane.WARNING_MESSAGE);
 
                             controlVista.desuscribirLobby(this);
-                            controlVista.reiniciarEstado();
+                            // No notificar al servidor, el Host ya lo hizo al abandonar
+                            controlVista.reiniciarEstado(false);
 
                             FrmMenuPrincipal menu = new FrmMenuPrincipal();
                             menu.setVisible(true);
@@ -482,6 +489,13 @@ public class FrmLobby extends JFrame implements ISuscriptor {
     }
 
     private void accionComenzarListo() {
+        // Evitar doble click
+        if (accionEnProceso) {
+            return;
+        }
+        accionEnProceso = true;
+        btnComenzarListo.setEnabled(false);
+
         if (esHost) {
             // El Host da click en "Comenzar"
             if (jugadores.size() >= 2 && jugador2Listo) {
@@ -492,6 +506,9 @@ public class FrmLobby extends JFrame implements ISuscriptor {
                         "Esperando a que el otro jugador esté listo.",
                         "Esperando jugador",
                         JOptionPane.INFORMATION_MESSAGE);
+                // Rehabilitar si no se pudo comenzar
+                accionEnProceso = false;
+                btnComenzarListo.setEnabled(true);
             }
         } else {
             // El Jugador 2 da click en "Listo"
@@ -499,7 +516,6 @@ public class FrmLobby extends JFrame implements ISuscriptor {
             controlVista.jugadorListo();
             yoDiListo = true;
 
-            btnComenzarListo.setEnabled(false);
             btnComenzarListo.setText("Listo!");
             actualizarUI();
 
@@ -507,6 +523,7 @@ public class FrmLobby extends JFrame implements ISuscriptor {
                     "Esperando a que el Host inicie la partida...",
                     "Listo",
                     JOptionPane.INFORMATION_MESSAGE);
+            // No rehabilitar - J2 ya dio listo
         }
     }
 
@@ -534,8 +551,8 @@ public class FrmLobby extends JFrame implements ISuscriptor {
             controlVista.abandonarLobby(jugador);
             controlVista.desuscribirLobby(this);
 
-            // Limpiar estado para nueva partida
-            controlVista.reiniciarEstado();
+            // Limpiar estado para nueva partida (no notificar de nuevo)
+            controlVista.reiniciarEstado(false);
 
             FrmMenuPrincipal menu = new FrmMenuPrincipal();
             menu.setVisible(true);
