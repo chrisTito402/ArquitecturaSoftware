@@ -21,8 +21,6 @@ public interface IModeloServidor {
     public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
 
     public ResultadoConfirmarNaves setConfirmarNaves(Jugador jugador);
-    
-    public void addJugador(Jugador j);
 
     public List<Jugador> getJugadores();
 

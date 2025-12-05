@@ -211,14 +211,6 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
-    public void addJugador(Jugador j) {
-        if (j != null) {
-            //jugadores.add(j);
-            System.out.println("Jugador agregado: " + j.getNombre());
-        }
-    }
-
-    @Override
     public void crearTableros() {
         // Los tableros se crean en el servidor, aquí solo inicializamos el DTO
         if (tablero == null) {
@@ -227,7 +219,6 @@ public class ControlModelo implements IModeloCliente {
         System.out.println("Tableros inicializados.");
     }
 
-    @Override
     public void suscribirAPartida(ISuscriptor suscriptor) {
         suscriptores.add(suscriptor);
     }
@@ -275,11 +266,6 @@ public class ControlModelo implements IModeloCliente {
     public void abandonarLobby(Jugador jugador) {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
-    }
-
-    @Override
-    public List<Jugador> getJugadores() {
-        return null;
     }
 
     @Override

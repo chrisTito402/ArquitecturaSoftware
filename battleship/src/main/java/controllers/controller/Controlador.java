@@ -194,11 +194,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
-    public void addJugador(Jugador jugador) {
-        partida.addJugador(jugador);
-    }
-
-    @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
     }
@@ -264,14 +259,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono el lobby.");
         //partida.notificarAllSuscriptores("ABANDONAR_LOBBY", jugadorDTO);
-    }
-
-    @Override
-    public List<JugadorDTO> getJugadores() {
-        return partida.getJugadores()
-                .stream()
-                .map(jugadorEntidad -> new JugadorDTO(jugadorEntidad.getNombre(), jugadorEntidad.getColor(), jugadorEntidad.getEstado()))
-                .toList();
     }
 
     private void actualizarLobby(Mensaje mensaje) {

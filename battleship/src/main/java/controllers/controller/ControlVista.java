@@ -352,10 +352,6 @@ public class ControlVista implements ISuscriptor {
     public void setAddNavePanel(AddNavePanel addNavePanel) {
         this.addNavePanel = addNavePanel;
     }
-    
-    public void addJugador(Jugador j) {
-        control.addJugador(j);
-    }
 
     public JLabel getLblTurno() {
         return lblTurno;
@@ -408,11 +404,7 @@ public class ControlVista implements ISuscriptor {
     public void abandonarLobby(JugadorDTO jugador) {
         control.abandonarLobby(jugador);
     }
-
-    public List<JugadorDTO> getJugadores() {
-        return control.getJugadores();
-    }
-
+    
     public void abandonarPartida() {
 
         // 1. Obtener DTO del jugador actual

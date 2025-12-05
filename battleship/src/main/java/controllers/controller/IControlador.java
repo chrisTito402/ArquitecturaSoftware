@@ -16,8 +16,6 @@ public interface IControlador {
 
     public String crearPartida(Jugador j);
 
-    public void addJugador(Jugador j);
-
     public void realizarDisparo(Coordenadas c);
 
     public JugadorDTO getJugador();
@@ -34,7 +32,5 @@ public interface IControlador {
     public void empezarPartida();
 
     public void abandonarLobby(JugadorDTO jugadorDTO);
-
-    public List<JugadorDTO> getJugadores();
 
 }

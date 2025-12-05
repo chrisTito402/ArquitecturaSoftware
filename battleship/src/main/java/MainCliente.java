@@ -40,7 +40,7 @@ public class MainCliente {
         controlVista.setControl(controlador);
 
         // 5. Suscribir la vista al modelo
-        modelo.suscribirAPartida(controlVista);
+        //modelo.suscribirAPartida(controlVista);
 
         // 6. Conectar al servidor
         System.out.println("Conectando al servidor...");

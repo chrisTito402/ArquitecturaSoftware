@@ -21,14 +21,10 @@ public interface IModeloCliente {
     public DisparoDTO realizarDisparo(Coordenadas coordenadas);
 
     public AddNaveDTO addNave(NaveDTO nave, List<Coordenadas> coordenadas);
-
-    public void addJugador(Jugador j);
     
     public JugadorDTO confirmarNaves();
 
     public void crearTableros();
-
-    public void suscribirAPartida(ISuscriptor suscriptor);
 
     public JugadorDTO getJugador();
 
@@ -38,8 +34,6 @@ public interface IModeloCliente {
     public boolean empezarPartida();
 
     public void abandonarLobby(Jugador jugador);
-
-    public List<Jugador> getJugadores();
 
     public JugadorDTO abandonarPartida(Jugador jugador);
 

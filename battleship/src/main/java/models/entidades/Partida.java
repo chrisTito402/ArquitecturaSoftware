@@ -91,11 +91,6 @@ public class Partida implements IModeloServidor {
     }
 
     @Override
-    public void addJugador(Jugador j) {
-        jugadores.add(j);
-    }
-
-    @Override
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo) {
         // Verificar Turno
         if (!jugador.getNombre().equals(turno.getNombre())) {
