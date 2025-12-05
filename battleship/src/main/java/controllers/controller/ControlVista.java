@@ -3,7 +3,6 @@ package controllers.controller;
 import views.DTOs.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.entidades.Nave;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import java.awt.Color;
@@ -17,21 +16,22 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import models.enums.ColorJugador;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
-import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
-import views.DTOs.NaveDTO;
 import views.DTOs.TipoNaveDTO;
 import views.frames.AddNavePanel;
 import views.frames.AddNaves;
 import views.frames.CasillaButton;
 import views.frames.CasillaPanel;
+import views.frames.FrmLobby;
 import views.frames.FrmPartidaEnCurso;
+import views.frames.FrmRegistrarJugador;
 import views.frames.PuntajePanel;
 import views.frames.TimerPanel;
 
@@ -61,9 +61,10 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti = new HashMap<>();
         manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
-        manejadoresNoti.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        manejadoresNoti.put("JUGADOR_UNIDO", this::manejarUnirsePartida);  // El servidor envía con esta clave
+        manejadoresNoti.put("JUGADOR_UNIDO", this::manejarJugadorUnido);  // El servidor envía con esta clave
+        manejadoresNoti.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadoresNoti.put("NO_EMPEZAR_PARTIDA", this::manejarNoEmpezarPartida);
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadoresNoti.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadoresNoti.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
@@ -356,16 +357,8 @@ public class ControlVista implements ISuscriptor {
         control.addJugador(j);
     }
 
-    public void crearTableros() {
-        control.crearTableros();
-    }
-
     public JLabel getLblTurno() {
         return lblTurno;
-    }
-
-    public void suscribirAModelo() {
-        control.suscribirAPartida(this);
     }
 
     public void mostrarFrmPartidaEnCurso() {
@@ -386,9 +379,26 @@ public class ControlVista implements ISuscriptor {
         frameActual.setVisible(true);
     }
 
+    public void mostrarFrmLobby(String nombre, Color color) {
+        if (frameActual != null) {
+            frameActual.dispose();
+        }
+        frameActual = new FrmLobby(nombre, color);
+        frameActual.setVisible(true);
+    }
+    
+    public void mostrarFrmRegistrarJugador() {
+        if (frameActual != null) {
+            frameActual.dispose();
+        }
+        
+        frameActual = new FrmRegistrarJugador();
+        frameActual.setVisible(true);
+    }
+    
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(JugadorDTO jugador) {
-        control.unirsePartida(jugador);
+    public void unirsePartida(String nombre, ColorJugador color) {
+        control.unirsePartida(nombre, color);
     }
 
     public void empezarPartida() {
@@ -414,19 +424,35 @@ public class ControlVista implements ISuscriptor {
         control.abandonarPartida(jugador);
     }
 
-    private void manejarUnirsePartida(Object datos) {
+    private void manejarJugadorUnido(Object datos) {
+        JugadorDTO j = (JugadorDTO) datos;
+        
+        if (frameActual instanceof FrmLobby) {
+            FrmLobby frame = (FrmLobby) frameActual;
+            frame.agregarJugador(j.getNombre(), Color.yellow);
+        }
+    }
+    
+    private void manejarResultadoUnirsePartida(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
-        System.out.println("=== ControlVista: manejarUnirsePartida ===");
-        System.out.println("Jugador recibido: " + dto.getNombre());
-        System.out.println("Suscriptores del lobby: " + suscriptoresLobby.size());
 
         // Notificar a los suscriptores del lobby para actualizar la UI
-        notificarLobby("JUGADOR_UNIDO", dto);
+        Color color;
+        if (dto.getColor() == ColorJugador.AZUL) {
+            color = Color.BLUE;
+        } else {
+            color = Color.RED;
+        }
+        mostrarFrmLobby(dto.getNombre(), color);
     }
 
     private void manejarEmpezarPartida(Object datos) {
-        JugadorDTO dto = (JugadorDTO) datos;
-        JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " empezo la partida.");
+        mostrarFrmAddNaves();
+    }
+    
+    private void manejarNoEmpezarPartida(Object datos) {
+        ResultadoEmpezarPartida resultado = (ResultadoEmpezarPartida) datos;
+        JOptionPane.showMessageDialog(null, resultado.name());
     }
 
     private void manejarAbandonarLobby(Object datos) {

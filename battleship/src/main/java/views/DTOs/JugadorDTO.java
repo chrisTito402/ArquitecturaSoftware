@@ -22,6 +22,11 @@ public class JugadorDTO {
         this.estado = estado;
     }
 
+    public JugadorDTO(String nombre, ColorJugador color) {
+        this.nombre = nombre;
+        this.color = color;
+    }
+
     public String getNombre() {
         return nombre;
     }

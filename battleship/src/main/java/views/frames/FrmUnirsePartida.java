@@ -181,15 +181,15 @@ public class FrmUnirsePartida extends JFrame {
 
         // IMPORTANTE: Crear el lobby PRIMERO para que se suscriba
         // ANTES de enviar el mensaje de unirse
-        FrmLobby lobby = new FrmLobby();
-        lobby.setCodigoPartida(codigo);
+        //FrmLobby lobby = new FrmLobby();
+        //lobby.setCodigoPartida(codigo);
 
         // Ahora sí enviar el mensaje de unirse (lobby ya está suscrito)
         JugadorDTO jugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
-        controlVista.unirsePartida(jugador);
+        //controlVista.unirsePartida(jugador);
 
         // Mostrar el lobby
-        lobby.setVisible(true);
+        //lobby.setVisible(true);
         dispose();
     }
 

@@ -32,53 +32,17 @@ import servidor.cronometro.Cronometro;
 public class PruebaServer {
 
     public static void main(String[] args) {
-        Casilla[][] casilla1 = new Casilla[10][10];
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                casilla1[i][j] = new Casilla(EstadoCasilla.AGUA, new Coordenadas(i, j));
-            }
-        }
-
-        Tablero t1 = new Tablero(casilla1, 10, 10);
-
-        Jugador j1 = new Jugador(
-                "J1",
-                ColorJugador.AZUL,
-                new ArrayList<>(),
-                t1,
-                EstadoJugador.JUGANDO);
-
-        // JUGADOR 2 ---------------------------------------------------
-        Casilla[][] casilla2 = new Casilla[10][10];
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                casilla2[i][j] = new Casilla(EstadoCasilla.AGUA, new Coordenadas(i, j));
-            }
-        }
-
-        Tablero t2 = new Tablero(casilla2, 10, 10);
-
-        Jugador j2 = new Jugador(
-                "J2",
-                ColorJugador.ROJO,
-                new ArrayList<>(),
-                t2,
-                EstadoJugador.JUGANDO);
-
-        List<Jugador> jugadores = new ArrayList<>();
-        jugadores.add(j1);
-        jugadores.add(j2);
 
         Cronometro cronometro = new Cronometro(5000);
         Partida p = new Partida(
-                j1,
-                jugadores,
+                null,
+                new ArrayList<>(),
                 3,
                 4,
                 2,
                 2,
                 11,
-                EstadoPartida.EN_CURSO,
+                EstadoPartida.POR_EMPEZAR,
                 new ArrayList<>(),
                 cronometro
         );
@@ -111,22 +75,15 @@ public class PruebaServer {
         json = gson.toJson(m);
         cliente.enviarMensaje(json);
         
-//        Mensaje m = new Mensaje(TipoAccion.SUSCRIBIR, "ADD_NAVE", null, "1");
-//        Gson gson = new Gson();
-//        String json = gson.toJson(m);
-//        cliente.enviarMensaje(json);
-//        List<Coordenadas> cords = new ArrayList<>();
-//        cords.add(
-//                new Coordenadas(2, 1)
-//        );
-//        cords.add(
-//                new Coordenadas(3, 1)
-//        );
-//        
-//        System.out.println("ADD NAVE: " + p.addNave(
-//                    j1, 
-//                    new Submarino(OrientacionNave.VERTICAL), 
-//                    cords
-//                    ));
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "UNIRSE_PARTIDA", null);
+        gson = new Gson();
+        json = gson.toJson(m);
+        cliente.enviarMensaje(json);
+        
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "EMPEZAR_PARTIDA", null);
+        gson = new Gson();
+        json = gson.toJson(m);
+        cliente.enviarMensaje(json);
+        
     }
 }

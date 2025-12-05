@@ -1,9 +1,9 @@
 package controllers.controller;
 
 import models.entidades.Jugador;
-import models.observador.ISuscriptor;
 import java.util.List;
 import models.entidades.Coordenadas;
+import models.enums.ColorJugador;
 import models.enums.OrientacionNave;
 import views.DTOs.JugadorDTO;
 import views.DTOs.TipoNaveDTO;
@@ -18,10 +18,6 @@ public interface IControlador {
 
     public void addJugador(Jugador j);
 
-    public void crearTableros();
-
-    public void suscribirAPartida(ISuscriptor suscriptor);
-
     public void realizarDisparo(Coordenadas c);
 
     public JugadorDTO getJugador();
@@ -33,7 +29,7 @@ public interface IControlador {
     public void abandonarPartida(Jugador jugador);
 
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(JugadorDTO jugadorDTO);
+    public void unirsePartida(String nombre, ColorJugador color);
 
     public void empezarPartida();
 

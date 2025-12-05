@@ -6,10 +6,13 @@ import java.util.List;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.enums.OrientacionNave;
+import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoDisparo;
+import models.enums.ResultadoEmpezarPartida;
 import models.observador.ISuscriptor;
+import views.DTOs.AddJugadorDTO;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -27,7 +30,7 @@ public class ControlModelo implements IModeloCliente {
     private List<NaveDTO> naves;
     private boolean turno;
     private List<ISuscriptor> suscriptores;
-    private List<Jugador> jugadores;
+    private List<JugadorDTO> jugadores;
 
     public ControlModelo() {
         this.jugadores = new java.util.ArrayList<>();
@@ -40,6 +43,14 @@ public class ControlModelo implements IModeloCliente {
         this.turno = turno;
         this.suscriptores = suscriptores;
         this.jugadores = new java.util.ArrayList<>();
+    }
+
+    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, List<ISuscriptor> suscriptores, List<JugadorDTO> jugadores) {
+        this.jugador = jugador;
+        this.tablero = tablero;
+        this.naves = naves;
+        this.suscriptores = suscriptores;
+        this.jugadores = jugadores;
     }
 
     @Override
@@ -202,7 +213,7 @@ public class ControlModelo implements IModeloCliente {
     @Override
     public void addJugador(Jugador j) {
         if (j != null) {
-            jugadores.add(j);
+            //jugadores.add(j);
             System.out.println("Jugador agregado: " + j.getNombre());
         }
     }
@@ -221,16 +232,15 @@ public class ControlModelo implements IModeloCliente {
         suscriptores.add(suscriptor);
     }
 
-    @Override
-    public void notificarAllSuscriptores(String contexto, Object datos) {
+    private void notificarAllSuscriptores(String contexto, Object datos) {
         suscriptores.forEach(s -> s.notificar(contexto, datos));
     }
 
     @Override
-    public void unirsePartida(Jugador jugador) {
+    public JugadorDTO unirsePartida(JugadorDTO jugador) {
         if (jugador == null) {
             System.out.println("Error: Jugador nulo al unirse a partida.");
-            return;
+            return jugador;
         }
 
         // Guardar el jugador local
@@ -240,16 +250,25 @@ public class ControlModelo implements IModeloCliente {
                 jugador.getEstado()
         );
 
+        this.jugador = jugador;
+        
         // Agregar a la lista de jugadores
         jugadores.add(jugador);
 
         System.out.println("Jugador " + jugador.getNombre() + " se unio a la partida.");
+        return jugador;
     }
 
     @Override
-    public void empezarPartida() {
-        System.out.println("Partida iniciada desde el cliente.");
-        // La lógica principal está en el servidor
+    public boolean empezarPartida() {
+        if (jugadores.size() != 2) {
+            return false;
+        }
+        if (jugador == null) {
+            return false;
+        }
+        
+        return true;
     }
 
     @Override
@@ -260,7 +279,7 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public List<Jugador> getJugadores() {
-        return jugadores;
+        return null;
     }
 
     @Override
@@ -297,6 +316,28 @@ public class ControlModelo implements IModeloCliente {
             return;
         }
         notificarAllSuscriptores("ABANDONO_PARTIDA", dto);
+    }
+
+    @Override
+    public void manejarJugadorUnido(AddJugadorDTO dto) {
+        // Verificar si es el Jugador del Modelo
+        if (dto.getJugador().getNombre().equals(jugador.getNombre()) && 
+                dto.getResultado() == ResultadoAddJugador.AÑADIDO) {
+            tablero = new TableroDTO(10, 10);
+            notificarAllSuscriptores("RESULTADO_UNIRSE_PARTIDA", dto.getJugador());
+        } else if (dto.getResultado() == ResultadoAddJugador.AÑADIDO &&
+                !jugadores.contains(dto)) {
+            notificarAllSuscriptores("JUGADOR_UNIDO", dto.getJugador());
+        } else {
+            jugadores.remove(dto.getJugador());
+        }
+    }
+    
+    @Override
+    public void manejarEmpezarPartida(ResultadoEmpezarPartida resultado) {
+        if (resultado == ResultadoEmpezarPartida.PARTIDA_INICIADA) {
+            notificarAllSuscriptores("EMPEZAR_PARTIDA", resultado);
+        }
     }
 
 }

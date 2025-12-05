@@ -17,11 +17,12 @@ import models.entidades.Nave;
 import models.entidades.PortaAviones;
 import models.entidades.Puntaje;
 import models.entidades.Submarino;
-import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
+import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
 import servidor.modelo.IModeloServidor;
+import views.DTOs.AddJugadorDTO;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -45,11 +46,12 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
         this.manejadoresEventos = mapa;
         this.manejadorNotificaciones = mapaNotis;
 
-        mapa.put("DISPARO", this::realizarDisparo);
-        mapa.put("ADD_NAVE", this::addNave);
-        mapa.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        mapa.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
-        mapa.put("CONFIRMAR_NAVES", this::setConfirmarNaves);
+        manejadoresEventos.put("DISPARO", this::realizarDisparo);
+        manejadoresEventos.put("ADD_NAVE", this::addNave);
+        manejadoresEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
+        manejadoresEventos.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
+        manejadoresEventos.put("CONFIRMAR_NAVES", this::setConfirmarNaves);
+        manejadoresEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         
         manejadorNotificaciones.put("CAMBIAR_TURNO", this::notificarCambiarTurno);
     }
@@ -220,9 +222,13 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
 
         Gson gson = new Gson();
         JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-        Mensaje respuesta = new Mensaje(TipoAccion.PUBLICAR, "ACTUALIZAR_LOBBY", mensaje.getData(), "SERVIDOR");
-        cliente.enviarMensaje(gson.toJson(respuesta));
-        enviarMensaje("JUGADOR_UNIDO", jugadorDTO);
+        
+        Jugador j = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
+        
+        ResultadoAddJugador resultado = servidor.unirsePartida(j);
+        AddJugadorDTO addJugador = new AddJugadorDTO(resultado, jugadorDTO);
+        
+        enviarMensaje("JUGADOR_UNIDO", addJugador);
     }
 
     //Recibe el mensaje enviado por el cliente
@@ -246,6 +252,11 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
         );
 
         enviarMensaje("JUGADOR_ABANDONO", jugadordto);
+    }
+    
+    private void manejarEmpezarPartida(Mensaje mensaje) {
+        ResultadoEmpezarPartida resultado = servidor.empezarPartida();
+        enviarMensaje("RESULTADO_EMPEZAR_PARTIDA", resultado);
     }
 
 }

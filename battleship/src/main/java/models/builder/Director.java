@@ -37,10 +37,6 @@ public class Director {
         builder.setNombre("Jugador1");
     }
 
-    public void makeBot(IJugadorBuilder builder) {
-
-    }
-
     public void makeTablero(ITableroBuilder builder) {
         builder.setLimiteX(10);
         builder.setLimiteY(10);

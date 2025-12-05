@@ -3,11 +3,7 @@ package views.frames;
 import controllers.controller.ControlVista;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
-import models.builder.IJugadorBuilder;
-import models.builder.JugadorBuilder;
 import models.enums.ColorJugador;
-import models.enums.EstadoJugador;
-import views.DTOs.JugadorDTO;
 
 /**
  *
@@ -169,27 +165,16 @@ public class FrmRegistrarJugador extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Color no válido. Por favor selecciona ROJO o AZUL.");
             return;
         }
-
-        IJugadorBuilder builder = new JugadorBuilder();
-        builder.setNombre(nombre);
-        builder.setColor(colorSeleccionado);
-        builder.setEstado(EstadoJugador.JUGANDO);
-//        JugadorDTO nuevoJugador = builder.getResult();
-        JugadorDTO nuevoJugador = new JugadorDTO(nombre, colorSeleccionado, EstadoJugador.JUGANDO);
-        this.cv.unirsePartida(nuevoJugador);
-
-        FrmLobby lobby = new FrmLobby();
-        lobby.setLocationRelativeTo(this);
-        lobby.setVisible(true);
-        this.dispose();
+        
+        this.cv.unirsePartida(nombre, colorSeleccionado);
     }//GEN-LAST:event_btnContinuarActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
         // TODO add your handling code here:
-        FrmMenuPrincipal m = new FrmMenuPrincipal();
-        m.setVisible(true);
-        m.setLocationRelativeTo(this);
-        dispose();
+//        FrmMenuPrincipal m = new FrmMenuPrincipal();
+//        m.setVisible(true);
+//        m.setLocationRelativeTo(this);
+//        dispose();
     }//GEN-LAST:event_btnRegresarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

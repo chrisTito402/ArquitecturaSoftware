@@ -3,9 +3,10 @@ package models.control;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import java.util.List;
-import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
 import models.observador.ISuscriptor;
+import views.DTOs.AddJugadorDTO;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
@@ -29,14 +30,12 @@ public interface IModeloCliente {
 
     public void suscribirAPartida(ISuscriptor suscriptor);
 
-    public void notificarAllSuscriptores(String contexto, Object datos);
-
     public JugadorDTO getJugador();
 
     // Caso de Uso: Unirse Partida
-    public void unirsePartida(Jugador jugador);
+    public JugadorDTO unirsePartida(JugadorDTO jugador);
 
-    public void empezarPartida();
+    public boolean empezarPartida();
 
     public void abandonarLobby(Jugador jugador);
 
@@ -54,4 +53,8 @@ public interface IModeloCliente {
     public void manejarResultadoConfirmarNaves(ResultadoConfirmarNaves resultado);
     
     public void manejarJugadorAbandono(JugadorDTO J);
+    
+    public void manejarJugadorUnido(AddJugadorDTO dto);
+    
+    public void manejarEmpezarPartida(ResultadoEmpezarPartida resultado);
 }

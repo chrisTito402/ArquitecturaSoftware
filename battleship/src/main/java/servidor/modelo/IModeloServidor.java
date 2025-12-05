@@ -5,8 +5,10 @@ import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
+import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
 
 /**
  *
@@ -24,10 +26,9 @@ public interface IModeloServidor {
 
     public List<Jugador> getJugadores();
 
-    public void unirsePartida(Jugador jugador);
+    public ResultadoAddJugador unirsePartida(Jugador jugador);
 
-    public void empezarPartida();
-
+    public ResultadoEmpezarPartida empezarPartida();
 
     public Jugador abandonarPartida(Jugador jugadorQueSeVa);
     

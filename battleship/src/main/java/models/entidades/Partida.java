@@ -1,16 +1,21 @@
 package models.entidades;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import java.util.List;
-import models.enums.EstadoCasilla;
+import java.util.Random;
+import models.builder.Director;
+import models.builder.TableroBuilder;
 import models.enums.EstadoJugador;
 import models.enums.OrientacionNave;
+import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
 import servidor.controlador.INotificadorServidor;
 import servidor.cronometro.ICronometro;
 import servidor.modelo.IModeloServidor;
@@ -345,38 +350,41 @@ public class Partida implements IModeloServidor {
     }
 
     private void crearTablero(Jugador jugador) {
-        Casilla[][] casillas = new Casilla[10][10];
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                casillas[i][j] = new Casilla(EstadoCasilla.AGUA, new Coordenadas(i, j));
-            }
-        }
-
-        Tablero tablero = new Tablero(casillas, 10, 10);
-        jugador.setTablero(tablero);
+        Director director = new Director();
+        TableroBuilder tB = new TableroBuilder();
+        director.makeTablero(tB);
+        
+        jugador.setTablero(tB.getResult());
+        jugador.setNaves(new ArrayList<>());
     }
 
     // Caso de Uso: Unirse Partida
     @Override
-    public void unirsePartida(Jugador jugador) {
+    public ResultadoAddJugador unirsePartida(Jugador jugador) {
         // Validar estado
         if (estado == EstadoPartida.EN_CURSO) {
             System.out.println("La partida ya inicio. No se puede unir.");
-            return;
+            return ResultadoAddJugador.PARTIDA_EN_CURSO;
         }
 
         // Comprobar que no este llena
         if (jugadores.size() >= 2) {
             System.out.println("La partida ya tiene 2 jugadores.");
-            return;
+            return ResultadoAddJugador.PARTIDA_LLENA;
         }
 
+        // Verificar que no este ya registrado el nombre.
+        boolean result = jugadores.stream()
+                .anyMatch(e -> e.getNombre().equals(jugador.getNombre()));
+        if (result) {
+            System.out.println("Nombre de Jugador repetido.");
+            return ResultadoAddJugador.NOMBRE_REPETIDO;
+        }
+        
         // Agregar nuevo jugador (Pendiente para unir con el caso de uso: Gestionar jugador)
-        this.addJugador(jugador);
+        jugadores.add(jugador);
         System.out.println(jugador.getNombre() + " se unio a la partida.");
-
-        // Notificar a observadores (socktes)
-//        notificarAllSuscriptores("JUGADOR_UNIDO", jugador);
+        return ResultadoAddJugador.AÑADIDO;
     }
     
     private void startGame() {
@@ -395,24 +403,27 @@ public class Partida implements IModeloServidor {
     }
     
     @Override
-    public void empezarPartida() {
+    public ResultadoEmpezarPartida empezarPartida() {
         // Comprobar que este llena
         if (jugadores.size() < 2) {
             System.out.println("No hay suficientes jugadores para iniciar.");
-            return;
+            return ResultadoEmpezarPartida.JUGADORES_INSUFICIENTES;
         }
 
         // Cambiar estado
         estado = EstadoPartida.EN_CURSO;
 
         // Crear tableros
-//        this.crearTableros();
-        // Asignar turno inicial (jugador 0)
-        turno = jugadores.get(0);
+        for (int i = 0; i < jugadores.size(); i++) {
+            crearTablero(jugadores.get(i));
+        }
+        Random random = new Random();
+        int i = random.nextInt(2);
+        turno = jugadores.get(i);
 
         // Notificar
         System.out.println("La partida ha comenzado.");
-//        notificarAllSuscriptores("PARTIDA_INICIADA", null);
+        return ResultadoEmpezarPartida.PARTIDA_INICIADA;
     }
 
     @Override

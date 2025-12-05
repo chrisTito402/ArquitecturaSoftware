@@ -4,7 +4,6 @@ import buseventos.Mensaje;
 import buseventos.TipoAccion;
 import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
 import models.builder.Director;
@@ -12,11 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import models.builder.PartidaBuilder;
-import models.observador.ISuscriptor;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
+import models.enums.ColorJugador;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoConfirmarNaves;
+import models.enums.ResultadoEmpezarPartida;
+import views.DTOs.AddJugadorDTO;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
@@ -28,9 +29,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private IClienteSocket cliente;
     private Map<String, Consumer<Mensaje>> manejadorEventos;
 
-//    private ControlModelo modelo;
-//    private ControlVista vista;
-//    private ClienteSocket clienteS;
     public Controlador() {
     }
 
@@ -43,24 +41,13 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
         manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-        manejadorEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadorEventos.put("RESULTADO_EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadorEventos.put("ACTUALIZAR_LOBBY", this::actualizarLobby);
         manejadorEventos.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
         manejadorEventos.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
     }
-
-//    public Controlador(ControlModelo modelo, ControlVista vista) {
-//        this.modelo = modelo;
-//        this.vista = vista;
-//
-//        this.cliente = new ClienteSocket("localhost", 5000, this);
-//        clienteS.execute();
-//
-//        this.manejadorEventos = new HashMap<>();
-//        registrarEventos();
-//    }
 //    private void registrarEventos() {
 //        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
 //        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
@@ -164,12 +151,8 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private void manejarJugadorUnido(Mensaje mensaje) {
         System.out.println("=== RECIBIDO JUGADOR_UNIDO ===");
         Gson gson = new Gson();
-        JugadorDTO jugadorDTO = gson.fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("Jugador en mensaje: " + jugadorDTO.getNombre());
-
-        // Notificar a los suscriptores locales (esto actualiza el lobby)
-        System.out.println("Notificando a suscriptores del modelo...");
-        partida.notificarAllSuscriptores("JUGADOR_UNIDO", jugadorDTO);
+        AddJugadorDTO data = gson.fromJson(mensaje.getData(), AddJugadorDTO.class);
+        partida.manejarJugadorUnido(data);
     }
 
     private void manejarResultadoConfirmarNaves(Mensaje mensaje) {
@@ -216,32 +199,19 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
-    public void crearTableros() {
-        partida.crearTableros();
-    }
-
-    @Override
-    public void suscribirAPartida(ISuscriptor suscriptor) {
-        partida.suscribirAPartida(suscriptor);
-    }
-
-    @Override
     public JugadorDTO getJugador() {
         return partida.getJugador();
     }
 
     // Caso de Uso: Unirse Partida
     @Override
-    public void unirsePartida(JugadorDTO jugadorDTO) {
-        Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
-        partida.unirsePartida(jugador);
+    public void unirsePartida(String nombre, ColorJugador color) {
+        JugadorDTO jugador = new JugadorDTO(nombre, color);
+        JugadorDTO j = partida.unirsePartida(jugador);
 
-        Gson gson = new Gson();
-        JsonElement data = gson.toJsonTree(jugador);
-        Mensaje mensaje = new Mensaje(TipoAccion.PUBLICAR, "UNIRSE_PARTIDA", data, "ID_CLIENTE");
-        String mensajeJSON = gson.toJson(mensaje);
-        cliente.enviarMensaje(mensajeJSON);
-        enviarMensaje("UNIRSE_PARTIDA", jugadorDTO);
+        if (j != null) {
+            enviarMensaje("UNIRSE_PARTIDA", j);
+        }
     }
 
     private void manejarUnirsePartida(Mensaje mensaje) {
@@ -249,7 +219,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         System.out.println("=== RECIBIDO UNIRSE_PARTIDA ===");
         System.out.println("Jugador que se unio: " + dto.getNombre());
 
-        partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
+        //partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
 
         // Si soy el HOST, enviar mi info al nuevo jugador para que me vea
         ControlVista cv = ControlVista.getInstancia();
@@ -271,14 +241,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     @Override
     public void empezarPartida() {
-        partida.empezarPartida();
-        enviarMensaje("EMPEZAR_PARTIDA", null);
+        boolean resultado = partida.empezarPartida();
+        if (!resultado) {
+            enviarMensaje("EMPEZAR_PARTIDA", null);
+        }
     }
 
     private void manejarEmpezarPartida(Mensaje mensaje) {
-        JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("La partida esta comenzando.");
-        partida.notificarAllSuscriptores("EMPEZAR_PARTIDA", jugadorDTO);
+        ResultadoEmpezarPartida resultado = new Gson().fromJson(mensaje.getData(), ResultadoEmpezarPartida.class);
+        partida.manejarEmpezarPartida(resultado);
     }
 
     @Override
@@ -292,7 +263,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     private void manejarAbandonarLobby(Mensaje mensaje) {
         JugadorDTO jugadorDTO = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
         System.out.println("El jugador " + jugadorDTO.getNombre() + " abandono el lobby.");
-        partida.notificarAllSuscriptores("ABANDONAR_LOBBY", jugadorDTO);
+        //partida.notificarAllSuscriptores("ABANDONAR_LOBBY", jugadorDTO);
     }
 
     @Override
@@ -307,6 +278,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         Gson gson = new Gson();
         JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
 
-        partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
+        //partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
     }
 }

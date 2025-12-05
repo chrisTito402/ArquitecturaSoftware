@@ -547,7 +547,6 @@ public class FrmColocarNaves extends JFrame {
             // Inicializar tableros en ControlVista
             controlVista.initTableroPropio();
             controlVista.initTableroEnemigo();
-            controlVista.suscribirAModelo();
 
             // Marcar las casillas propias donde hay naves
             marcarNavesEnTableroPropio();
@@ -591,8 +590,8 @@ public class FrmColocarNaves extends JFrame {
                 JOptionPane.YES_NO_OPTION);
 
         if (opcion == JOptionPane.YES_OPTION) {
-            FrmLobby lobby = new FrmLobby();
-            lobby.setVisible(true);
+            //FrmLobby lobby = new FrmLobby();
+            //lobby.setVisible(true);
             dispose();
         }
     }
