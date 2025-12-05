@@ -22,6 +22,8 @@ public class FrmLobby extends javax.swing.JFrame {
     public void agregarJugador(String nombre, Color color) {
         lblJugadorDos.setText(nombre);
         pnlEstadoDos.setBackground(color);
+        lblJugadorDos.revalidate();
+        lblJugadorDos.repaint();
     }
 
     /**

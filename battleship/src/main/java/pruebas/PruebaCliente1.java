@@ -22,7 +22,15 @@ public class PruebaCliente1 {
     public static void main(String[] args) {
         ControlVista cV = ControlVista.getInstancia();
 
-        ControlModelo cM = new ControlModelo(new JugadorDTO(), new TableroDTO(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        ControlModelo cM = new ControlModelo(
+                new JugadorDTO(), 
+                new TableroDTO(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new HashMap<>()
+        );
         cM.suscribirAPartida(cV);
 
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);

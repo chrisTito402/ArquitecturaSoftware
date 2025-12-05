@@ -571,13 +571,13 @@ public class FrmColocarNaves extends JFrame {
                     final int fila = i;
                     final int col = j;
                     // Buscar la casilla correspondiente y pintarla
-                    for (CasillaPanel cp : casillasPropias) {
-                        CoordenadasDTO coords = cp.getCoordenadas();
-                        if (coords.getX() == fila && coords.getY() == col) {
-                            cp.setBackground(casillas[fila][col].getBackground());
-                            break;
-                        }
-                    }
+//                    for (CasillaPanel cp : casillasPropias) {
+//                        //CoordenadasDTO coords = cp.getCoordenadas();
+//                        if (coords.getX() == fila && coords.getY() == col) {
+//                            cp.setBackground(casillas[fila][col].getBackground());
+//                            break;
+//                        }
+//                    }
                 }
             }
         }

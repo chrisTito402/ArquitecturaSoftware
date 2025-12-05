@@ -1,6 +1,5 @@
 package views.frames;
 
-import views.DTOs.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import javax.swing.JButton;
 

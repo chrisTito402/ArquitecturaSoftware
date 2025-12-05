@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import models.control.ControlModelo;
 import views.DTOs.JugadorDTO;
+import views.DTOs.NaveDTO;
 import views.DTOs.TableroDTO;
 import views.frames.TimerPanel;
 
@@ -22,7 +23,15 @@ public class PruebaCliente2 {
     public static void main(String[] args) {
         ControlVista cV = ControlVista.getInstancia();
 
-        ControlModelo cM = new ControlModelo(new JugadorDTO(), new TableroDTO(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        ControlModelo cM = new ControlModelo(
+                new JugadorDTO(), 
+                new TableroDTO(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new ArrayList<>(), 
+                new HashMap<>()
+        );
         cM.suscribirAPartida(cV);
 
         ClienteSocket cS = new ClienteSocket("localhost", 5000, null);

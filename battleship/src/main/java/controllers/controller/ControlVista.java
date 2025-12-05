@@ -1,12 +1,11 @@
 package controllers.controller;
 
-import views.DTOs.CoordenadasDTO;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.enums.ResultadoDisparo;
 import models.observador.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,14 +15,17 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import models.enums.ColorJugador;
 import models.enums.EstadoPartida;
 import models.enums.OrientacionNave;
+import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoEmpezarPartida;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
+import views.DTOs.ResultadoConfirmarNavesDTO;
 import views.DTOs.TipoNaveDTO;
 import views.frames.AddNavePanel;
 import views.frames.AddNaves;
@@ -59,16 +61,22 @@ public class ControlVista implements ISuscriptor {
 
     private ControlVista() {
         manejadoresNoti = new HashMap<>();
-        manejadoresNoti.put("RESULTADO_DISPARO", this::manejarDisparo);
+        manejadoresNoti.put("RESULTADO_DISPARO_PROPIO", this::manejarDisparoPropio);
+        manejadoresNoti.put("RESULTADO_DISPARO_ENEMIGO", this::manejarDisparoEnemigo);
+        manejadoresNoti.put("HUNDIMIENTO_NAVE", this::manejarHundimientoNave);
         manejadoresNoti.put("ABANDONO_PARTIDA", this::manejarAbandono);
         manejadoresNoti.put("JUGADOR_UNIDO", this::manejarJugadorUnido);  // El servidor envía con esta clave
         manejadoresNoti.put("RESULTADO_UNIRSE_PARTIDA", this::manejarResultadoUnirsePartida);
+        manejadoresNoti.put("ERROR_UNIRSE_PARTIDA", this::manejarErrorUniserPartida);
         manejadoresNoti.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadoresNoti.put("NO_EMPEZAR_PARTIDA", this::manejarNoEmpezarPartida);
         manejadoresNoti.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadoresNoti.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
         manejadoresNoti.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
+        manejadoresNoti.put("ERROR_CONFIRMAR_NAVES", this::manejarErrorConfirmarNaves);
         manejadoresNoti.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
+        manejadoresNoti.put("JUGADOR_ENEMIGO_OBTENIDO", this::manejarJugadorEnemigoObtenido);
+        manejadoresNoti.put("MOSTRAR_MARCADOR", this::manejarMostrarMarcador);
         
         suscriptoresLobby = new ArrayList<>();
     }
@@ -81,12 +89,6 @@ public class ControlVista implements ISuscriptor {
 
     public void desuscribirLobby(ISuscriptor suscriptor) {
         suscriptoresLobby.remove(suscriptor);
-    }
-
-    private void notificarLobby(String contexto, Object datos) {
-        for (ISuscriptor s : suscriptoresLobby) {
-            s.notificar(contexto, datos);
-        }
     }
 
     public String getCodigoPartida() {
@@ -192,7 +194,31 @@ public class ControlVista implements ISuscriptor {
         System.out.println("CAMBIAR_TURNO");
     }
     
-    private void manejarDisparo(Object datos) {
+    private void manejarDisparoEnemigo(Object datos) {
+        if (!(datos instanceof DisparoDTO)) {
+            System.out.println("Los datos no son un objeto DisparoDTO");
+            return;
+        }
+
+        // Reiniciar Temporizador
+        timer.initTimer();
+        
+        DisparoDTO d = (DisparoDTO) datos;
+        
+        
+        Component componente = getCasillaPropia(d.getCoordenadas());
+        CasillaPanel casillaPanel = (CasillaPanel) componente;
+        casillaPanel.marcarDisparo();
+        
+        if (d.getEstadoPartida() == EstadoPartida.FINALIZADA) {
+            casillasEnemigas.forEach(e -> e.setEnabled(false));
+            timer.stopTimer();
+            System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
+            JOptionPane.showMessageDialog(frameActual, "EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
+        }
+    }
+    
+    private void manejarDisparoPropio(Object datos) {
         if (!(datos instanceof DisparoDTO)) {
             System.out.println("Los datos no son un objeto DisparoDTO");
             return;
@@ -204,27 +230,19 @@ public class ControlVista implements ISuscriptor {
         DisparoDTO d = (DisparoDTO) datos;
         Coordenadas c = d.getCoordenadas();
 
-        JugadorDTO jugador = control.getJugador();
+        Component componente = getCasillaEnemiga(d.getCoordenadas());
 
-        Component componente;
-        if (d.getJugador().getNombre().equals(jugador.getNombre())) {
-            componente = getCasillaEnemiga(d.getCoordenadas());
-            if (puntajePanel != null && d.getPuntaje() != null) {
-                puntajePanel.actualizarPuntaje(d.getPuntaje());
-                System.out.println("Puntaje actualizado en UI: " + d.getPuntaje().getPuntosTotales());
+        if (null != d.getResultadoDisparo()) {
+            switch (d.getResultadoDisparo()) {
+                case IMPACTO ->
+                    componente.setBackground(Color.YELLOW);
+                case HUNDIMIENTO ->
+                    componente.setBackground(Color.RED);
+                case AGUA ->
+                    componente.setBackground(Color.BLUE);
+                default -> {
+                }
             }
-        } else {
-            componente = getCasillaPropia(d.getCoordenadas());
-        }
-
-        if (d.getResultadoDisparo() == ResultadoDisparo.IMPACTO) {
-            componente.setBackground(Color.YELLOW);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
-            componente.setBackground(Color.RED);
-        }
-        if (d.getResultadoDisparo() == ResultadoDisparo.AGUA) {
-            componente.setBackground(Color.BLUE);
         }
 
         System.out.println(c.getX() + " " + c.getY());
@@ -234,27 +252,23 @@ public class ControlVista implements ISuscriptor {
             casillasEnemigas.forEach(e -> e.setEnabled(false));
             timer.stopTimer();
             System.out.println("EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
-
-            if (d.getPuntaje() != null) {
-                String mensaje = String.format(
-                        "¡Partida terminada!\n\n"
-                        + "Ganador: %s\n"
-                        + "Puntaje final: %d puntos\n"
-                        + "Aciertos: %d\n"
-                        + "Fallos: %d\n"
-                        + "Naves hundidas: %d\n"
-                        + "Precisión: %.2f%%",
-                        d.getJugador().getNombre(),
-                        d.getPuntaje().getPuntosTotales(),
-                        d.getPuntaje().getDisparosAcertados(),
-                        d.getPuntaje().getDisparosFallados(),
-                        d.getPuntaje().getNavesHundidas(),
-                        d.getPuntaje().getPrecision()
-                );
-
-                JOptionPane.showMessageDialog(null, mensaje, "Fin de Partida", JOptionPane.INFORMATION_MESSAGE);
-            }
+            JOptionPane.showMessageDialog(frameActual, "EL JUGADOR " + d.getJugador().getNombre() + " GANO LA PARTIDA!!");
         }
+    }
+    
+    private void manejarHundimientoNave(Object datos) {
+        List<Coordenadas> coordenadas = (List<Coordenadas>) datos;
+        
+        coordenadas.forEach(c -> {
+            CasillaButton casilla = casillasEnemigas.stream()
+                    .filter(e -> e.getCoordenadas().equals(c))
+                    .findFirst()
+                    .orElse(null);
+            
+            if (casilla != null) {
+                casilla.setBackground(Color.RED);
+            }
+        });
     }
 
     private void manejarResultadoAddNave(Object datos) {
@@ -263,18 +277,36 @@ public class ControlVista implements ISuscriptor {
         addNavePanel.pintarNaveAñadida(resultado.getCoordenadases());
     }
     
-    private void manejarResultadoConfirmarNaves(Object datos) {
+    private void manejarErrorConfirmarNaves(Object datos) {
         ResultadoConfirmarNaves resultado = (ResultadoConfirmarNaves) datos;
-        
+        JOptionPane.showMessageDialog(null, resultado.name());
+    }
+    
+    private void manejarResultadoConfirmarNaves(Object datos) {
+        ResultadoConfirmarNavesDTO resultado = (ResultadoConfirmarNavesDTO) datos;
+
         System.out.println(resultado);
-        if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
-            initTableroPropio();
-            initTableroEnemigo();
-            mostrarFrmPartidaEnCurso();
-            return;
+        initTableroPropio();
+        initTableroEnemigo();
+        
+        Color color;
+        if (resultado.getColor() == ColorJugador.AZUL) {
+            color = Color.BLUE;
+        } else {
+            color = Color.RED;
         }
         
-        JOptionPane.showMessageDialog(null, resultado.toString());
+        resultado.getCoordenadas().forEach(e -> {
+            CasillaPanel pnl = casillasPropias.stream()
+                    .filter(c -> c.getCoordenadas().equals(e))
+                    .findFirst()
+                    .orElse(null);
+            if (pnl != null) {
+                pnl.setBackground(color);
+            }
+        });
+
+        mostrarFrmPartidaEnCurso();
     }
     
     public void confirmarNaves() {
@@ -307,7 +339,7 @@ public class ControlVista implements ISuscriptor {
 
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                CoordenadasDTO coordenadas = new CoordenadasDTO(i, j);
+                Coordenadas coordenadas = new Coordenadas(i, j);
                 CasillaPanel cP = new CasillaPanel(coordenadas);
                 cP.setBackground(new Color(242, 242, 242)); // O cualquier color que necesites
                 cP.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -380,6 +412,7 @@ public class ControlVista implements ISuscriptor {
             frameActual.dispose();
         }
         frameActual = new FrmLobby(nombre, color);
+        obtenerJugadorEnemigo();
         frameActual.setVisible(true);
     }
     
@@ -390,6 +423,10 @@ public class ControlVista implements ISuscriptor {
         
         frameActual = new FrmRegistrarJugador();
         frameActual.setVisible(true);
+    }
+    
+    public void mostrarMarcador() {
+        control.obtenerMarcador();
     }
     
     // Caso de Uso: Unirse Partida
@@ -419,10 +456,23 @@ public class ControlVista implements ISuscriptor {
     private void manejarJugadorUnido(Object datos) {
         JugadorDTO j = (JugadorDTO) datos;
         
-        if (frameActual instanceof FrmLobby) {
-            FrmLobby frame = (FrmLobby) frameActual;
-            frame.agregarJugador(j.getNombre(), Color.yellow);
+        if (!(frameActual instanceof FrmLobby)) {
+            return;
         }
+        
+        Color color;
+        if (j.getColor() == ColorJugador.AZUL) {
+            color = Color.RED;
+        } else {
+            color = Color.BLUE;
+        }
+        FrmLobby frame = (FrmLobby) frameActual;
+        frame.agregarJugador(j.getNombre(), color);
+    }
+    
+    private void manejarErrorUniserPartida(Object datos) {
+        ResultadoAddJugador resultado = (ResultadoAddJugador) datos;
+        JOptionPane.showMessageDialog(null, resultado.name());
     }
     
     private void manejarResultadoUnirsePartida(Object datos) {
@@ -450,5 +500,37 @@ public class ControlVista implements ISuscriptor {
     private void manejarAbandonarLobby(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
         JOptionPane.showMessageDialog(null, "El jugador " + dto.getNombre() + " abandono el lobby.");
+    }
+    
+    private void manejarJugadorEnemigoObtenido(Object datos) {
+        JugadorDTO j = (JugadorDTO) datos;
+        if (frameActual instanceof FrmLobby) {
+            FrmLobby frame = (FrmLobby) frameActual;
+            
+            Color color;
+            if (j.getColor() == ColorJugador.AZUL) {
+                color = Color.BLUE;
+            } else {
+                color = Color.RED;
+            }
+            
+            frame.agregarJugador(j.getNombre(), color);
+        }
+    }
+    
+    public void obtenerJugadorEnemigo() {
+        if (frameActual instanceof FrmLobby) {
+            control.obtenerJugadorEnemigo();
+        }
+    }
+    
+    private void manejarMostrarMarcador(Object datos) {
+        String marcador = (String) datos;
+        JTextArea txtArea = new JTextArea(marcador);
+        txtArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        txtArea.setOpaque(false);
+        txtArea.setEditable(false);
+        
+        JOptionPane.showMessageDialog(frameActual, txtArea);
     }
 }

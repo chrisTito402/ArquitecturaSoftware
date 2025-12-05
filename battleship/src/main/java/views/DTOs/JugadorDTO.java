@@ -1,5 +1,6 @@
 package views.DTOs;
 
+import java.util.Objects;
 import models.enums.ColorJugador;
 import models.enums.EstadoJugador;
 
@@ -49,6 +50,27 @@ public class JugadorDTO {
 
     public void setEstado(EstadoJugador estado) {
         this.estado = estado;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JugadorDTO other = (JugadorDTO) obj;
+        return Objects.equals(this.nombre, other.nombre);
     }
 
     @Override

@@ -88,16 +88,7 @@ public class PartidaBuilder implements IPartidaBuilder {
         // Crear lista de naves vacía (se llenarán en FrmColocarNaves)
         List<NaveDTO> naves = new ArrayList<>();
 
-        // Crear ControlModelo con los valores configurados
-        ControlModelo modelo = new ControlModelo(
-                null,  // jugadorDTO se asignará cuando se una
-                tableroDTO,
-                naves,
-                false, // turno inicial
-                suscriptores != null ? suscriptores : new ArrayList<>()
-        );
-
-        return modelo;
+        return null;
     }
 
 }

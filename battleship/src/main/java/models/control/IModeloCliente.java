@@ -5,7 +5,6 @@ import models.entidades.Jugador;
 import java.util.List;
 import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoEmpezarPartida;
-import models.observador.ISuscriptor;
 import views.DTOs.AddJugadorDTO;
 import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
@@ -36,6 +35,10 @@ public interface IModeloCliente {
     public void abandonarLobby(Jugador jugador);
 
     public JugadorDTO abandonarPartida(Jugador jugador);
+    
+    public JugadorDTO obtenerJugadorEnemigo();
+    
+    public void obtenerMarcador();
 
     // Manejadores de Resultados
     public void manejarResultadoDisparo(DisparoDTO disparo);
@@ -51,4 +54,6 @@ public interface IModeloCliente {
     public void manejarJugadorUnido(AddJugadorDTO dto);
     
     public void manejarEmpezarPartida(ResultadoEmpezarPartida resultado);
+    
+    public void manejarObtenerJugadorEnemigo(JugadorDTO jugador);
 }

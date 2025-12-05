@@ -70,6 +70,7 @@ public class Partida implements IModeloServidor {
         turno = jugadores.stream().filter(e -> e != turno)
                 .findFirst()
                 .orElse(null);
+        System.out.println("Turno de: " + turno.getNombre());
         if (turno == null) {
             System.out.println("Error al cambiar el turno");
             return false;
@@ -123,19 +124,6 @@ public class Partida implements IModeloServidor {
         Tablero tablero = j2.getTablero();
         ResultadoDisparo resultadoDisparo = tablero.realizarDisparo(coordenadas);
 
-        //Puntaje
-        Jugador jugadorActual = jugadores.stream()
-                .filter(e -> e.getNombre().equals(jugador.getNombre()))
-                .findFirst()
-                .orElse(null);
-
-        if (jugadorActual != null && jugadorActual.getPuntaje() != null) {
-            int puntosObtenidos = jugadorActual.getPuntaje().calcularPuntos(resultadoDisparo);
-            System.out.println("Jugador " + jugadorActual.getNombre()
-                    + " obtuvo " + puntosObtenidos + " puntos. "
-                    + "Total: " + jugadorActual.getPuntaje().getPuntosTotales());
-        }
-
         if (resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
             Nave nave = j2.getNaves().stream().filter(n -> n.getEstado() == EstadoNave.SIN_DAÑOS
                     || n.getEstado() == EstadoNave.AVERIADO)
@@ -146,37 +134,47 @@ public class Partida implements IModeloServidor {
                 System.out.println("Jugador: " + turno.getNombre() + " GANO!");
                 estado = EstadoPartida.FINALIZADA;
 
-                if (jugadorActual != null && jugadorActual.getPuntaje() != null) {
-                    jugadorActual.getPuntaje().sumarVictoria();
-                    System.out.println("Puntaje final de " + jugadorActual.getNombre()
-                            + ": " + jugadorActual.getPuntaje().getPuntosTotales());
-                }
-
-                disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
+                Nave n = tablero.getNave(coordenadas);
+                disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado, n.getEstado());
                 return disparo;
             }
         }
-
+        
+        if (resultadoDisparo == ResultadoDisparo.IMPACTO || resultadoDisparo == ResultadoDisparo.HUNDIMIENTO) {
+            Nave n = tablero.getNave(coordenadas);
+            
+            cronometro.initCronometro();
+            notificador.notificar("CAMBIAR_TURNO", turno);
+            disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado, n.getEstado());
+            System.out.println("ESTADO NAVE=" + n.getEstado());
+            return disparo;
+        }
+        
+        if (resultadoDisparo == ResultadoDisparo.YA_DISPARADO) {
+            disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
+            return disparo;
+        }
+        
         disparo = new Disparo(jugador, coordenadas, resultadoDisparo, estado);
         cambiarTurno();
         return disparo;
     }
 
     @Override
-    public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
+    public AddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas) {
         if (jugador == null || jugador.getNombre() == null || jugador.getNombre().isBlank()) {
             System.out.println("Error: Informacion insuficiente del Jugador.");
-            return ResultadoAddNave.JUGADOR_NULL;
+            return new AddNave(ResultadoAddNave.JUGADOR_NULL, null);
         }
 
         if (nave == null) {
             System.out.println("Error: Informacion insuficiente de la Nave");
-            return ResultadoAddNave.NAVE_NULL;
+            return new AddNave(ResultadoAddNave.NAVE_NULL, null);
         }
 
         if (coordenadas == null || coordenadas.isEmpty()) {
             System.out.println("Error: Informacion insuficiente de las Coordenadas");
-            return ResultadoAddNave.COORDENADAS_NULL;
+            return new AddNave(ResultadoAddNave.COORDENADAS_NULL, null);
         }
 
         // Verificar que el jugador existe.
@@ -187,7 +185,7 @@ public class Partida implements IModeloServidor {
 
         if (j == null) {
             System.out.println("Error: No se encontro al Jugador.");
-            return ResultadoAddNave.JUGADOR_NO_ENCONTRADO;
+            return new AddNave(ResultadoAddNave.JUGADOR_NO_ENCONTRADO, null);
         }
         
         
@@ -199,29 +197,29 @@ public class Partida implements IModeloServidor {
         if (clase == Barco.class) {
             if (cantidad == cantBarcos) {
                 System.out.println("Error: Cantidad de Naves excedida.");
-                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+                return new AddNave(ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA, null);
             }
         } else if (clase == Submarino.class) {
             if (cantidad == cantSubmarinos) {
                 System.out.println("Error: Cantidad de Naves excedida.");
-                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+                return new AddNave(ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA, null);
             }
         } else if (clase == Crucero.class) {
             if (cantidad == cantSubmarinos) {
                 System.out.println("Error: Cantidad de Naves excedida.");
-                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+                return new AddNave(ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA, null);
             }
         } else if (clase == PortaAviones.class) {
             if (cantidad == cantSubmarinos) {
                 System.out.println("Error: Cantidad de Naves excedida.");
-                return ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA;
+                return new AddNave(ResultadoAddNave.CANTIDAD_NAVES_EXCEDIDA, null);
             }
         }
 
         // Verificar que el numero de coordenadas sea el mismo que el tamaño de la Nave.
         if (coordenadas.size() != nave.getTamanio()) {
             System.out.println("Error: Coordenadas extra para la nave.");
-            return ResultadoAddNave.COORDENADAS_EXTRA;
+            return new AddNave(ResultadoAddNave.COORDENADAS_EXTRA, null);
         }
 
         // Verificar que las coordenadas no se salen del limite del tablero.
@@ -230,7 +228,7 @@ public class Partida implements IModeloServidor {
             if (coordenada.getY() < 0 || coordenada.getY() > t.getLimiteY() - 1
                     || coordenada.getX() < 0 || coordenada.getX() > t.getLimiteX() - 1) {
                 System.out.println("Error: La nave se sale de los limites del tablero.");
-                return ResultadoAddNave.COORDENADAS_FUERA_LIMITE;
+                return new AddNave(ResultadoAddNave.COORDENADAS_FUERA_LIMITE, null);
             }
         }
 
@@ -240,7 +238,7 @@ public class Partida implements IModeloServidor {
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getY() != y) {
                     System.out.println("Error: La nave no esta ordenada Verticalmente");
-                    return ResultadoAddNave.NO_ORDENADA_VERTICLMENTE;
+                    return new AddNave(ResultadoAddNave.NO_ORDENADA_VERTICLMENTE, null);
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
@@ -248,7 +246,7 @@ public class Partida implements IModeloServidor {
             for (Coordenadas coordenada : coordenadas) {
                 if (coordenada.getX() != x) {
                     System.out.println("Error: La nave no esta ordenada Horizontalmente.");
-                    return ResultadoAddNave.NO_ORDENADA_HORIZONTALMENTE;
+                    return new AddNave(ResultadoAddNave.NO_ORDENADA_HORIZONTALMENTE, null);
                 }
             }
         }
@@ -265,7 +263,7 @@ public class Partida implements IModeloServidor {
                 }
                 if (coordenadas.get(i - 1).getX() != coordenadas.get(i).getX() - 1) {
                     System.out.println("Error: Coordenas no consecutivas en 'X'");
-                    return ResultadoAddNave.NO_CONSECUTIVO_X;
+                    return new AddNave(ResultadoAddNave.NO_CONSECUTIVO_X, null);
                 }
             }
         } else if (nave.getOrientacion() == OrientacionNave.HORIZONTAL) {
@@ -275,7 +273,7 @@ public class Partida implements IModeloServidor {
                 }
                 if (coordenadas.get(i - 1).getY() != coordenadas.get(i).getY() - 1) {
                     System.out.println("Error: Coordenas no consecutivas en 'Y'");
-                    return ResultadoAddNave.NO_CONSECUTIVO_Y;
+                    return new AddNave(ResultadoAddNave.NO_CONSECUTIVO_Y, null);
                 }
             }
         }
@@ -291,7 +289,7 @@ public class Partida implements IModeloServidor {
                         if (n != null) {
                             if (n != nave) {
                                 System.out.println("Error: Nave encima de otra.");
-                                return ResultadoAddNave.ESPACIO_YA_OCUPADO;
+                                return new AddNave(ResultadoAddNave.ESPACIO_YA_OCUPADO, null);
                             }
                         }
                     }
@@ -302,7 +300,7 @@ public class Partida implements IModeloServidor {
         t.addNave(nave, coordenadas);
         j.getNaves().add(nave);
 
-        return ResultadoAddNave.NAVE_AÑADIDA;
+        return new AddNave(ResultadoAddNave.NAVE_AÑADIDA, nave);
     }
 
     @Override
@@ -449,6 +447,32 @@ public class Partida implements IModeloServidor {
         return jugadorQueSeVa;
     }
 
+    @Override
+     public Jugador obtenerJugadorEnemigo(Jugador jugador) {
+        if (jugador == null || jugador.getNombre() == null) {
+            return null;
+        }
+        if (jugador.getNombre().isBlank()) {
+            return null;
+        }
+        
+        Jugador j = jugadores.stream()
+                .filter(e -> e.getNombre().equals(jugador.getNombre()))
+                .findFirst()
+                .orElse(null);
+        
+        if (j == null) {
+            return null;
+        }
+        
+        Jugador jEnemigo = jugadores.stream()
+                .filter(e -> e != j)
+                .findFirst()
+                .orElse(null);
+        
+        return jEnemigo;
+    }
+    
     public void setNotificador(INotificadorServidor notificador) {
         this.notificador = notificador;
     }

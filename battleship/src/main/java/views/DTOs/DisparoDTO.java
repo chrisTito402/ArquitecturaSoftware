@@ -1,7 +1,7 @@
 package views.DTOs;
 
-import java.time.Instant;
 import models.entidades.Coordenadas;
+import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 
@@ -16,6 +16,8 @@ public class DisparoDTO {
     private ResultadoDisparo resultadoDisparo;
     private EstadoPartida estadoPartida;
     private long tiempo;
+    private int cantImpact;
+    private EstadoNave estadoNave;
     private PuntajeDTO puntaje;
 
     public DisparoDTO() {
@@ -43,6 +45,15 @@ public class DisparoDTO {
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
         this.estadoPartida = estadoPartida;
+    }
+
+    public DisparoDTO(JugadorDTO jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, int cantImpact, EstadoNave estadoNave) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+        this.cantImpact = cantImpact;
+        this.estadoNave = estadoNave;
     }
 
     public PuntajeDTO getPuntaje() {
@@ -91,6 +102,22 @@ public class DisparoDTO {
 
     public void setTiempo(long tiempo) {
         this.tiempo = tiempo;
+    }
+
+    public int getCantImpact() {
+        return cantImpact;
+    }
+
+    public void setCantImpact(int cantImpact) {
+        this.cantImpact = cantImpact;
+    }
+
+    public EstadoNave getEstadoNave() {
+        return estadoNave;
+    }
+
+    public void setEstadoNave(EstadoNave estadoNave) {
+        this.estadoNave = estadoNave;
     }
 
     @Override

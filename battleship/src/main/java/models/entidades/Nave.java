@@ -23,7 +23,7 @@ public abstract class Nave {
 
     public EstadoNave addDisparo() {
         cantDisparos++;
-        if (cantDisparos == 0) {
+        if (cantDisparos > 0 && cantDisparos < this.getTamanio()) {
             estado = EstadoNave.AVERIADO;
         } else {
             if (cantDisparos == this.getTamanio()) {
@@ -40,6 +40,10 @@ public abstract class Nave {
 
     public OrientacionNave getOrientacion() {
         return orientacion;
+    }
+    
+    public int getCantDisparos() {
+        return cantDisparos;
     }
 
 }

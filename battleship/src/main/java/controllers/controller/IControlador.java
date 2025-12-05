@@ -32,5 +32,9 @@ public interface IControlador {
     public void empezarPartida();
 
     public void abandonarLobby(JugadorDTO jugadorDTO);
+    
+    public void obtenerJugadorEnemigo();
+    
+    public void obtenerMarcador();
 
 }

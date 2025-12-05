@@ -8,6 +8,7 @@ import controllers.controller.ManejadorRespuestaCliente;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import models.entidades.AddNave;
 import models.entidades.Barco;
 import models.entidades.Coordenadas;
 import models.entidades.Crucero;
@@ -28,6 +29,7 @@ import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
 import views.DTOs.PuntajeDTO;
+import views.DTOs.TipoNaveDTO;
 
 /**
  *
@@ -52,6 +54,7 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
         manejadoresEventos.put("ABANDONAR_PARTIDA", this::manejarAbandonarPartidaSv);
         manejadoresEventos.put("CONFIRMAR_NAVES", this::setConfirmarNaves);
         manejadoresEventos.put("EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
+        manejadoresEventos.put("OBTENER_JUGADOR_ENEMIGO", this::manejarObtenerEnemigo);
         
         manejadorNotificaciones.put("CAMBIAR_TURNO", this::notificarCambiarTurno);
     }
@@ -151,10 +154,16 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
             }
         }
 
-        ResultadoAddNave resultadoAddNave = servidor.addNave(jugador, nave, coordenadas);
-        AddNaveDTO resultado = new AddNaveDTO(jugadorDTO, naveDTO, coordenadas, resultadoAddNave);
+        AddNave resultado = servidor.addNave(jugador, nave, coordenadas);
+        
+        nave = resultado.getNave();
+        naveDTO.setEstado(nave.getEstado());
+        naveDTO.setOrientacion(nave.getOrientacion());
+        naveDTO.setTamanio(nave.getTamanio());
+        
+        AddNaveDTO resultadoDTO = new AddNaveDTO(jugadorDTO, naveDTO, coordenadas, resultado.getResultado());
 
-        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESULTADO_ADD_NAVE", resultado);
+        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "RESULTADO_ADD_NAVE", resultadoDTO);
     }
 
     private void realizarDisparo(Mensaje mensaje) {
@@ -195,7 +204,9 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
                         disparo.getJugador().getEstado()),
                 disparo.getCoordenadas(),
                 disparo.getResultadoDisparo(),
-                disparo.getEstadoPartida()
+                disparo.getEstadoPartida(),
+                disparo.getCantImpact(),
+                disparo.getEstadoNave()
         );
 
         resultado.setPuntaje(puntajeDTO);
@@ -228,6 +239,11 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
         ResultadoAddJugador resultado = servidor.unirsePartida(j);
         AddJugadorDTO addJugador = new AddJugadorDTO(resultado, jugadorDTO);
         
+        if (resultado != ResultadoAddJugador.AÑADIDO) {
+            enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "JUGADOR_UNIDO", addJugador);
+            return;
+        }
+        
         enviarMensaje("JUGADOR_UNIDO", addJugador);
     }
 
@@ -257,6 +273,17 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
     private void manejarEmpezarPartida(Mensaje mensaje) {
         ResultadoEmpezarPartida resultado = servidor.empezarPartida();
         enviarMensaje("RESULTADO_EMPEZAR_PARTIDA", resultado);
+    }
+    
+    private void manejarObtenerEnemigo(Mensaje mensaje) {
+        Gson gson = new Gson();
+        
+        JugadorDTO dto = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        Jugador jugador = new Jugador(dto.getNombre(), dto.getColor(), dto.getEstado());
+        
+        Jugador j = servidor.obtenerJugadorEnemigo(jugador);
+        
+        enviarMensaje("MENSAJE_CLIENTE_" + mensaje.getIdPublicador(), "OBTENER_JUGADOR_ENEMIGO", j);
     }
 
 }

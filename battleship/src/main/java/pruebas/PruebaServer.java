@@ -6,22 +6,8 @@ import clientesocket.ClienteSocket;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import models.entidades.Barco;
-import models.entidades.Casilla;
-import models.entidades.Coordenadas;
-import models.entidades.Jugador;
-import models.entidades.Nave;
 import models.entidades.Partida;
-import models.entidades.Submarino;
-import models.entidades.Tablero;
-import models.enums.ColorJugador;
-import models.enums.EstadoCasilla;
-import models.enums.EstadoJugador;
 import models.enums.EstadoPartida;
-import models.enums.OrientacionNave;
 import servidor.controlador.ControladorServidor;
 import servidor.cronometro.Cronometro;
 
@@ -81,6 +67,11 @@ public class PruebaServer {
         cliente.enviarMensaje(json);
         
         m = new Mensaje(TipoAccion.SUSCRIBIR, "EMPEZAR_PARTIDA", null);
+        gson = new Gson();
+        json = gson.toJson(m);
+        cliente.enviarMensaje(json);
+        
+        m = new Mensaje(TipoAccion.SUSCRIBIR, "OBTENER_JUGADOR_ENEMIGO", null);
         gson = new Gson();
         json = gson.toJson(m);
         cliente.enviarMensaje(json);

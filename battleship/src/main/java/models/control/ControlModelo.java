@@ -3,8 +3,12 @@ package models.control;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
+import models.enums.ColorJugador;
+import models.enums.EstadoNave;
 import models.enums.OrientacionNave;
 import models.enums.ResultadoAddJugador;
 import models.enums.ResultadoAddNave;
@@ -17,7 +21,9 @@ import views.DTOs.AddNaveDTO;
 import views.DTOs.DisparoDTO;
 import views.DTOs.JugadorDTO;
 import views.DTOs.NaveDTO;
+import views.DTOs.ResultadoConfirmarNavesDTO;
 import views.DTOs.TableroDTO;
+import views.DTOs.TipoNaveDTO;
 
 /**
  *
@@ -31,34 +37,44 @@ public class ControlModelo implements IModeloCliente {
     private boolean turno;
     private List<ISuscriptor> suscriptores;
     private List<JugadorDTO> jugadores;
+    private List<Coordenadas> cordsNaves;
+    private Map<NaveDTO, List<Coordenadas>> navesCords;
 
     public ControlModelo() {
         this.jugadores = new java.util.ArrayList<>();
     }
 
-    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores) {
+    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, boolean turno, List<ISuscriptor> suscriptores, List<Coordenadas> cordsNaves) {
         this.jugador = jugador;
         this.tablero = tablero;
         this.naves = naves;
         this.turno = turno;
         this.suscriptores = suscriptores;
         this.jugadores = new java.util.ArrayList<>();
+        this.cordsNaves = cordsNaves;
     }
 
-    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, List<ISuscriptor> suscriptores, List<JugadorDTO> jugadores) {
+    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, List<ISuscriptor> suscriptores, List<JugadorDTO> jugadores, List<Coordenadas> cordsNaves, Map<NaveDTO, List<Coordenadas>> navesCords) {
         this.jugador = jugador;
         this.tablero = tablero;
         this.naves = naves;
         this.suscriptores = suscriptores;
         this.jugadores = jugadores;
+        this.cordsNaves = cordsNaves;
+        this.navesCords = navesCords;
+    }
+
+    public ControlModelo(JugadorDTO jugador, TableroDTO tablero, List<NaveDTO> naves, List<ISuscriptor> suscriptores, List<JugadorDTO> jugadores, Map<NaveDTO, List<Coordenadas>> navesCords) {
+        this.jugador = jugador;
+        this.tablero = tablero;
+        this.naves = naves;
+        this.suscriptores = suscriptores;
+        this.jugadores = jugadores;
+        this.navesCords = navesCords;
     }
 
     @Override
     public DisparoDTO realizarDisparo(Coordenadas coordenadas) {
-        if (!turno) {
-            System.out.println("No es el turno del Jugador");
-            return null;
-        }
         if (coordenadas.getX() > tablero.getLimiteX() || coordenadas.getX() < 0) {
             System.out.println("Las Coordenadas en X estan fuera del limite");
             return null;
@@ -72,6 +88,37 @@ public class ControlModelo implements IModeloCliente {
         return disparo;
     }
 
+    private void verificarJugadorDisparo(Coordenadas coordenadas, EstadoNave estado) {
+        System.out.println("CANTIDAD DISPAROS=" + estado);
+        
+        for (NaveDTO nave: navesCords.keySet()) {
+            for (Coordenadas cords: navesCords.get(nave)) {
+                if (cords.equals(coordenadas)) {
+                    nave.setEstado(estado);
+                    return;
+                }
+            }
+        }
+    }
+    
+    private List<Coordenadas> obtenerCoordenadasNave(Coordenadas coordenadas) {
+        boolean result = false;
+        for (NaveDTO nave: navesCords.keySet()) {
+            for (Coordenadas cords: navesCords.get(nave)) {
+                if (cords.equals(coordenadas)) {
+                    result = true;
+                    break;
+                }
+            }
+            
+            if (result) {
+                return navesCords.get(nave);
+            }
+        }
+        
+        return null;
+    }
+    
     @Override
     public void manejarResultadoDisparo(DisparoDTO disparo) {
         if (disparo.getResultadoDisparo() == ResultadoDisparo.DISPARO_FUERA_TIEMPO) {
@@ -82,8 +129,27 @@ public class ControlModelo implements IModeloCliente {
             System.out.println(disparo.getResultadoDisparo());
             return;
         }
-
-        notificarAllSuscriptores("RESULTADO_DISPARO", disparo);
+        
+        if (!disparo.getJugador().getNombre().equals(jugador.getNombre())) {
+            if (disparo.getResultadoDisparo() == ResultadoDisparo.IMPACTO
+                    || disparo.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO) {
+                verificarJugadorDisparo(disparo.getCoordenadas(), disparo.getEstadoNave());
+            }
+        }
+        
+        if (disparo.getResultadoDisparo() == ResultadoDisparo.HUNDIMIENTO &&
+                disparo.getJugador().getNombre().equals(jugador.getNombre())) {
+            List<Coordenadas> cords = obtenerCoordenadasNave(disparo.getCoordenadas());
+            if (cords != null) {
+                notificarAllSuscriptores("HUNDIMIENTO_NAVE", cords);
+            }
+        }
+        
+        if (disparo.getJugador().getNombre().equals(jugador.getNombre())) {
+            notificarAllSuscriptores("RESULTADO_DISPARO_PROPIO", disparo);
+        } else {
+            notificarAllSuscriptores("RESULTADO_DISPARO_ENEMIGO", disparo);
+        }
     }
 
     @Override
@@ -196,7 +262,12 @@ public class ControlModelo implements IModeloCliente {
     public void manejarResultadoAddNave(AddNaveDTO resultado) {
         System.out.println("RESULTADO ADD NAVE EN ModeloCliente: " + resultado);
 
-        if (resultado.getResultado() == ResultadoAddNave.NAVE_AÑADIDA) {
+        if (resultado.getResultado() == ResultadoAddNave.NAVE_AÑADIDA && 
+                resultado.getJugador().getNombre().equals(jugador.getNombre())) {
+            
+            naves.add(resultado.getNave());
+            navesCords.put(resultado.getNave(), resultado.getCoordenadases());
+            resultado.getCoordenadases().forEach(e -> cordsNaves.add(e));
             notificarAllSuscriptores("RESULTADO_ADD_NAVE", resultado);
         }
     }
@@ -206,8 +277,13 @@ public class ControlModelo implements IModeloCliente {
         if (resultado == null) {
             return;
         }
-
-        notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", resultado);
+        
+        if (resultado == ResultadoConfirmarNaves.EMPEZAR_PARTIDA) {
+            ResultadoConfirmarNavesDTO dto = new ResultadoConfirmarNavesDTO(resultado, cordsNaves, jugador.getColor());
+            notificarAllSuscriptores("RESULTADO_CONFIRMAR_NAVES", dto);
+        } else {
+            notificarAllSuscriptores("ERROR_CONFIRMAR_NAVES", resultado);
+        }
     }
 
     @Override
@@ -235,12 +311,6 @@ public class ControlModelo implements IModeloCliente {
         }
 
         // Guardar el jugador local
-        this.jugador = new JugadorDTO(
-                jugador.getNombre(),
-                jugador.getColor(),
-                jugador.getEstado()
-        );
-
         this.jugador = jugador;
         
         // Agregar a la lista de jugadores
@@ -306,6 +376,8 @@ public class ControlModelo implements IModeloCliente {
 
     @Override
     public void manejarJugadorUnido(AddJugadorDTO dto) {
+        System.out.println("JUGADOR=" + jugador.toString());
+        
         // Verificar si es el Jugador del Modelo
         if (dto.getJugador().getNombre().equals(jugador.getNombre()) && 
                 dto.getResultado() == ResultadoAddJugador.AÑADIDO) {
@@ -316,6 +388,7 @@ public class ControlModelo implements IModeloCliente {
             notificarAllSuscriptores("JUGADOR_UNIDO", dto.getJugador());
         } else {
             jugadores.remove(dto.getJugador());
+            notificarAllSuscriptores("ERROR_UNIRSE_PARTIDA", dto.getResultado());
         }
     }
     
@@ -325,5 +398,70 @@ public class ControlModelo implements IModeloCliente {
             notificarAllSuscriptores("EMPEZAR_PARTIDA", resultado);
         }
     }
+    
+    @Override
+    public void manejarObtenerJugadorEnemigo(JugadorDTO jugador) {
+        if (jugador == null) {
+            return;
+        }
+        
+        ColorJugador[] colores = ColorJugador.values();
+        for (ColorJugador color : colores) {
+            if (color != this.jugador.getColor()) {
+                jugador.setColor(color);
+            }
+        }
+        
+        notificarAllSuscriptores("JUGADOR_ENEMIGO_OBTENIDO", jugador);
+    }
 
+    @Override
+    public JugadorDTO obtenerJugadorEnemigo() {
+        if (jugador == null) {
+            return null;
+        }
+        if (jugador.getNombre() == null) {
+            return null;
+        }
+        if (jugador.getNombre().isBlank()) {
+            return null;
+        }
+        
+        return jugador;
+    }
+    
+    @Override
+    public void obtenerMarcador() {
+        System.out.println(cordsNaves);
+        
+        StringBuilder sb = new StringBuilder();
+        String formatoH = "%-15s %10s %10s %10s\n";
+        String formatoF = "%-15s %10d %10d %10d\n";
+
+        sb.append("-------------------------------------------------------\n");
+        sb.append(String.format(formatoH, "TipoNave", "Sin daños", "Averiada", "Hundida"));
+        sb.append("-------------------------------------------------------\n");
+        
+        TipoNaveDTO[] tipos = TipoNaveDTO.values();
+        for (TipoNaveDTO tipo : tipos) {
+            List<NaveDTO> naves = navesCords.keySet().stream()
+                    .filter(e -> e.getTipo() == tipo)
+                    .collect(Collectors.toList());
+            System.out.println(naves);
+            
+            long sinDaños = naves.stream()
+                    .filter(e -> e.getEstado() == EstadoNave.SIN_DAÑOS)
+                    .count();
+            long averiada = naves.stream()
+                    .filter(e -> e.getEstado() == EstadoNave.AVERIADO)
+                    .count();
+            long hundimiento = naves.stream()
+                    .filter(e -> e.getEstado() == EstadoNave.HUNDIDO)
+                    .count();
+            
+            sb.append(String.format(formatoF, tipo.name(), sinDaños, averiada, hundimiento));
+        }
+        
+        notificarAllSuscriptores("MOSTRAR_MARCADOR", sb.toString());
+    }
 }

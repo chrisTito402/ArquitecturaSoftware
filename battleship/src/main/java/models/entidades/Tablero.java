@@ -39,18 +39,22 @@ public class Tablero {
             EstadoNave estadoNave = nave.addDisparo();
 
             if (estadoNave == EstadoNave.AVERIADO || estadoNave == EstadoNave.SIN_DAÑOS) {
+                casilla.setEstado(EstadoCasilla.YA_DISPARADO);
                 return ResultadoDisparo.IMPACTO;
             } else if (estadoNave == EstadoNave.HUNDIDO) {
+                casilla.setEstado(EstadoCasilla.YA_DISPARADO);
                 return ResultadoDisparo.HUNDIMIENTO;
             }
         }
 
         if (eC == EstadoCasilla.AGUA) {
+            casilla.setEstado(EstadoCasilla.YA_DISPARADO);
             return ResultadoDisparo.AGUA;
         }
 
         casilla.setEstado(EstadoCasilla.YA_DISPARADO);
 
+        casilla.setEstado(EstadoCasilla.YA_DISPARADO);
         return ResultadoDisparo.AGUA;
     }
 
@@ -60,6 +64,10 @@ public class Tablero {
         return true;
     }
 
+    public Nave getNave(Coordenadas coordenadas) {
+        return casillas[coordenadas.getX()][coordenadas.getY()].getNave();
+    }
+    
     public Casilla[][] getCasillas() {
         return casillas;
     }

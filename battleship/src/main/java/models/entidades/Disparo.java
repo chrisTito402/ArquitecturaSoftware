@@ -1,6 +1,7 @@
 package models.entidades;
 
 import java.time.Instant;
+import models.enums.EstadoNave;
 import models.enums.EstadoPartida;
 import models.enums.ResultadoDisparo;
 
@@ -15,6 +16,8 @@ public class Disparo {
     private ResultadoDisparo resultadoDisparo;
     private EstadoPartida estadoPartida;
     private Instant tiempo;
+    private int cantImpact;
+    private EstadoNave estadoNave;
 
     public Disparo() {
     }
@@ -32,6 +35,14 @@ public class Disparo {
         this.coordenadas = coordenadas;
         this.resultadoDisparo = resultadoDisparo;
         this.estadoPartida = estadoPartida;
+    }
+
+    public Disparo(Jugador jugador, Coordenadas coordenadas, ResultadoDisparo resultadoDisparo, EstadoPartida estadoPartida, EstadoNave estadoNave) {
+        this.jugador = jugador;
+        this.coordenadas = coordenadas;
+        this.resultadoDisparo = resultadoDisparo;
+        this.estadoPartida = estadoPartida;
+        this.estadoNave = estadoNave;
     }
 
     public Jugador getJugador() {
@@ -72,6 +83,22 @@ public class Disparo {
 
     public void setTiempo(Instant tiempo) {
         this.tiempo = tiempo;
+    }
+
+    public int getCantImpact() {
+        return cantImpact;
+    }
+
+    public void setCantImpact(int cantImpact) {
+        this.cantImpact = cantImpact;
+    }
+
+    public EstadoNave getEstadoNave() {
+        return estadoNave;
+    }
+
+    public void setEstadoNave(EstadoNave estadoNave) {
+        this.estadoNave = estadoNave;
     }
 
 }

@@ -1,12 +1,12 @@
 package servidor.modelo;
 
 import java.util.List;
+import models.entidades.AddNave;
 import models.entidades.Coordenadas;
 import models.entidades.Disparo;
 import models.entidades.Jugador;
 import models.entidades.Nave;
 import models.enums.ResultadoAddJugador;
-import models.enums.ResultadoAddNave;
 import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoEmpezarPartida;
 
@@ -18,7 +18,7 @@ public interface IModeloServidor {
 
     public Disparo realizarDisparo(Coordenadas coordenadas, Jugador jugador, long tiempo);
 
-    public ResultadoAddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
+    public AddNave addNave(Jugador jugador, Nave nave, List<Coordenadas> coordenadas);
 
     public ResultadoConfirmarNaves setConfirmarNaves(Jugador jugador);
 
@@ -29,5 +29,7 @@ public interface IModeloServidor {
     public ResultadoEmpezarPartida empezarPartida();
 
     public Jugador abandonarPartida(Jugador jugadorQueSeVa);
+    
+    public Jugador obtenerJugadorEnemigo(Jugador jugador);
     
 }

@@ -47,6 +47,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("ACTUALIZAR_LOBBY", this::actualizarLobby);
         manejadorEventos.put("RESULTADO_CONFIRMAR_NAVES", this::manejarResultadoConfirmarNaves);
         manejadorEventos.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
+        manejadorEventos.put("OBTENER_JUGADOR_ENEMIGO", this::manejarObtenerJugadorEnemigo);
     }
 //    private void registrarEventos() {
 //        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
@@ -266,5 +267,27 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         JugadorDTO jugador = gson.fromJson(mensaje.getData(), JugadorDTO.class);
 
         //partida.notificarAllSuscriptores("NUEVO_JUGADOR_LOBBY", jugador);
+    }
+    
+    private void manejarObtenerJugadorEnemigo(Mensaje mensaje) {
+        Gson gson = new Gson();
+        JugadorDTO j = gson.fromJson(mensaje.getData(), JugadorDTO.class);
+        
+        partida.manejarObtenerJugadorEnemigo(j);
+    }
+    
+    @Override
+    public void obtenerJugadorEnemigo() {
+        JugadorDTO j = partida.obtenerJugadorEnemigo();
+        if (j == null) {
+            return;
+        }
+        
+        enviarMensaje("OBTENER_JUGADOR_ENEMIGO", j);
+    }
+    
+    @Override
+    public void obtenerMarcador() {
+        partida.obtenerMarcador();
     }
 }
