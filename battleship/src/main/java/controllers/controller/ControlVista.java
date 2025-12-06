@@ -72,7 +72,6 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("JUGADOR_ENEMIGO_OBTENIDO", this::manejarJugadorEnemigoObtenido);
         manejadoresNoti.put("MOSTRAR_MARCADOR", this::manejarMostrarMarcador);
         manejadoresNoti.put("ERROR_ADD_NAVE", this::manejarErrorAddNave);
-        
     }
 
     public static ControlVista getInstancia() {
@@ -212,18 +211,18 @@ public class ControlVista implements ISuscriptor {
     }
     
     private void manejarHundimientoNave(Object datos) {
-        List<Coordenadas> coordenadas = (List<Coordenadas>) datos;
-        
-        coordenadas.forEach(c -> {
-            CasillaButton casilla = casillasEnemigas.stream()
-                    .filter(e -> e.getCoordenadas().equals(c))
-                    .findFirst()
-                    .orElse(null);
-            
-            if (casilla != null) {
-                casilla.setBackground(Color.RED);
-            }
-        });
+//        List<Coordenadas> coordenadas = (List<Coordenadas>) datos;
+//        
+//        coordenadas.forEach(c -> {
+//            CasillaButton casilla = casillasEnemigas.stream()
+//                    .filter(e -> e.getCoordenadas().equals(c))
+//                    .findFirst()
+//                    .orElse(null);
+//            
+//            if (casilla != null) {
+//                casilla.setBackground(Color.RED);
+//            }
+//        });
     }
 
     private void manejarResultadoAddNave(Object datos) {
