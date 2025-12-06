@@ -1,0 +1,75 @@
+@startuml DiagramaRobustez_UnirsePartida
+
+title Diagrama de Robustez - CU03: Unirse a Partida
+
+skinparam backgroundColor White
+
+' ==================== ACTOR ====================
+actor "Jugador (Invitado)" as jugador
+
+' ==================== BOUNDARY (Azul) ====================
+rectangle "FrmUnirsePartida" as frmUnirse #LightBlue
+rectangle "FrmLobby" as frmLobby #LightBlue
+
+' ==================== CONTROL (Amarillo) ====================
+rectangle "ControlVista" as cv #LightYellow
+rectangle "Controlador" as ctrl #LightYellow
+rectangle "BusEventos" as bus #LightYellow
+rectangle "GestorPartida" as gestor #LightYellow
+
+' ==================== ENTITY (Verde) ====================
+rectangle "SolicitudUnirseDTO" as solicitud #LightGreen
+rectangle "RespuestaUnirseDTO" as respuesta #LightGreen
+rectangle "JugadorDTO" as jdto #LightGreen
+
+' ==================== FLUJO ====================
+jugador --> frmUnirse : 1. Ingresa codigo
+jugador --> frmUnirse : 2. Click Unirse
+frmUnirse --> cv : 3. unirsePartida()
+cv --> ctrl : 4. unirsePartidaConCodigo()
+ctrl --> solicitud : 5. new SolicitudUnirseDTO()
+ctrl --> bus : 6. UNIRSE_PARTIDA
+bus --> gestor : 7. procesarUnirsePartida()
+gestor --> gestor : 8. validarCodigo()
+gestor --> gestor : 9. validarCapacidad()
+gestor --> jdto : 10. registrarJugador()
+gestor --> respuesta : 11. RespuestaUnirseDTO.exito()
+bus --> ctrl : 12. RESPUESTA_UNIRSE
+bus --> bus : 13. publicar a todos
+ctrl --> cv : 14. Union exitosa
+cv --> frmLobby : 15. Navegar a Lobby
+frmLobby --> jugador : 16. Mostrar ambos jugadores
+
+' ==================== NOTAS ====================
+note right of frmUnirse
+  **Boundary**
+  txtCodigo
+  btnUnirse
+  mostrarError()
+end note
+
+note right of gestor
+  **Validaciones:**
+  - Codigo existe
+  - Menos de 2 jugadores
+  - Nombre no duplicado
+
+  **Errores:**
+  - errorCodigoInvalido()
+  - errorPartidaLlena()
+end note
+
+note bottom of respuesta
+  **Entity**
+  exitoso: boolean
+  mensaje: String
+end note
+
+legend right
+  |= Color |= Tipo |
+  |<#LightBlue> Azul </color>| Boundary |
+  |<#LightYellow> Amarillo </color>| Control |
+  |<#LightGreen> Verde </color>| Entity |
+endlegend
+
+@enduml

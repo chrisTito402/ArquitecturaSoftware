@@ -1,0 +1,68 @@
+@startuml DiagramaRobustez_CrearPartida
+
+title Diagrama de Robustez - CU02: Crear Partida
+
+skinparam backgroundColor White
+
+' ==================== ACTOR ====================
+actor "Jugador (Host)" as jugador
+
+' ==================== BOUNDARY (Azul) ====================
+rectangle "FrmCrearPartida" as frmCrear #LightBlue
+rectangle "FrmLobby" as frmLobby #LightBlue
+
+' ==================== CONTROL (Amarillo) ====================
+rectangle "ControlVista" as cv #LightYellow
+rectangle "Controlador" as ctrl #LightYellow
+rectangle "BusEventos" as bus #LightYellow
+rectangle "GestorPartida" as gestor #LightYellow
+
+' ==================== ENTITY (Verde) ====================
+rectangle "Partida" as partida #LightGreen
+rectangle "JugadorDTO" as jdto #LightGreen
+rectangle "SolicitudUnirseDTO" as solicitud #LightGreen
+
+' ==================== FLUJO ====================
+jugador --> frmCrear : 1. Click Crear Partida
+frmCrear --> cv : 2. Generar codigo
+cv --> frmCrear : 3. Mostrar codigo (6 chars)
+jugador --> frmCrear : 4. Click Crear
+frmCrear --> cv : 5. crearPartida()
+cv --> ctrl : 6. crearPartidaConCodigo()
+ctrl --> solicitud : 7. new SolicitudUnirseDTO()
+ctrl --> bus : 8. CREAR_PARTIDA
+bus --> gestor : 9. procesarCrearPartida()
+gestor --> partida : 10. Registrar partida
+gestor --> jdto : 11. Registrar host
+bus --> ctrl : 12. RESPUESTA_UNIRSE
+ctrl --> cv : 13. Partida creada
+cv --> frmLobby : 14. Navegar a Lobby
+frmLobby --> jugador : 15. Mostrar lobby con codigo
+
+' ==================== NOTAS ====================
+note right of frmCrear
+  **Boundary**
+  lblCodigoGenerado
+  btnCrear
+end note
+
+note right of gestor
+  **Control**
+  procesarCrearPartida()
+  registrarJugador()
+end note
+
+note bottom of partida
+  **Entity**
+  codigo: String
+  estado: EstadoPartida
+end note
+
+legend right
+  |= Color |= Tipo |
+  |<#LightBlue> Azul </color>| Boundary |
+  |<#LightYellow> Amarillo </color>| Control |
+  |<#LightGreen> Verde </color>| Entity |
+endlegend
+
+@enduml

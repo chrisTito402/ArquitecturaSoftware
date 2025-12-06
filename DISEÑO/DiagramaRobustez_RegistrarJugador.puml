@@ -1,0 +1,63 @@
+@startuml DiagramaRobustez_RegistrarJugador
+
+title Diagrama de Robustez - CU01: Registrar Jugador
+
+skinparam backgroundColor White
+skinparam rectangleBorderColor Black
+
+' ==================== ACTOR ====================
+actor "Jugador" as jugador
+
+' ==================== BOUNDARY (Azul) ====================
+rectangle "FrmRegistrarJugador" as frm #LightBlue
+rectangle "FrmMenuPrincipal" as menu #LightBlue
+
+' ==================== CONTROL (Amarillo) ====================
+rectangle "ControlVista" as cv #LightYellow
+rectangle "Controlador" as ctrl #LightYellow
+
+' ==================== ENTITY (Verde) ====================
+rectangle "Jugador" as entJugador #LightGreen
+rectangle "JugadorDTO" as dto #LightGreen
+
+' ==================== FLUJO ====================
+jugador --> frm : 1. Ingresa nombre\ny selecciona color
+frm --> cv : 2. btnRegistrar.click()
+cv --> cv : 3. validarDatos()
+cv --> ctrl : 4. addJugador(datos)
+ctrl --> entJugador : 5. new Jugador()
+entJugador --> dto : 6. Convertir a DTO
+ctrl --> cv : 7. Jugador registrado
+cv --> menu : 8. Navegar a menu
+menu --> jugador : 9. Mostrar opciones
+
+' ==================== NOTAS ====================
+note right of frm
+  **Boundary - Vista**
+  txtNombre
+  cmbColor
+  btnRegistrar
+end note
+
+note right of cv
+  **Control - Logica**
+  validarDatos()
+  crearJugador()
+end note
+
+note right of entJugador
+  **Entity - Datos**
+  nombre: String
+  color: ColorJugador
+  estado: EstadoJugador
+end note
+
+' ==================== LEYENDA ====================
+legend right
+  |= Color |= Tipo |
+  |<#LightBlue> Azul </color>| Boundary (Vista) |
+  |<#LightYellow> Amarillo </color>| Control (Logica) |
+  |<#LightGreen> Verde </color>| Entity (Datos) |
+endlegend
+
+@enduml

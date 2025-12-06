@@ -1,0 +1,80 @@
+@startuml DiagramaRobustez_RealizarDisparo
+
+title Diagrama de Robustez - CU05: Realizar Disparo
+
+skinparam backgroundColor White
+
+' ==================== ACTOR ====================
+actor "Jugador en Turno" as jugador
+
+' ==================== BOUNDARY (Azul) ====================
+rectangle "FrmPartidaEnCurso" as frmPartida #LightBlue
+rectangle "CasillaButton" as casilla #LightBlue
+rectangle "TimerPanel" as timer #LightBlue
+rectangle "FrmFinPartida" as frmFin #LightBlue
+
+' ==================== CONTROL (Amarillo) ====================
+rectangle "ControlVista" as cv #LightYellow
+rectangle "Controlador" as ctrl #LightYellow
+rectangle "ControlModelo" as modelo #LightYellow
+rectangle "BusEventos" as bus #LightYellow
+rectangle "GestorPartida" as gestor #LightYellow
+
+' ==================== ENTITY (Verde) ====================
+rectangle "DisparoDTO" as disparoDto #LightGreen
+rectangle "CoordenadasDTO" as coordDto #LightGreen
+rectangle "TurnoDTO" as turnoDto #LightGreen
+rectangle "NaveInfo" as naveInfo #LightGreen
+
+' ==================== FLUJO ====================
+jugador --> frmPartida : 1. Click casilla enemiga
+frmPartida --> casilla : 2. Obtener (x,y)
+casilla --> cv : 3. realizarDisparo(coords)
+cv --> modelo : 4. realizarDisparo()
+modelo --> modelo : 5. validarTurno()
+modelo --> disparoDto : 6. new DisparoDTO()
+cv --> ctrl : 7. realizarDisparo()
+ctrl --> bus : 8. DISPARO
+bus --> gestor : 9. procesarDisparo()
+gestor --> gestor : 10. verificarTurno()
+gestor --> naveInfo : 11. procesarImpacto()
+gestor --> disparoDto : 12. Crear resultado
+bus --> bus : 13. publicar RESULTADO_DISPARO
+ctrl --> modelo : 14. manejarResultado()
+modelo --> cv : 15. notificar (Observer)
+cv --> frmPartida : 16. mostrarResultado()
+frmPartida --> casilla : 17. Pintar resultado
+
+' ==================== NOTAS ====================
+note right of gestor
+  **Validaciones:**
+  - Es turno del jugador
+  - Coordenada no repetida
+
+  **Errores:**
+  - TURNO_INCORRECTO
+  - YA_DISPARADO
+end note
+
+note bottom of disparoDto
+  **ResultadoDisparo:**
+  - AGUA: cambiar turno
+  - IMPACTO: mantener turno
+  - HUNDIMIENTO: verificar victoria
+  - FIN_PARTIDA: navegar a fin
+end note
+
+note right of timer
+  **Timer:**
+  30 segundos por turno
+  Si llega a 0 pierde turno
+end note
+
+legend right
+  |= Color |= Tipo |
+  |<#LightBlue> Azul </color>| Boundary |
+  |<#LightYellow> Amarillo </color>| Control |
+  |<#LightGreen> Verde </color>| Entity |
+endlegend
+
+@enduml

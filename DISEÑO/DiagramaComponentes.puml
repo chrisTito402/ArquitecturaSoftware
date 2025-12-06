@@ -1,0 +1,177 @@
+@startuml DiagramaComponentes
+!theme plain
+skinparam componentStyle rectangle
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam package {
+    BackgroundColor WhiteSmoke
+    BorderColor Gray
+}
+
+title Diagrama de Componentes - Patrones y Estilos Arquitectonicos\nBatalla Naval - Equipo 3
+
+' ==================== CLIENTE ====================
+
+package "CLIENTE" as cliente {
+
+    package "Capa Presentacion (View)" as presentacion {
+        [FrmMenuPrincipal] as menu
+        [FrmCrearPartida] as crear
+        [FrmUnirsePartida] as unirse
+        [FrmLobby] as lobby
+        [FrmColocarNaves] as colocar
+        [FrmPartidaEnCurso] as partida
+        [FrmFinPartida] as fin
+        [CasillaPanel] as casilla
+        [TimerPanel] as timer
+        [MarcadorNavesPanel] as marcador
+    }
+
+    package "Capa Control (Controller)" as control {
+        [<<Singleton>>\nControlVista] as cvista
+        [Controlador] as ctrl
+        interface "IControlador" as ictrl
+    }
+
+    package "Capa Negocio (Model)" as negocio {
+        [ControlModelo] as modelo
+        interface "IModeloCliente" as imodelo
+
+        package "<<Builder Pattern>>" as builder {
+            [Director] as director
+            [PartidaBuilder] as pbuilder
+            [JugadorBuilder] as jbuilder
+            [TableroBuilder] as tbuilder
+        }
+    }
+
+    package "<<Observer Pattern>>" as observer_pkg {
+        interface "ISuscriptor" as isuscriptor
+    }
+}
+
+' ==================== SERVIDOR ====================
+
+package "SERVIDOR" as servidor {
+
+    package "Capa Bus de Eventos" as bus_pkg {
+        [<<Pub-Sub>>\nBusEventos] as bus
+        interface "IPublicadorEventos" as ipub
+    }
+
+    package "Capa Negocio Servidor" as negocio_srv {
+        [GestorPartida\n<<SRP: Logica>>] as gestor
+        [Partida] as partida_srv
+        [Cronometro] as crono
+    }
+
+    [ServidorSocket] as srv_socket
+}
+
+' ==================== COMPARTIDO ====================
+
+package "COMPARTIDO" as compartido {
+
+    package "Comunicacion" as comunicacion {
+        [ClienteSocket] as cli_socket
+        [Mensaje] as mensaje
+
+        package "DTOs" as dtos {
+            [JugadorDTO] as jdto
+            [NaveDTO] as ndto
+            [DisparoDTO] as ddto
+            [TurnoDTO] as tdto
+        }
+    }
+
+    package "Entidades" as entidades {
+        [Jugador] as jug
+        [Tablero] as tab
+        [Nave] as nav
+        [Casilla] as cas
+    }
+
+    package "Enums" as enums {
+        [EstadoPartida] as ep
+        [ResultadoDisparo] as rd
+    }
+}
+
+' ==================== CONEXIONES MVC ====================
+
+presentacion -down-> control : eventos
+control -down-> negocio : operaciones
+negocio -up-> observer_pkg : notifica
+observer_pkg -up-> presentacion : actualiza
+
+' ==================== CONEXIONES INTERNAS ====================
+
+ctrl -down- ictrl
+modelo -down- imodelo
+cvista .right.> ctrl : usa
+cvista .up.|> isuscriptor : implementa
+
+director .right.> pbuilder : usa
+director .right.> jbuilder : usa
+director .right.> tbuilder : usa
+
+' ==================== CONEXION CLIENTE-SERVIDOR ====================
+
+ctrl -down-> cli_socket : envia
+cli_socket <-down-> srv_socket : "TCP/IP\nPuerto 5000"
+srv_socket -down-> bus : mensajes
+
+' ==================== BUS DE EVENTOS ====================
+
+bus -down- ipub
+bus -down-> gestor : delega logica
+gestor .right.> partida_srv : gestiona
+partida_srv .right.> crono : usa
+
+' ==================== USO DE COMPARTIDO ====================
+
+ctrl ..> dtos : usa
+gestor ..> dtos : usa
+negocio ..> entidades : usa
+negocio_srv ..> entidades : usa
+
+' ==================== NOTAS ====================
+
+note top of cliente
+    **Patrones en Cliente:**
+    * MVC (Model-View-Controller)
+    * Singleton (ControlVista)
+    * Builder (Director + Builders)
+    * Observer (ISuscriptor)
+end note
+
+note top of servidor
+    **Patrones en Servidor:**
+    * Bus de Eventos (Pub-Sub)
+    * SRP (BusEventos vs GestorPartida)
+    * DIP (IPublicadorEventos)
+end note
+
+note bottom of compartido
+    **Capa Compartida:**
+    * DTOs para transferencia
+    * Entidades del dominio
+    * Enumeraciones de estado
+end note
+
+' ==================== LEYENDA ====================
+
+legend right
+    |= Patron |= Implementacion |
+    | MVC | View - Control - Model |
+    | Singleton | ControlVista.getInstancia() |
+    | Builder | Director + PartidaBuilder |
+    | Observer | ISuscriptor.notificar() |
+    | Bus Eventos | BusEventos (Pub-Sub) |
+    | SRP | Bus != GestorPartida |
+    | DIP | IPublicadorEventos |
+endlegend
+
+@enduml
