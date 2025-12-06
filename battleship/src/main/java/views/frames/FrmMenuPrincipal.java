@@ -117,9 +117,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnJugarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJugarActionPerformed
-        FrmSeleccionPartida seleccion = new FrmSeleccionPartida();
-        seleccion.setLocationRelativeTo(this);
-        seleccion.setVisible(true);
+
         dispose();
     }//GEN-LAST:event_btnJugarActionPerformed
 

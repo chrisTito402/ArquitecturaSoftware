@@ -157,9 +157,11 @@ public class ControladorServidor implements ManejadorRespuestaCliente, INotifica
         AddNave resultado = servidor.addNave(jugador, nave, coordenadas);
         
         nave = resultado.getNave();
-        naveDTO.setEstado(nave.getEstado());
-        naveDTO.setOrientacion(nave.getOrientacion());
-        naveDTO.setTamanio(nave.getTamanio());
+        if (nave != null) {
+            naveDTO.setEstado(nave.getEstado());
+            naveDTO.setOrientacion(nave.getOrientacion());
+            naveDTO.setTamanio(nave.getTamanio());
+        }
         
         AddNaveDTO resultadoDTO = new AddNaveDTO(jugadorDTO, naveDTO, coordenadas, resultado.getResultado());
 

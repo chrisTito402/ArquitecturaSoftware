@@ -24,7 +24,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTimer.revalidate();
         pnlTimer.repaint();
 
-        cV.setPuntajePanel(pnlPuntaje);
         pnlTurno.add(cV.getLblTurno());
 
     }
@@ -43,7 +42,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
         pnlTimer = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         btnAbandonar = new javax.swing.JButton();
-        pnlPuntaje = new views.frames.PuntajePanel();
         pnlTurno = new javax.swing.JPanel();
         btnMarcador = new javax.swing.JButton();
 
@@ -72,17 +70,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout pnlPuntajeLayout = new javax.swing.GroupLayout(pnlPuntaje);
-        pnlPuntaje.setLayout(pnlPuntajeLayout);
-        pnlPuntajeLayout.setHorizontalGroup(
-            pnlPuntajeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 168, Short.MAX_VALUE)
-        );
-        pnlPuntajeLayout.setVerticalGroup(
-            pnlPuntajeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-
         pnlTurno.setMaximumSize(new java.awt.Dimension(100, 30));
         pnlTurno.setMinimumSize(new java.awt.Dimension(100, 30));
         pnlTurno.setName(""); // NOI18N
@@ -109,8 +96,7 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(pnlPuntaje, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(174, 174, 174))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 451, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
@@ -130,7 +116,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel1)
                     .addComponent(pnlTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlPuntaje, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(pnlTurno, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -164,7 +149,6 @@ public class FrmPartidaEnCurso extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel pnlPuntaje;
     private javax.swing.JPanel pnlTimer;
     private javax.swing.JPanel pnlTurno;
     // End of variables declaration//GEN-END:variables

@@ -76,15 +76,13 @@ public class AddNavePanel extends JPanel {
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) { 
                 if (estaArrastrando && naveSeleccionada != null) {
-                    
-                    // 1. "Pintar" permanentemente las celdas afectadas
+                   
                     List<Coordenadas> coordenadas = new ArrayList<>();
                     for (Celda c : grid) {
                         if (c.isOverlapped) {
                             coordenadas.add(c.coordenadas);
-//                            c.isPintada = true; // SE QUEDA PINTADO PARA SIEMPRE
                             System.out.println("Pintada celda: " + c.coordenadas);
                         }
                     }
@@ -225,7 +223,7 @@ public class AddNavePanel extends JPanel {
                     .orElse(null);
             
             if (celda != null) {
-                celda.isPintada = true; // SE QUEDA PINTADO PARA SIEMPRE
+                celda.isPintada = true;
                 System.out.println("Pintada celda: " + celda.coordenadas);
                 
                 navesDisponibles.remove(naveSeleccionada);

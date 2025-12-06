@@ -269,7 +269,10 @@ public class ControlModelo implements IModeloCliente {
             navesCords.put(resultado.getNave(), resultado.getCoordenadases());
             resultado.getCoordenadases().forEach(e -> cordsNaves.add(e));
             notificarAllSuscriptores("RESULTADO_ADD_NAVE", resultado);
+            return;
         }
+        
+        notificarAllSuscriptores("ERROR_ADD_NAVE", resultado);
     }
 
     @Override
@@ -333,7 +336,7 @@ public class ControlModelo implements IModeloCliente {
     }
 
     @Override
-    public void abandonarLobby(Jugador jugador) {
+    public void abandonarLobby() {
         JugadorDTO dto = new JugadorDTO(jugador.getNombre(), jugador.getColor(), jugador.getEstado());
         notificarAllSuscriptores("ABANDONAR_PARTIDA", dto);
     }
@@ -345,7 +348,7 @@ public class ControlModelo implements IModeloCliente {
 
     //Envia
     @Override
-    public JugadorDTO abandonarPartida(Jugador jugador) {
+    public JugadorDTO abandonarPartida() {
 
         // VALIDACIONES (igualitas al estilo de addNave)
         if (jugador == null) {
@@ -371,7 +374,9 @@ public class ControlModelo implements IModeloCliente {
             System.out.println("Error el jugador regreso null desde el servidor.");
             return;
         }
-        notificarAllSuscriptores("ABANDONO_PARTIDA", dto);
+        if (!dto.getNombre().equals(jugador.getNombre())) {
+            notificarAllSuscriptores("ABANDONO_PARTIDA", dto);
+        }
     }
 
     @Override

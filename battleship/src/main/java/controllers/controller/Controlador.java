@@ -6,11 +6,9 @@ import clientesocket.IClienteSocket;
 import com.google.gson.Gson;
 import models.entidades.Coordenadas;
 import models.entidades.Jugador;
-import models.builder.Director;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import models.builder.PartidaBuilder;
 import views.DTOs.DisparoDTO;
 import models.control.IModeloCliente;
 import models.enums.ColorJugador;
@@ -40,7 +38,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
         manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
         manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
         manejadorEventos.put("RESULTADO_EMPEZAR_PARTIDA", this::manejarEmpezarPartida);
         manejadorEventos.put("ABANDONAR_LOBBY", this::manejarAbandonarLobby);
         manejadorEventos.put("RESULTADO_ADD_NAVE", this::manejarResultadoAddNave);
@@ -49,13 +46,7 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         manejadorEventos.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
         manejadorEventos.put("OBTENER_JUGADOR_ENEMIGO", this::manejarObtenerJugadorEnemigo);
     }
-//    private void registrarEventos() {
-//        manejadorEventos.put("RESULTADO_DISPARO", this::manejarResultadoDisparo);
-//        manejadorEventos.put("JUGADOR_UNIDO", this::manejarJugadorUnido);
-//        manejadorEventos.put("JUGADOR_ABANDONO", this::manejarAbandonarPartida);
-//        manejadorEventos.put("UNIRSE_PARTIDA", this::manejarUnirsePartida);
-//        manejadorEventos.put("INICIAR_PARTIDA", this::manejarIniciarPartida);
-//    }
+    
     // Metodo para enviar mensaje por la red.
     private void enviarMensaje(String evento, Object datos) {
         Gson gson = new Gson();
@@ -122,23 +113,15 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
     //Manda mensaje* al servidor
     @Override
-    public void abandonarPartida(Jugador jugador) {
+    public void abandonarPartida() {
         // Validaciones del modelo
-        JugadorDTO dto = partida.abandonarPartida(jugador);
+        JugadorDTO dto = partida.abandonarPartida();
         if (dto == null) {
             System.out.println("No se pudo abandonar la partida.");
             return;
         }
         System.out.println("CASI LLLEGA");
         enviarMensaje("ABANDONAR_PARTIDA", dto);
-    }
-
-    @Override
-    public String crearPartida(Jugador j) {
-        Director d = new Director();
-        IModeloCliente modelo = d.makePartida(new PartidaBuilder());
-        this.partida = modelo;
-        return "Partida creada correctamente";
     }
 
     @Override
@@ -194,11 +177,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
         }
     }
 
-    @Override
-    public JugadorDTO getJugador() {
-        return partida.getJugador();
-    }
-
     // Caso de Uso: Unirse Partida
     @Override
     public void unirsePartida(String nombre, ColorJugador color) {
@@ -207,31 +185,6 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
 
         if (j != null) {
             enviarMensaje("UNIRSE_PARTIDA", j);
-        }
-    }
-
-    private void manejarUnirsePartida(Mensaje mensaje) {
-        JugadorDTO dto = new Gson().fromJson(mensaje.getData(), JugadorDTO.class);
-        System.out.println("=== RECIBIDO UNIRSE_PARTIDA ===");
-        System.out.println("Jugador que se unio: " + dto.getNombre());
-
-        //partida.notificarAllSuscriptores("UNIRSE_PARTIDA", dto);
-
-        // Si soy el HOST, enviar mi info al nuevo jugador para que me vea
-        ControlVista cv = ControlVista.getInstancia();
-        System.out.println("Soy HOST? " + cv.isEsHost());
-
-        if (cv.isEsHost()) {
-            JugadorDTO miJugador = partida.getJugador();
-            System.out.println("Mi jugador: " + (miJugador != null ? miJugador.getNombre() : "NULL"));
-
-            // Solo enviar si tengo info y no soy yo mismo
-            if (miJugador != null && !miJugador.getNombre().equals(dto.getNombre())) {
-                System.out.println(">>> HOST: Enviando JUGADOR_UNIDO con mi info: " + miJugador.getNombre());
-                enviarMensaje("JUGADOR_UNIDO", miJugador);
-            } else {
-                System.out.println("No envio porque es el mismo jugador o miJugador es null");
-            }
         }
     }
 
@@ -249,11 +202,10 @@ public class Controlador implements IControlador, ManejadorRespuestaCliente {
     }
 
     @Override
-    public void abandonarLobby(JugadorDTO jugadorDTO) {
-        Jugador jugador = new Jugador(jugadorDTO.getNombre(), jugadorDTO.getColor(), jugadorDTO.getEstado());
-        partida.abandonarLobby(jugador);
-        //Mandar mensaje al servidor para avisar al rival
-        enviarMensaje("ABANDONAR_LOBBY", jugadorDTO);
+    public void abandonarLobby() {
+//        partida.abandonarLobby();
+//        //Mandar mensaje al servidor para avisar al rival
+//        enviarMensaje("ABANDONAR_LOBBY", jugadorDTO);
     }
 
     private void manejarAbandonarLobby(Mensaje mensaje) {

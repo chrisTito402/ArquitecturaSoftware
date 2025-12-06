@@ -1,7 +1,6 @@
 package controllers.controller;
 
 import models.entidades.Coordenadas;
-import models.entidades.Jugador;
 import models.observador.ISuscriptor;
 import java.awt.Color;
 import java.awt.Component;
@@ -34,7 +33,6 @@ import views.frames.CasillaPanel;
 import views.frames.FrmLobby;
 import views.frames.FrmPartidaEnCurso;
 import views.frames.FrmRegistrarJugador;
-import views.frames.PuntajePanel;
 import views.frames.TimerPanel;
 
 /**
@@ -49,11 +47,7 @@ public class ControlVista implements ISuscriptor {
     private List<CasillaPanel> casillasPropias;
     private List<CasillaButton> casillasEnemigas;
     private TimerPanel timer;
-    private PuntajePanel puntajePanel;
     private Map<String, Consumer<Object>> manejadoresNoti;
-    private List<ISuscriptor> suscriptoresLobby;
-    private String codigoPartida;
-    private boolean esHost;
     private JFrame frameActual;
     private JLabel lblTurno;
     
@@ -77,34 +71,8 @@ public class ControlVista implements ISuscriptor {
         manejadoresNoti.put("CAMBIAR_TURNO", this::manejarCambiarTurno);
         manejadoresNoti.put("JUGADOR_ENEMIGO_OBTENIDO", this::manejarJugadorEnemigoObtenido);
         manejadoresNoti.put("MOSTRAR_MARCADOR", this::manejarMostrarMarcador);
+        manejadoresNoti.put("ERROR_ADD_NAVE", this::manejarErrorAddNave);
         
-        suscriptoresLobby = new ArrayList<>();
-    }
-
-    public void suscribirLobby(ISuscriptor suscriptor) {
-        if (suscriptor != null && !suscriptoresLobby.contains(suscriptor)) {
-            suscriptoresLobby.add(suscriptor);
-        }
-    }
-
-    public void desuscribirLobby(ISuscriptor suscriptor) {
-        suscriptoresLobby.remove(suscriptor);
-    }
-
-    public String getCodigoPartida() {
-        return codigoPartida;
-    }
-
-    public void setCodigoPartida(String codigoPartida) {
-        this.codigoPartida = codigoPartida;
-    }
-
-    public boolean isEsHost() {
-        return esHost;
-    }
-
-    public void setEsHost(boolean esHost) {
-        this.esHost = esHost;
     }
 
     public static ControlVista getInstancia() {
@@ -136,19 +104,6 @@ public class ControlVista implements ISuscriptor {
 
     public void setTimer(TimerPanel timer) {
         this.timer = timer;
-    }
-
-    public PuntajePanel getPuntajePanel() {
-        return puntajePanel;
-    }
-
-    public void setPuntajePanel(javax.swing.JPanel panel) {  //Para que acepte JPanel Generico
-        if (panel instanceof PuntajePanel) {
-            this.puntajePanel = (PuntajePanel) panel;
-            System.out.println("PuntajePanel registrado correctamente");
-        } else {
-            System.err.println("ERROR: El panel no es de tipo PuntajePanel");
-        }
     }
 
     public void realizarDisparo(Coordenadas c) {
@@ -277,6 +232,11 @@ public class ControlVista implements ISuscriptor {
         addNavePanel.pintarNaveAñadida(resultado.getCoordenadases());
     }
     
+    private void manejarErrorAddNave(Object datos) {
+        AddNaveDTO dto = (AddNaveDTO) datos;
+        JOptionPane.showMessageDialog(frameActual, dto.getResultado().name());
+    }
+    
     private void manejarErrorConfirmarNaves(Object datos) {
         ResultadoConfirmarNaves resultado = (ResultadoConfirmarNaves) datos;
         JOptionPane.showMessageDialog(null, resultado.name());
@@ -315,12 +275,6 @@ public class ControlVista implements ISuscriptor {
     
     private void manejarAbandono(Object datos) {
         JugadorDTO dto = (JugadorDTO) datos;
-        JugadorDTO yo = control.getJugador();
-
-        // Si YO soy el que abandonó → no mostrar nada
-        if (dto.getNombre().equals(yo.getNombre())) {
-            return;
-        }
 
         // Mostrar aviso SOLO al rival
         JOptionPane.showMessageDialog(
@@ -366,10 +320,6 @@ public class ControlVista implements ISuscriptor {
                 casillasEnemigas.add(cB);
             }
         }
-    }
-
-    public void crearPartida(Jugador j) {
-        control.crearPartida(j);
     }
 
     // ADD NAVE METODOS
@@ -438,19 +388,12 @@ public class ControlVista implements ISuscriptor {
         control.empezarPartida();
     }
 
-    public void abandonarLobby(JugadorDTO jugador) {
-        control.abandonarLobby(jugador);
+    public void abandonarLobby() {
+//        control.abandonarLobby(jugador);
     }
     
     public void abandonarPartida() {
-
-        // 1. Obtener DTO del jugador actual
-        JugadorDTO dto = control.getJugador();
-
-        // 2. Convertir DTO → ENTIDAD
-        Jugador jugador = new Jugador(dto.getNombre(), dto.getColor(), dto.getEstado());
-
-        control.abandonarPartida(jugador);
+        control.abandonarPartida();
     }
 
     private void manejarJugadorUnido(Object datos) {

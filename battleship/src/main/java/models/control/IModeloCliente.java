@@ -1,7 +1,6 @@
 package models.control;
 
 import models.entidades.Coordenadas;
-import models.entidades.Jugador;
 import java.util.List;
 import models.enums.ResultadoConfirmarNaves;
 import models.enums.ResultadoEmpezarPartida;
@@ -32,9 +31,9 @@ public interface IModeloCliente {
 
     public boolean empezarPartida();
 
-    public void abandonarLobby(Jugador jugador);
+    public void abandonarLobby();
 
-    public JugadorDTO abandonarPartida(Jugador jugador);
+    public JugadorDTO abandonarPartida();
     
     public JugadorDTO obtenerJugadorEnemigo();
     
